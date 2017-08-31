@@ -8,7 +8,7 @@
 #+STARTUP: overview indent
 #+OPTIONS: ^:nil
 #+OPTIONS: _:nil toc:nil num:nil
-#+HTML_HEAD: <script type="text/javascript" src="./sparser.js"></script>
+#+HTML_HEAD: <script type="text/javascript" src="./sparser_listener.js"></script>
 
 #+BEGIN_EXPORT html
 <script>

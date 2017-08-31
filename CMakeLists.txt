@@ -101,7 +101,7 @@ function(AddAntlrTarget target parser_g4 lexer_g4 path)
 endfunction()
 
 add_subdirectory(./SExpr/Antlr/)
-add_subdirectory(./SExpr/AntlrVisitor/)
+add_subdirectory(./SExpr/AntlrListener/)
 add_subdirectory(./SExpr/LL1/)
 add_subdirectory(./SExpr/Naive/)
 add_subdirectory(./SExpr/Naive-Tokens/)

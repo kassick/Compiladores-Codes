@@ -8,22 +8,13 @@ grammar SExpr;
 }
 
 sexpr : '(' n=NAME
-         {
-            cerr << "A" << endl;
-         }
          slist ')'
-         {
-            cerr << "B" << endl;
-         }
          ;
 
 slist : NAME
-        {
-            cerr << "C" << endl;
-        }
         childList=slist
         #slistName
-      | sexpr { cerr << "D" << endl;} childList=slist { cerr << "E" << endl; }
+      | sexpr childList=slist
         #slistSexpr
       |
         #slistEmpty

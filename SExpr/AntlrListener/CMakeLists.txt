@@ -1,4 +1,4 @@
-add_custom_target(antlrvisitor_html
+add_custom_target(antlr_listener_html
   ALL
   COMMAND cp ${CMAKE_CURRENT_LIST_DIR}/SExpr.html ${CMAKE_CURRENT_BINARY_DIR}/index.html
   BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/index.html
@@ -10,9 +10,9 @@ SET(GRAMMAR_FILE ${CMAKE_CURRENT_SOURCE_DIR}/SExpr.g4)
 SET(GENERATED_PATH ${CMAKE_CURRENT_BINARY_DIR}/generated)
 SET(ANTLR_EXTRA_OPTS  -package sexpr_parser)
 
-AddAntlrTarget(sparser_antlrvisitor ${GRAMMAR_FILE} "" ${GENERATED_PATH})
+AddAntlrTarget(sparser_antlr_listener ${GRAMMAR_FILE} "" ${GENERATED_PATH})
 
 include_directories(${GENERATED_PATH})
-add_executable(sparservisitor sparser_antlrvisitor.cpp ${sparser_antlrvisitor_GENERATED_SRC})
-add_dependencies(sparservisitor antlr_html generate_sparser_antlrvisitor)
-target_link_libraries(sparservisitor antlr4static)
+add_executable(sparser_listener sparser_antlr_listener.cpp ${sparser_antlr_listener_GENERATED_SRC})
+add_dependencies(sparser_listener antlr_html generate_sparser_antlr_listener)
+target_link_libraries(sparser_listener antlr4static)

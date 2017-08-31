@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Tue Aug  1 23:16:10 2017"
- *         Updated: "2017-08-30 22:04:23 kassick"
+ *         Updated: "2017-08-31 11:05:34 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -18,7 +18,7 @@
 #include <string>
 #include <sstream>
 #include <string.h>
-#include "SExprVisitor.H"
+#include "SExprMyListener.H"
 
 using namespace sexpr_parser;
 using namespace antlr4;
@@ -32,11 +32,11 @@ void parse_antlr(istream& in, stringstream &sout)
     tokens.fill();
 
     SExprParser parser(&tokens);
-    SExprVisitor visitor;
-    visitor.out = &cout;
-    //parser.sexpr()->enterRule(&visitor);
+    SExprMyListener listener;
+    listener.out = &cout;
+    //parser.sexpr()->enterRule(&listener);
     tree::ParseTree* tree = parser.sexpr();
-    tree::ParseTreeWalker::DEFAULT.walk(&visitor, tree);
+    tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
 
 }
 

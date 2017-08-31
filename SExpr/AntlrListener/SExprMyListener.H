@@ -1,11 +1,11 @@
 /****************************************************************************
- *        Filename: "SExprVisitor.H"
+ *        Filename: "SExprMyListener.H"
  *
  *     Description:
  *
  *         Version: 1.0
  *         Created: "Wed Aug 30 21:07:02 2017"
- *         Updated: "2017-08-30 22:18:12 kassick"
+ *         Updated: "2017-08-31 11:04:53 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -30,7 +30,7 @@ std::ostream& print_indent(std::ostream * out, int indent, const std::string msg
 
 namespace sexpr_parser {
 
-class SExprVisitor : public SExprBaseListener
+class SExprMyListener : public SExprBaseListener
 {
   public:
     int indent = 0;
