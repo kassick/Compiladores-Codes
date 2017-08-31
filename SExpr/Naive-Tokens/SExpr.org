@@ -1,0 +1,73 @@
+#+TITLE: S-Expr Parser
+#+AUTHOR: Prof. Rodrigo Kassick
+#+LANGUAGE: pt
+#+TAGS: noexport(n) deprecated(d) success(s) failed(f) pending(p)
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+SEQ_TODO: TODO(t!) STARTED(s!) WAITING(w!) REVIEW(r!) PENDING(p!) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
+#+STARTUP: overview indent
+#+OPTIONS: ^:nil
+#+OPTIONS: _:nil toc:nil num:nil
+#+HTML_HEAD: <script type="text/javascript" src="./sparser_naive.js"></script>
+
+#+BEGIN_EXPORT html
+<script>
+ doParse = function(text)
+ {
+     console.log('text is ' + text);
+     r = ccall('parse_string_c', 'string', ['string'], [text]);
+     console.log('resault is ' + r);
+     return r;
+ };
+
+ parseSource = function()
+ {
+     d_ta = document.getElementById('esource');
+     d_res = document.getElementById('result');
+
+     res = doParse(d_ta.value);
+
+     d_res.value = res;
+ };
+</script>
+#+END_EXPORT
+
+* Entrada                                                            :ignore:
+
+*Entrada:*
+
+#+BEGIN_EXPORT html
+<textarea name="source" id="esource" rows="10" cols="70">
+(a b)
+</textarea>
+
+<p>
+
+<button type="button" onclick='parseSource()'>Parse</button>
+
+#+END_EXPORT
+
+#+HTML: <p>
+
+* Resultado                                                          :ignore:
+
+*Resultado:*
+
+#+BEGIN_EXPORT html
+<textarea id="result" rows="10" cols="70"></textarea>
+#+END_EXPORT
+
+* Exemplos
+
+| Válidas                  |            |   | Inválidas |
+| /                        | <10>       |<  |           |
+|--------------------------+------------+---+-----------|
+| (a)                      |            |   | (a        |
+|                          |            |   |           |
+| (a b c)                  |            |   | ()        |
+|                          |            |   |           |
+| (a (b c) (def lala) zzz) |            |   | (a b ))   |
+|                          |            |   |           |
+| ( a b (                  |            |   | (((a b )) |
+| le la)                   |            |   |           |
+| )                        |            |   |           |

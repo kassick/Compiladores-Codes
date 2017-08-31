@@ -1,0 +1,19 @@
+diff -Naur antlrruntime.old/src/antlrruntime/CMakeLists.txt antlrruntime.new/src/antlrruntime/CMakeLists.txt
+--- antlrruntime.old/CMakeLists.txt	2017-08-02 17:48:27.778533764 -0300
++++ antlrruntime.new/CMakeLists.txt	2017-08-02 12:19:45.315157617 -0300
+@@ -33,7 +33,7 @@
+ 
+ if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+   find_package(PkgConfig REQUIRED)
+-  pkg_check_modules(UUID REQUIRED uuid)
++  #pkg_check_modules(UUID REQUIRED uuid)
+ endif()
+ if(APPLE)
+   find_library(COREFOUNDATION_LIBRARY CoreFoundation)
+@@ -98,7 +98,7 @@
+		 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+	 endif()
+ else ()
+-    message(FATAL_ERROR "Your C++ compiler does not support C++11.")
++    message(STATUS "Your C++ compiler may not not support C++11.")
+ endif ()
