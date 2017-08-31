@@ -58,7 +58,7 @@ endif()
 
   Esse javascript pode ser utilizado dentro de um HTML, usando a função `ccall`:
 
-```sh
+```html
 <script type="text/javascript" src="./sparser.js"></script>
 
 <script>
@@ -75,7 +75,7 @@ endif()
 
       d_res.value = res;
   };
-  </script>
+</script>
 ```
 
 ## Versão Antiga da Compilação para WEB
