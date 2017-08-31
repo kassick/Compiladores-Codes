@@ -23,6 +23,7 @@ O código em C/C++ pode ser compilado para *asm.js* e executado no navegador. Os
 Deve-se utilizar o [EMScripten](https://github.com/juj/emsdk) para compilar o código C++ -> Javascript.
 
 A compilação foi testada com os seguintes componentes da SDK:
+
 - sdk-tag-1.37.18-64bit (compiled from source)
 - emscripten-tag-1.37.18-64bit (compiled from source)
 - node-4.1.1-64bit (downloaded)
