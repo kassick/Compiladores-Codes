@@ -3,10 +3,15 @@
 Parser de S-expressões desenvolvido em C++.
 
 Versões:
+
 - Naive [Código](./SExpr/Naive/sparser_naive.cpp): Implementação sem técnica nenhuma, percorrendo um stream de entrada.
+
 - LL(1) (sparser_2.cpp) [Código](./SExpr/LL1/sparser_naive.cpp): Parser Descendente Recursivo com 1 token de lookahead. Não usa tabela.
+
 - Naive Tokens [Código](./SExpr/Naive-Tokens/sparser_naive_tokens.cpp): Implementação sem técnica, porém utilizando um *lexer* (ANTLR) para obter uma lista de tokens
+
 - ANTLR ALL(*) [Código](./SExpr/Antlr/sparser_antlr.cpp): Implementação usando uma gramática do ANTLR, com ações embutidas na gramática
+
 - ANTLR ALL(*) Listener [Código](./SExpr/AntlrListener/sparser_antlr_listener.cpp): Implementação usando uma gramática ANTLR, com código em um Listener.
 
 *Extra*: Projeto em C#, sem código ainda: [Código](./CSharp)
