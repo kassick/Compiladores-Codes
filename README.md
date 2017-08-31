@@ -50,7 +50,7 @@ Em um diretório de build (E.g. ./JS):
   ```
 
   Esse javascript pode ser utilizado dentro de um HTML, usando a função `ccall`:
-  ```html
+  ```sh
   <script type="text/javascript" src="./sparser.js"></script>
 
   <script>

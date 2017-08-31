@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Tue Aug  1 23:16:10 2017"
- *         Updated: "2017-08-31 11:05:34 kassick"
+ *         Updated: "2017-08-31 11:26:26 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -33,7 +33,7 @@ void parse_antlr(istream& in, stringstream &sout)
 
     SExprParser parser(&tokens);
     SExprMyListener listener;
-    listener.out = &cout;
+    listener.out = &sout;
     //parser.sexpr()->enterRule(&listener);
     tree::ParseTree* tree = parser.sexpr();
     tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
@@ -43,7 +43,7 @@ void parse_antlr(istream& in, stringstream &sout)
 std::string parsestring(std::string s) {
     std::stringstream sin(s);
     std::stringstream sout;
-    sout << "Antlr: " << endl;
+    sout << "Antlr Listener: " << endl;
     parse_antlr(sin, sout);
     return sout.str();
 }
