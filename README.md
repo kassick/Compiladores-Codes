@@ -31,18 +31,25 @@ A compilação foi testada com os seguintes componentes da SDK:
 Em um diretório de build (E.g. ./JS):
 
 - Carrege o environment do emsdk:
+
   ```sh
   source ../emsdk-portable/emsdk_env.sh
   ```
+
 - Execute o `cmake` com o `emconfigure`. O emconfigure seta o compilador e outros detalhes para o cmake
+
   ```sh
   emconfigure cmake ..
   ```
+
 - Execute `make` com o `emmake`. O emmake seta algumas variáveis de ambiente para o make funcionar.
+
   ```sh
   emmake make
   ```
+
 - Ao fim da compilação, ao invés de executáveis binários, deve ter sido gerados arquivos `.js`. Normalmente, esses arquivos poderiam ser executados como um programa para o node. Porém, eu instruo a compilação a exportar um símbolo `parse_string_c`. Isso faz com que a compilação gere um javascript para importação.
+
   ```sh
   if(${CMAKE_CXX_COMPILER} MATCHES "em\\+\\+")
     set(CMAKE_EXE_LINKER_FLAGS "-s EXPORTED_FUNCTIONS=\"['_parse_string_c']\"")
@@ -50,7 +57,8 @@ Em um diretório de build (E.g. ./JS):
   ```
 
   Esse javascript pode ser utilizado dentro de um HTML, usando a função `ccall`:
-  ```html
+
+  ```sh
   <script type="text/javascript" src="./sparser.js"></script>
 
   <script>
