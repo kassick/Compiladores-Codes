@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep  8 21:28:33 2017"
- *         Updated: "2017-09-08 22:05:07 kassick"
+ *         Updated: "2017-09-08 22:07:16 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -37,6 +37,7 @@ void NestedSymbolTable::add(const Symbol s) {
 Symbol NestedSymbolTable::find(const string name) const {
     try {
         Symbol s = this->findSymbolRecursive(name);
+        s.offset += this->offset;
         return s;
     } catch (string s) {
         throw std::out_of_range(string("Symbol not found " + name));
