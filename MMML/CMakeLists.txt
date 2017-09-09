@@ -13,6 +13,12 @@ SET(ANTLR_EXTRA_OPTS  -package mmml)
 AddAntlrTarget(mmml_parser ${GRAMMAR_FILE} "" ${GENERATED_PATH})
 
 include_directories(${GENERATED_PATH})
-add_executable(mmmlc mmmlc.cpp ${mmml_parser_GENERATED_SRC})
+include_directories(include/)
+
+add_executable(mmmlc
+  mmmlc.cpp
+  Symbol.cpp
+  NestedSymbolTable.cpp
+  ${mmml_parser_GENERATED_SRC})
 add_dependencies(mmmlc mmmlc_html generate_mmml_parser)
 target_link_libraries(mmmlc antlr4static)
