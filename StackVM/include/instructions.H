@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 14:14:39 2017"
- *         Updated: "2017-09-19 15:59:34 kassick"
+ *         Updated: "2017-09-19 16:37:55 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -22,13 +22,18 @@
 // mark
 // Adds a marker that makes the stack begin anew on top of the current stack
 struct PushStackMarkInstr: public Instruction {
+    int keep;
+
+    PushStackMarkInstr() : keep(0) {}
+    PushStackMarkInstr(int keep_) : keep(keep_) {}
+
     virtual VM& run(VM& vm) const override {
-        vm.push_mark();
+        vm.push_mark(vm.size() - keep);
         return vm;
     }
 
     virtual string to_string() const override {
-        return "mark";
+        return string("mark") + std::to_string(keep);
     }
 };
 
@@ -38,7 +43,7 @@ struct PopStackMarkInstr: public Instruction {
     virtual VM& run(VM& vm) const override {
         int mark = vm.pop_mark();
         DataItem itm(mark);
-        vm.push(itm);
+        vm.push(std::move(itm));
         return vm;
     }
 
@@ -237,7 +242,7 @@ struct ArrayLenInstr: public Instruction {
 
     VM& run(VM& vm) const override {
 
-        const DataItem arr = vm.pop();
+        const DataItem arr = std::move(vm.pop());
         if (arr.type != Array)
             throw logic_error("Trying to unpack something not an array");
 
@@ -279,7 +284,7 @@ struct ArrayGetInstr: public Instruction {
             the_pos = pos_itm.as<int>();
         }
 
-        const DataItem arr = vm.pop();
+        const DataItem arr = std::move(vm.pop());
         if (arr.type != Array)
             throw logic_error("Trying to unpack something not an array");
 
@@ -289,9 +294,9 @@ struct ArrayGetInstr: public Instruction {
         if (the_pos < 0 || the_pos >= arr_data->size())
             throw logic_error("Invalid position for array access");
 
-        DataItem itm = (*arr_data)[the_pos];
+        DataItem itm = std::move((*arr_data)[the_pos]);
 
-        vm.push(itm);
+        vm.push(std::move(itm));
 
         return vm;
     }
@@ -453,7 +458,7 @@ struct PopNInstr : public Instruction {
     virtual VM& run(VM & vm) const override{
         int howmany = n;
         if (howmany < 0) {
-            DataItem itm = vm.pop();
+            DataItem itm = std::move(vm.pop());
             if (itm.type != Int) {
                 throw logic_error("Popping N, but in is not an int");
             }

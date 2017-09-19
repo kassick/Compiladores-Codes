@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 14:06:37 2017"
- *         Updated: "2017-09-19 16:02:29 kassick"
+ *         Updated: "2017-09-19 17:52:06 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -63,7 +63,7 @@ struct VM {
         stringstream ss;
         ss << "Stack: " << endl;
 
-        for (int i = stack.size() - 1; i >= 0; i--)
+        for (int i = 0;  i < stack.size() ; i++)
         {
             ss << setw(5) << i - marker_stack.top()
                << " : " << stack[i].to_string()
@@ -71,14 +71,34 @@ struct VM {
         }
 
         ss << endl << "Code: (* is currenct pc, > is last pc)" << endl;
+        int display_pc = pc;
+        if (display_pc < 0)
+            display_pc = last_pc;
 
-        for(int i = 0; i < instructions.size(); i++)
+        int window_size = 10;
+        int start = display_pc - window_size/2;
+        int end = display_pc + window_size/2;
+
+        if (start < 0) {
+            end += -1 * start;
+            start = 0;
+        }
+
+        if (end > instructions.size())
+        {
+            start += instructions.size() - end;
+            start = std::max(0, start);
+            end = std::min(start + window_size, (int)instructions.size());
+        }
+
+        for(int i = start; i < end; i++)
         {
             ss << (pc == i? "*" : (last_pc == i? ">" : " "))
                << setw(5) << i
                << " : " << instructions[i]->to_string()
                << endl;
         }
+
 
         return ss.str();
     }
@@ -157,6 +177,15 @@ struct VM {
 
         return item;
     }
+
+    // template<typename T>
+    // void put(T&& v, int i)
+    // {
+    //     if (i < 0 || i >= size())
+    //         throw logic_error("Putting in invalid position");
+
+    //     stack[marker_stack.top() + i] = std::forward<T>(v);
+    // }
 
     void dup(int i) {
         DataItem item = get(i);

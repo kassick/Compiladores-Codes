@@ -11,11 +11,15 @@ instruction_line
         instruction
         NEWLINE
         #instructionLine
+    |   NEWLINE // linhas em branco
+        #ignoreLine
     ;
 
 instruction
     :   'mark'
         #mark
+    |   'mark' keep=non_negative_int_arg
+        #markArg
     |   'pop_mark'
         #popMark
     |   'drop_mark'
