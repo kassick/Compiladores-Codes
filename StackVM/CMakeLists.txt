@@ -20,6 +20,6 @@ add_executable(stackvm
   )
 add_dependencies(stackvm
   #antlr_html
-  generate_sparser_antlr
+  generate_stackvm_antlr
   )
 target_link_libraries(stackvm antlr4static)

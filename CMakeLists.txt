@@ -63,7 +63,7 @@ find_package(Java COMPONENTS Runtime REQUIRED)
 
 function(AddAntlrTarget target parser_g4 lexer_g4 path)
  get_filename_component(g4base ${parser_g4} NAME_WE)
- message(FATAL "g4 base is ${g4base}")
+ message(INFO "g4 base is ${g4base}")
  set(${target}_GENERATED_SRC
    ${path}/${g4base}BaseListener.cpp
    ${path}/${g4base}Listener.cpp
@@ -91,7 +91,7 @@ function(AddAntlrTarget target parser_g4 lexer_g4 path)
    DEPENDS ${parser_g4} ${lexer_g4}
    )
  foreach( src_file ${the_sources} )
-   message(FATAL "Source ${src_file} is generated")
+   message(INFO "Source ${src_file} is generated")
    set_source_files_properties(
      ${src_file}
      PROPERTIES GENERATED TRUE
@@ -106,5 +106,5 @@ add_subdirectory(./SExpr/AntlrVisitor/)
 add_subdirectory(./SExpr/LL1/)
 add_subdirectory(./SExpr/Naive/)
 add_subdirectory(./SExpr/Naive-Tokens/)
-add_subdirectory(./MMML)
+# add_subdirectory(./MMML)
 add_subdirectory(./StackVM)
