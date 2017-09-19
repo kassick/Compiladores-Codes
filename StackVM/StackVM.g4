@@ -191,7 +191,7 @@ LITERAL_STRING
         '"'
     ;
 
-LITERAL_LABEL: [a-zA-Z][a-zA-Z0-9]*;
+LITERAL_LABEL: '_'*[a-zA-Z][a-zA-Z0-9_]*;
 
 LITERAL_CHAR
     :   '\''
