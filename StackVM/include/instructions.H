@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 14:14:39 2017"
- *         Updated: "2017-09-19 03:13:14 kassick"
+ *         Updated: "2017-09-19 04:25:10 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -640,9 +640,6 @@ struct AddInstr : public Instruction {
         if (lhs.type == Double || rhs.type == Double)
         {
             vm.push(AddFunctor<double>()(lhs.cast<double>(), rhs.cast<double>()));
-        } else if (lhs.type == Float || rhs.type == Float)
-        {
-            vm.push(AddFunctor<float>()(lhs.cast<float>(), rhs.cast<float>()));
         } else if (lhs.type == Int || rhs.type == Int)
         {
             vm.push(AddFunctor<int>()(lhs.cast<int>(), rhs.cast<int>()));
@@ -669,9 +666,6 @@ struct SubInstr : public Instruction {
         if (lhs.type == Double || rhs.type == Double)
         {
             vm.push(SubFunctor<double>()(lhs.cast<double>(), rhs.cast<double>()));
-        } else if (lhs.type == Float || rhs.type == Float)
-        {
-            vm.push(SubFunctor<float>()(lhs.cast<float>(), rhs.cast<float>()));
         } else if (lhs.type == Int || rhs.type == Int)
         {
             vm.push(SubFunctor<int>()(lhs.cast<int>(), rhs.cast<int>()));
@@ -697,9 +691,6 @@ struct MulInstr : public Instruction {
         if (lhs.type == Double || rhs.type == Double)
         {
             vm.push(MulFunctor<double>()(lhs.cast<double>(), rhs.cast<double>()));
-        } else if (lhs.type == Float || rhs.type == Float)
-        {
-            vm.push(MulFunctor<float>()(lhs.cast<float>(), rhs.cast<float>()));
         } else if (lhs.type == Int || rhs.type == Int)
         {
             vm.push(MulFunctor<int>()(lhs.cast<int>(), rhs.cast<int>()));
@@ -725,9 +716,6 @@ struct DivInstr : public Instruction {
         if (lhs.type == Double || rhs.type == Double)
         {
             vm.push(DivFunctor<double>()(lhs.cast<double>(), rhs.cast<double>()));
-        } else if (lhs.type == Float || rhs.type == Float)
-        {
-            vm.push(DivFunctor<float>()(lhs.cast<float>(), rhs.cast<float>()));
         } else if (lhs.type == Int || rhs.type == Int)
         {
             vm.push(DivFunctor<int>()(lhs.cast<int>(), rhs.cast<int>()));
@@ -1050,13 +1038,49 @@ struct PushInstr<PC> : public Instruction {
 
 struct ExitInstr : public Instruction {
 
-
     virtual string to_string() const override {
         return "exit";
     }
 
     virtual VM& run(VM & vm) const override {
         vm.ok_to_go = false;
+        return vm;
+    }
+};
+
+template <typename T>
+struct CastToInstr : public Instruction {
+
+    virtual string to_string() const override {
+        return string("cast<") +
+                typeid(T).name() +
+                string(">");
+    }
+
+    virtual VM& run(VM & vm) const override {
+        DataItem d = vm.pop();
+
+        T tmp = d.cast<T>();
+
+        vm.push(tmp);
+
+        return vm;
+    }
+};
+
+template <>
+struct CastToInstr<string> : public Instruction {
+
+    virtual string to_string() const override {
+        return string("cast<string>");
+    }
+
+    virtual VM& run(VM & vm) const override {
+        DataItem d = vm.pop();
+
+        string s = d.value_to_string();
+        PushInstr<string>(s).run(vm);
+
         return vm;
     }
 };

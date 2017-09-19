@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 11:35:28 2017"
- *         Updated: "2017-09-19 04:10:35 kassick"
+ *         Updated: "2017-09-19 04:17:11 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -26,7 +26,6 @@ enum DataType {
     UNINITIALIZED = -1,
     Char = 0,
     Int,
-    Float,
     Double,
     Array,
 };
@@ -35,7 +34,6 @@ const char * dataTypeNameStr(DataType t) {
     switch (t) {
         case Char: return "char"; break;
         case Int: return "int"; break;
-        case Float: return "float"; break;
         case Double: return "double"; break;
         case Array: return "[]"; break;
         default: return "UNINITIALIZED"; break;
@@ -61,8 +59,6 @@ struct DataItem {
     DataItem(const char c) : DataItem(c, Char) {}
 
     DataItem(const int i) : DataItem(i, Int) {}
-
-    DataItem(const float d) : DataItem(d, Float) {}
 
     DataItem(const double d) : DataItem(d, Double) {}
 
@@ -114,7 +110,6 @@ struct DataItem {
         switch(type) {
             case Char: return (T)this->as<char>(); break;
             case Int: return (T)this->as<int>(); break;
-            case Float: return (T)this->as<float>(); break;
             case Double: return (T)this->as<double>(); break;
                 //case Array: return (T)this->as<vector<DataItem>*>();
 
@@ -130,7 +125,6 @@ struct DataItem {
         switch (t) {
             case Char: return DataItem((char)i); break;
             case Int: return DataItem((int)i); break;
-            case Float: return DataItem((float)i); break;
             case Double: return DataItem((double)i); break;
             default:
                 throw logic_error("Invalid type in create_and_cast"); break;
@@ -144,7 +138,6 @@ struct DataItem {
         switch(this->type) {
             case Char: return createWithType(this->as<char>(), d); break;
             case Int: return createWithType(this->as<int>(), d); break;
-            case Float: return createWithType(this->as<float>(), d); break;
             case Double: return createWithType(this->as<double>(), d); break;
             default:
                 throw logic_error("Invalid target type to dataCastAs"); break;
@@ -206,7 +199,6 @@ struct DataItem {
         switch (this->type) {
             case Char: ss << "'" << as<char>() << "'"; break;
             case Int: ss << as<int>(); break;
-            case Float: ss << as<float>(); break;
             case Double: ss << as<double>(); break;
             case Array:
                 {
@@ -231,7 +223,6 @@ struct DataItem {
         switch (this->type) {
             case Char:   return std::to_string( as<char>() );
             case Int:    return std::to_string( as<int>() );
-            case Float:  return std::to_string( as<float>() );
             case Double: return std::to_string( as<double>() );
             case Array:  return to_string();
             default:     return "null";

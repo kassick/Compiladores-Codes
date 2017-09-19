@@ -139,6 +139,10 @@ instruction
         #branchPositiveImediate
     |  'push' 'pc'
         #pushPC
+    |  'cast_c' #castAsChar
+    |  'cast_i' #castAsInt
+    |  'cast_d' #castAsDouble
+    |  'cast_s' #castAsStr
     |  'exit'
         #exit
     ;
