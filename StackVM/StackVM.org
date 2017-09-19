@@ -1,0 +1,87 @@
+#+TITLE: StackVM -- Documentação
+#+AUTHOR: Rodrigo Kassick
+#+LANGUAGE: pt
+#+LATEX_HEADER: \usepackage[margin=2cm,a4paper]{geometry}
+#+LATEX_HEADER: \ifxetex
+#+LATEX_HEADER:     \usepackage{tgtermes}
+#+LATEX_HEADER: \else
+#+LATEX_HEADER:     \usepackage{times}              % pacote para usar fonte Adobe Times
+#+LATEX_HEADER: \fi
+#+TAGS: noexport(n) deprecated(d) success(s) failed(f) pending(p)
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+SEQ_TODO: TODO(t!) STARTED(s!) WAITING(w!) REVIEW(r!) PENDING(p!) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
+#+STARTUP: overview indent
+#+OPTIONS: ^:nil
+#+OPTIONS: _:nil
+
+* Introdução
+
+Máquina de pilha simples com suporte a vetores de tipos mistos.
+
+* Compilação
+
+1. Obtenha o ZIP com o código.
+
+2. Em uma máquina /Linux/[fn:1], descompacte o código e entre no diretório
+   #+BEGIN_SRC sh :eval never
+   unzip StackVM.zip
+   cd Compiladores
+   #+END_SRC
+
+3. Em um diretório de Build, execute o CMake
+   #+BEGIN_SRC sh :eval never
+   mkdir Build
+   cd Build
+   cmake ..
+   cd ..
+   #+END_SRC
+
+4. Ainda no diretório de build, construa o projeto
+   #+BEGIN_SRC sh :eval never
+   make
+   #+END_SRC
+
+* Execução
+
+Para executar a StackVM, entre no diretório =Build/StackVM= e execute (em um terminal) o programa =stackvm=
+#+BEGIN_SRC sh :eval never
+./stackvm
+#+END_SRC
+
+Para digitar as instruções diretamente para a máquina, use o redirecionamento de entrada:
+#+BEGIN_SRC sh :eval never
+./stackvm <<EOF
+push 1
+push 2
+add
+EOF
+#+END_SRC
+
+Pode-se também passar um nome de arquivo como parâmetro. O arquivo deve ser um arquivo texto padrão.
+#+BEGIN_SRC sh :eval never
+./stackvm arquivo.m
+#+END_SRC
+
+* Formato de Arquivo Fonte para a Máquina Virtual
+
+*Comentários* são linhas iniciadas por # :
+#+BEGIN_SRC sh :eval never
+# esta linha eh um comentario
+push 1
+#+END_SRC
+
+O arquivo deve conter uma ou mais *Linhas de Instrução*
+#+BEGIN_SRC sh :eval never
+push 1
+push 2
+push 3
+add
+div
+#+END_SRC
+
+Linhas de instrução *podem* possuir /labels/ que são utilizados para controle de fluxo
+
+* Footnotes
+
+[fn:1] A StackVM foi desenvolvida em C++ com o sistema de build CMake. Enquanto a plataforma Windows deve ser suportada, a instalação de ambiente e suporte a compilação com Windows não está no escopo desse documento.

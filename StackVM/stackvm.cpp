@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Sep 13 11:00:28 2017"
- *         Updated: "2017-09-19 12:01:03 kassick"
+ *         Updated: "2017-09-19 18:36:57 kassick"
  *
  *          Author:
  *
@@ -87,18 +87,31 @@ VM& parse_stream(istream& in, ostream& out, VM& vm)
                       out);
 }
 
-std::string parsestring(std::string s) {
-    std::stringstream sin(s);
+std::string parsestring(std::string s, std::string input) {
+
+    std::stringstream code_stream(s);
+    std::stringstream input_stream(input);
     std::stringstream out;
 
-    VM vm(sin, out);
+    VM vm(input_stream, out);
 
-    parse_stream(sin, out, vm);
+    parse_stream(code_stream, out, vm);
 
     if (!vm.ok_to_go) {
         out << "Can not run" << endl;
     } else {
         out << "going to run now" << endl;
+        out << vm.to_string();
+
+        if (vm.set_pc_to("start") < 0)
+            vm.set_pc_to(0);
+
+        out << "Running: " << endl;
+        out << vm.to_string() << endl << endl;
+
+        vm.run();
+
+        out << "Finished " << endl;
         out << vm.to_string();
     }
 
@@ -106,9 +119,9 @@ std::string parsestring(std::string s) {
 }
 
 extern "C" {
-    const char * parse_string_c(const char *s)
+    const char * parse_string_c(const char *code, const char * input)
     {
-        return strdup(parsestring(string(s)).c_str());
+        return strdup(parsestring(string(code), string(input)).c_str());
     }
 }
 
