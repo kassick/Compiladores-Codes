@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 14:14:39 2017"
- *         Updated: "2017-09-19 04:25:10 kassick"
+ *         Updated: "2017-09-19 15:59:34 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -16,6 +16,8 @@
 #pragma once
 
 #include "vm.H"
+
+#include <cassert>
 
 // mark
 // Adds a marker that makes the stack begin anew on top of the current stack
@@ -196,8 +198,11 @@ struct ArrayCreateInstr: public Instruction {
         std::vector<DataItem> arr(rl);
         for (int i = 0; i < rl; i++) {
             DataItem itm = vm.pop();
-            arr[rl - i - 1] = itm;
+            arr[rl - i - 1] = std::move(itm);
+            assert(itm.type == UNINITIALIZED);
         }
+
+        vm.push(arr);
 
         return vm;
     }
@@ -249,8 +254,8 @@ struct ArrayLenInstr: public Instruction {
     }
 };
 
-// aget     : Array get the indirect position
-// aget i   : Array get the direct position
+// aget     : Array get the indirect position [ arr pos ]
+// aget i   : Array get the direct position   [ arr ]
 struct ArrayGetInstr: public Instruction {
     int pos;
 
@@ -292,8 +297,8 @@ struct ArrayGetInstr: public Instruction {
     }
 };
 
-// aset      : Indirect array set stack = [val pos arr]
-// aset i    : Direct array set stack = [val arr]
+// aset      : Indirect array set stack   [arr pos val]
+// aset i    : Direct array set stack     [arr val]
 struct ArraySetInstr: public Instruction {
     int pos;
 
@@ -310,11 +315,11 @@ struct ArraySetInstr: public Instruction {
         // pos?
         // array
 
-        DataItem value_itm = vm.pop();
+        DataItem value_itm = std::move(vm.pop());
 
         int the_pos = pos;
         if (the_pos < 0) {
-            DataItem pos_itm = vm.pop();
+            DataItem pos_itm = std::move(vm.pop());
             if (pos_itm.type != Int) {
                 throw logic_error("Trying to access array with something not an integer");
             }
@@ -322,19 +327,36 @@ struct ArraySetInstr: public Instruction {
             the_pos = pos_itm.as<int>();
         }
 
-        DataItem arr = vm.pop();
+        DataItem arr = std::move(vm.pop());
         if (arr.type != Array)
             throw logic_error("Trying to unpack something not an array");
 
         // this is owned by the arr DataItem
         vector<DataItem>* arr_data = arr.as<vector<DataItem>*>();
 
-        if (pos < 0 || pos >= arr_data->size())
+        if (the_pos < 0 || the_pos >= arr_data->size())
             throw logic_error("Invalid position for array access");
 
-        (*arr_data)[the_pos] = value_itm;
+        // cerr << "BEFORE: "
+        //      << "arr_data at " << (void*)arr_data
+        //      << " swapping " << (*arr_data)[the_pos].to_string()
+        //      << " with " << value_itm.to_string()
+        //      << endl;
+        (*arr_data)[the_pos] = std::move(value_itm);
+        assert(value_itm.type == UNINITIALIZED);
+        // cerr << "AFTER: "
+        //      << "arr_data at " << (void*)arr_data
+        //      << " swappped old " << (*arr_data)[the_pos].to_string()
+        //      << " with new" << value_itm.to_string()
+        //      << endl;
 
-        vm.push(arr);
+        vm.push(std::move(arr));
+
+        // cerr << "AFTER PUSH: "
+        //      << " top of the stack has " << vm.stack[vm.size() - 1].to_string()
+        //      << " arr has " << arr.to_string()
+        //      << " value_itm has " << value_itm.to_string()
+        //      << endl;
 
         return vm;
     }
@@ -576,17 +598,20 @@ struct PrintStringInstr : public Instruction {
             throw logic_error("Printing something that ain't string on PrintStr");
 
         int l = len.as<int>();
+        if (l < 0)
+            throw logic_error("Invalid string len");
 
-        if (l < 0) throw logic_error("Invalid string len");
-
+        string s(l, ' '); // whitespace string with the right size
         while (l--)
         {
             DataItem c = vm.pop();
             if (c.type != Char)
                 throw logic_error("Printing something that ain't a string");
 
-            vm.out << c.as<char>();
+            s[l] = c.as<char>();
         }
+
+        vm.out << s;
 
         return vm;
     }
@@ -829,7 +854,7 @@ struct BAndInstr : public Instruction {
 struct BOrInstr : public Instruction {
 
     virtual string to_string() const override {
-        return "bot";
+        return "bor";
     }
 
     virtual VM& run(VM & vm) const override {
@@ -1043,7 +1068,7 @@ struct ExitInstr : public Instruction {
     }
 
     virtual VM& run(VM & vm) const override {
-        vm.ok_to_go = false;
+        vm.pc = -1;
         return vm;
     }
 };

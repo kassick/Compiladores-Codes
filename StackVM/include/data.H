@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 11:35:28 2017"
- *         Updated: "2017-09-19 04:17:11 kassick"
+ *         Updated: "2017-09-19 16:05:00 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -19,6 +19,7 @@
 #include <vector>
 #include <sstream>
 #include <cstring>
+#include <utility>
 
 using namespace std;
 
@@ -37,6 +38,17 @@ const char * dataTypeNameStr(DataType t) {
         case Double: return "double"; break;
         case Array: return "[]"; break;
         default: return "UNINITIALIZED"; break;
+    }
+}
+
+const string char_escape(const char c) {
+    switch(c) {
+        case '\n': return "\\n";
+        case '\t': return "\\t";
+        case '\r': return "\\r";
+        case '\b': return "\\b";
+        default:
+            return string({c});
     }
 }
 
@@ -63,14 +75,24 @@ struct DataItem {
     DataItem(const double d) : DataItem(d, Double) {}
 
     DataItem(const std::vector<DataItem> &v) {
+        // cerr << "copy ctor from "
+        //      << (void*)&v
+        //      << " to "
+        //      << (void*) this
+        //      << endl;
         vector<DataItem> * nv = new vector<DataItem>(v);
         type = Array;
         data.resize(sizeof(nv));
         memcpy(data.data(), &nv, sizeof(nv));
     }
 
-    DataItem(std::vector<DataItem> &&v) {
-        vector<DataItem> * nv = new vector<DataItem>(std::move( v ));
+    DataItem(std::vector<DataItem> &&other) {
+        // cerr << "move ctor from "
+        //      << (void*)&other
+        //      << " to "
+        //      << (void*) this
+        //      << endl;
+        vector<DataItem> * nv = new vector<DataItem>(std::move( other ));
         type = Array;
         data.resize(sizeof(nv));
         memcpy(data.data(), &nv, sizeof(nv));
@@ -85,11 +107,55 @@ struct DataItem {
             vector<DataItem> * nv = new vector<DataItem>(*old_data);
             data.resize(sizeof(nv));
             memcpy(data.data(), &nv, sizeof(nv));
+
+            // cerr << "!copy ctor from "
+            //      << (void*)&other
+            //      << " to "
+            //      << (void*) this
+            //      << endl;
         }
+    }
+
+    DataItem(DataItem&& other) :
+            type(other.type),
+            data(std::move(other.data))
+    {
+        other.type = UNINITIALIZED;
+        other.data.resize(0);
+    }
+
+    void swap(DataItem & other) {
+        std::swap(this->type, other.type);
+        std::swap(this->data, other.data);
+    }
+
+    DataItem& operator=(const DataItem& other) = delete;
+    DataItem& operator=(DataItem&& other)
+    {
+        if (this->type == Array) {
+            // cerr << "Eliminating an array at "
+            //      << (void*) this->as<std::vector<DataItem>*>()
+            //      << endl;
+            delete this->as<std::vector<DataItem>*>();
+            this->data.resize(0);
+        }
+
+        this->data = std::move(other.data);
+        this->type = other.type;
+
+        other.type = UNINITIALIZED;
+        other.data.resize(0);
+
+        return *this;
     }
 
     ~DataItem() {
         if (type == Array) {
+            // cerr << "Deleting array for item "
+            //      << (void*)this
+            //      << " array at "
+            //      << (void*)this->data.data()
+            //      << endl;
             delete this->as<vector<DataItem>*>();
         }
     }
@@ -194,16 +260,20 @@ struct DataItem {
     string to_string() const {
         stringstream ss;
 
-        ss << dataTypeNameStr(this->type)
-           << " : ";
+        ss << "("
+           << dataTypeNameStr(this->type)
+           << " ";
         switch (this->type) {
-            case Char: ss << "'" << as<char>() << "'"; break;
+            case Char: ss << "'" << char_escape(as<char>()) << "'"; break;
             case Int: ss << as<int>(); break;
             case Double: ss << as<double>(); break;
             case Array:
                 {
-                    ss << "[ ";
-                    for (const DataItem& i : as<vector<DataItem>>())
+                    // 0x8fafbd {3} [(int 1) (double 2) (null)]
+                    ss << (void*) data.data()
+                       << " {" << as<vector<DataItem>*>()->size() << "}"
+                       << " [ ";
+                    for (const DataItem& i : *as<vector<DataItem>*>())
                     {
                         ss << i.to_string() << " ";
                     }
@@ -213,6 +283,7 @@ struct DataItem {
                 break;
             default: ss << "null"; break;
         }
+        ss << ")";
 
         return ss.str();
     }
@@ -221,7 +292,7 @@ struct DataItem {
         stringstream ss;
 
         switch (this->type) {
-            case Char:   return std::to_string( as<char>() );
+            case Char:   return std::string( { as<char>() } );
             case Int:    return std::to_string( as<int>() );
             case Double: return std::to_string( as<double>() );
             case Array:  return to_string();
@@ -231,3 +302,9 @@ struct DataItem {
         return ss.str();
     }
 };
+
+namespace std {
+void swap(DataItem &a, DataItem &b) {
+    a.swap(b);
+}
+}

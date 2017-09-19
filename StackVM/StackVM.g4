@@ -9,6 +9,7 @@ instruction_line
     :
         (label ':' )?
         instruction
+        NEWLINE
         #instructionLine
     ;
 
@@ -179,7 +180,7 @@ strarg : LITERAL_STRING ;
 
 // Tokens
 
-WS : [ \r\t\u000C\n] -> skip;
+WS : [ \t] -> skip;
 
 NEWLINE : '\r'? '\n'; // dos or windows newlines
 

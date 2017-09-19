@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Sep 13 11:00:28 2017"
- *         Updated: "2017-09-19 03:58:08 kassick"
+ *         Updated: "2017-09-19 12:01:03 kassick"
  *
  *          Author:
  *
@@ -63,6 +63,9 @@ VM& parse_full(tree::ParseTree& tree, VM& vm, ostream& out )
     StackVM::InstructionListener instr_listener(vm, out);
     tree::ParseTreeWalker::DEFAULT.walk(&instr_listener, &tree);
 
+    if (instr_listener.errors > 0)
+        vm.ok_to_go = false;
+
     return vm;
 }
 
@@ -116,20 +119,38 @@ int main(int argc, char *argv[])
 
     if (argc > 1) {
         fstream * fh = new fstream(argv[1], ios_base::in);
+        if (!fh->is_open()) {
+            cerr << "Could not open input file ``"
+                 << argv[1]
+                 << "''"
+                 << endl;
+            return 1;
+        }
+
         in = fh;
     }
 
-    VM vm(*in, sout);
+    // New vm that will interact with stdin and stdout
+    VM vm(cin, cout);
+
+    // Parse stream from stdin or a file
     parse_stream(*in, sout, vm);
+    cout << sout.str();
 
     if (!vm.ok_to_go) {
         sout << "Can not run" << endl;
     } else {
-        sout << "going to run now" << endl;
+        if (vm.set_pc_to("start") < 0)
+            vm.set_pc_to(0);
+
+        sout << "Running: " << endl;
+        sout << vm.to_string() << endl << endl;
+
+        vm.run();
+
+        sout << "Finished " << endl;
         sout << vm.to_string();
     }
-
-    cout << sout.str();
 
     return 0;
 }

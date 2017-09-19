@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 14:06:37 2017"
- *         Updated: "2017-09-19 03:37:12 kassick"
+ *         Updated: "2017-09-19 16:02:29 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -24,6 +24,8 @@
 #include <istream>
 #include <iomanip>
 #include <sstream>
+#include <thread>
+#include <chrono>
 
 #include "data.H"
 
@@ -45,7 +47,8 @@ struct VM {
     std::vector<Instruction::pointer> instructions;
     std::unordered_map<string, int> label_map;
     int pc = 0;
-    bool ok_to_go;
+    int last_pc = -1;
+    bool ok_to_go; // if the machine was correctly loaded
 
     istream& in;
     ostream& out;
@@ -67,11 +70,12 @@ struct VM {
                << endl;
         }
 
-        ss << endl << "Code:" << endl;
+        ss << endl << "Code: (* is currenct pc, > is last pc)" << endl;
 
         for(int i = 0; i < instructions.size(); i++)
         {
-            ss << setw(5) << i
+            ss << (pc == i? "*" : (last_pc == i? ">" : " "))
+               << setw(5) << i
                << " : " << instructions[i]->to_string()
                << endl;
         }
@@ -82,10 +86,7 @@ struct VM {
     int set_pc_to(const string label) {
         const auto it = label_map.find(label);
         if (it == label_map.cend()) {
-            out << "ERROR: can not find target " << label
-                << " to set pc to "
-                << endl;
-            ok_to_go = false;
+            pc = -1;
         } else {
             pc = it->second;
         }
@@ -93,17 +94,33 @@ struct VM {
         return pc;
     }
 
+    int set_pc_to(const int target) {
+        pc = target;
+        return pc;
+    }
+
     void run() {
-        while(ok_to_go) {
+        while(pc >= 0 && pc < instructions.size()) {
             try {
+                last_pc = pc;
                 Instruction::pointer instr = instructions[pc++];
                 instr->run(*this);
+
+                #ifndef NDEBUG
+                cout << "--------------------"
+                     << endl
+                     << this->to_string()
+                     << "--------------------"
+                     << endl;
+                std::this_thread::sleep_for (std::chrono::seconds(1));
+                #endif
+
             } catch (out_of_range & e) {
-                ok_to_go = false;
                 out << "Tried to access invalid pc " << pc << endl;
+                pc = -1;
             } catch (logic_error & e) {
-                ok_to_go = false;
                 out << e.what() << endl;
+                pc = -1;
             }
         }
     }
@@ -119,23 +136,21 @@ struct VM {
     }
 
     template<typename T>
-    void push(T v) {
-        stack.emplace_back(v);
+    void push(T&& v) {
+        stack.emplace_back(std::forward<T>(v));
     }
 
     DataItem pop() {
         if (stack.size() == marker_stack.top())
             throw logic_error("Popping beyond top mark");
 
-        DataItem item = stack[stack.size() - 1];
+        DataItem item = std::move(stack[stack.size() - 1]);
         stack.resize(stack.size() - 1);
         return item;
     }
 
     DataItem get(int i) const {
-        int logic_size = stack.size() - marker_stack.top();
-
-        if (i < 0 || i >= logic_size)
+        if (i < 0 || i >= size())
             throw logic_error("Trying to get item past stack end");
 
         DataItem item = stack[marker_stack.top() + i];
@@ -149,7 +164,7 @@ struct VM {
     }
 
     void dup() {
-        dup(stack.size());
+        dup(size() - 1);
     }
 
 
