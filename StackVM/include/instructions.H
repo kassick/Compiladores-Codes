@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 14:14:39 2017"
- *         Updated: "2017-09-18 16:58:03 kassick"
+ *         Updated: "2017-09-19 03:13:14 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -24,6 +24,10 @@ struct PushStackMarkInstr: public Instruction {
         vm.push_mark();
         return vm;
     }
+
+    virtual string to_string() const override {
+        return "mark";
+    }
 };
 
 // pop_mark
@@ -35,6 +39,10 @@ struct PopStackMarkInstr: public Instruction {
         vm.push(itm);
         return vm;
     }
+
+    virtual string to_string() const override {
+        return "pop_mark";
+    }
 };
 
 // drop_mark     ==    pop_mark ; pop
@@ -43,6 +51,10 @@ struct DropStackMarkInstr: public Instruction {
     virtual VM& run(VM& vm) const override {
         vm.pop_mark();
         return vm;
+    }
+
+    virtual string to_string() const override {
+        return "drop_mark";
     }
 };
 
@@ -55,6 +67,14 @@ struct CrunchInstr : public Instruction {
     CrunchInstr(int base_, int size_) : base(base_), size(size_) {}
     CrunchInstr(int size_) : base(-1), size(size_) {}
     CrunchInstr() : base(-1), size(-1) {}
+
+    virtual string to_string() const override {
+
+        return string("crunch ") +
+                std::to_string(base) +
+                string(" ") +
+                std::to_string(size);
+    }
 
     virtual VM& run(VM& vm) const override {
 
@@ -88,6 +108,10 @@ struct TrimInstr : public Instruction {
     TrimInstr(int base_) : base(base_) {}
     TrimInstr() : base(-1) {}
 
+    virtual string to_string() const override {
+        return string("trim ") + std::to_string(base);
+    }
+
     virtual VM& run(VM& vm) const override {
         int the_base = base;
         if (the_base < 0) {
@@ -117,6 +141,10 @@ struct SwapInstr : public Instruction {
     // Swap top with next
     SwapInstr() : SwapInstr(-1, -1) {}
 
+    virtual string to_string() const override {
+        return string("swap ") + std::to_string(i) + string(" ") + std::to_string(j);
+    }
+
     virtual VM& run(VM& vm) const override {
         if (i < 0 && j < 0)
             vm.swap();
@@ -135,6 +163,10 @@ struct DupInstr : public Instruction {
         vm.dup();
         return vm;
     }
+
+    virtual string to_string() const override {
+        return "dup";
+    }
 };
 
 // acreate           : creates an array with size=top , value = the rest
@@ -144,6 +176,11 @@ struct ArrayCreateInstr: public Instruction {
 
     ArrayCreateInstr(int len_) : len(len_) {}
     ArrayCreateInstr() : ArrayCreateInstr(-1) {}
+
+    virtual string to_string() const override {
+        return string("acreate ") +
+                std::to_string(len);
+    }
 
     VM& run(VM& vm) const override {
         int rl = len;
@@ -184,6 +221,10 @@ struct ArrayLoadInstr: public Instruction {
 
         return vm;
     }
+
+    virtual string to_string() const override {
+        return "aload";
+    }
 };
 
 // alen             : gets the len of the array at the top of the stack
@@ -202,6 +243,10 @@ struct ArrayLenInstr: public Instruction {
 
         return vm;
     }
+
+    virtual string to_string() const override {
+        return "alen";
+    }
 };
 
 // aget     : Array get the indirect position
@@ -211,6 +256,10 @@ struct ArrayGetInstr: public Instruction {
 
     ArrayGetInstr(int pos_) : pos(pos_) {}
     ArrayGetInstr(): ArrayGetInstr(-1) {}
+
+    virtual string to_string() const override {
+        return string("aget ") + std::to_string(pos);
+    }
 
     VM& run(VM& vm) const override {
 
@@ -251,6 +300,11 @@ struct ArraySetInstr: public Instruction {
     ArraySetInstr(int pos_) : pos(pos_) {}
     ArraySetInstr(): ArraySetInstr(-1) {}
 
+    virtual string to_string() const override {
+        return string("aset ") +
+                std::to_string(pos);
+    }
+
     VM& run(VM& vm) const override {
         // value
         // pos?
@@ -286,15 +340,20 @@ struct ArraySetInstr: public Instruction {
     }
 };
 
-// push[cifd] literal
-// pushi 1
-// pushd 2.0
+// push literal
+// push 1
+// push 2.0
+// push 'a'
 template <typename T>
 struct PushInstr : public Instruction {
 
     DataItem d;
 
     PushInstr(T val) : d(val) {}
+
+    virtual string to_string() const override {
+        return string("push ") + d.to_string();
+    }
 
     virtual VM& run(VM& vm) const override {
         vm.push(d);
@@ -309,6 +368,10 @@ struct PushInstr<string> : public Instruction {
     string val;
 
     PushInstr(string val_) : val(val_) {}
+
+    virtual string to_string() const override {
+        return string("push \"") + val + string("\"");
+    }
 
     virtual VM& run(VM& vm) const override {
         for (const char c : val)
@@ -325,6 +388,10 @@ struct Null {};
 template <>
 struct PushInstr<Null> : public Instruction {
 
+    virtual string to_string() const override {
+        return "push null";
+    }
+
     virtual VM& run(VM& vm) const override {
 
         vm.push(DataItem());
@@ -337,6 +404,11 @@ struct PushInstr<Null> : public Instruction {
 struct StackSize {};
 template<>
 struct PushInstr<StackSize>: public Instruction {
+
+    virtual string to_string() const override {
+        return "push stack_size";
+    }
+
     virtual VM& run(VM& vm) const override {
         DataItem itm(vm.size());
         vm.push(itm);
@@ -344,10 +416,32 @@ struct PushInstr<StackSize>: public Instruction {
     }
 };
 
-// pop
-struct PopInstr : public Instruction {
+// popn     : pops n items (n in stack)
+// popn i   : pops i items
+struct PopNInstr : public Instruction {
+    int n;
+
+    PopNInstr(int n_) : n(n_) {};
+    PopNInstr(): n(-1) {};
+
+    virtual string to_string() const override {
+        return string("popn ") + std::to_string(n);
+    }
+
     virtual VM& run(VM & vm) const override{
-        vm.pop();
+        int howmany = n;
+        if (howmany < 0) {
+            DataItem itm = vm.pop();
+            if (itm.type != Int) {
+                throw logic_error("Popping N, but in is not an int");
+            }
+
+            howmany = itm.as<int>();
+        }
+
+        while(howmany--)
+            vm.pop();
+
         return vm;
     }
 };
@@ -360,6 +454,11 @@ struct StoreInstr : public Instruction {
 
     StoreInstr(int target_) : target(target_) {}
     StoreInstr() : target(-1) {}
+
+    virtual string to_string() const override {
+        return string("store ") +
+                std::to_string(target);
+    }
 
     virtual VM& run(VM& vm) const override {
         // swap top with target
@@ -386,6 +485,11 @@ struct LoadInstr : public Instruction {
     LoadInstr(int target_) : target(target_) {}
     LoadInstr() : target(-1) {}
 
+    virtual string to_string() const override {
+        return string("load ") +
+                std::to_string(target);
+    }
+
     virtual VM& run(VM& vm) const override {
         int the_target = target;
         if (the_target < 0) {
@@ -402,13 +506,19 @@ struct LoadInstr : public Instruction {
 };
 
 // I/O
-// read[cifd]
-// reads char, int, float, double and add it to the stack
+// read[cid]
+// reads char, int, double and add it to the stack
 template <typename T>
 struct ReadInstr : public Instruction {
+
+    virtual string to_string() const override {
+        return string( "read_" ) +
+                typeid(T).name();
+    }
+
     virtual VM& run(VM & vm) const override {
         T val;
-        cin >> val;
+        vm.in >> val;
 
         vm.push(val);
     }
@@ -417,10 +527,15 @@ struct ReadInstr : public Instruction {
 // reads : reads string and add it (as an unpacked array) to the top of the stack
 template<>
 struct ReadInstr<string> : public Instruction {
+
+    virtual string to_string() const override {
+        return "reads";
+    }
+
     virtual VM& run(VM & vm) const override {
         string val;
 
-        cin >> val;
+        vm.in >> val;
 
         for (const char c: val)
             vm.push(c);
@@ -433,17 +548,27 @@ struct ReadInstr<string> : public Instruction {
 
 // print  : prints the char, int, float, double on the top of the stack
 struct PrintInstr : public Instruction {
+
+    virtual string to_string() const override {
+        return "print";
+    }
+
     virtual VM& run(VM & vm) const override {
         DataItem val = vm.pop();
 
-        cout << val.value_to_string();
+        vm.out << val.value_to_string();
 
         return vm;
     }
 };
 
 // prints  : prints the unpacked string in the stack
-struct PrintString : public Instruction {
+struct PrintStringInstr : public Instruction {
+
+    virtual string to_string() const override {
+        return "prints";
+    }
+
     virtual VM& run(VM & vm) const override {
 
         DataItem len = vm.pop();
@@ -460,7 +585,7 @@ struct PrintString : public Instruction {
             if (c.type != Char)
                 throw logic_error("Printing something that ain't a string");
 
-            cout << c.as<char>();
+            vm.out << c.as<char>();
         }
 
         return vm;
@@ -504,6 +629,10 @@ struct DivFunctor {
 
 struct AddInstr : public Instruction {
 
+    virtual string to_string() const override {
+        return "add";
+    }
+
     virtual VM& run(VM & vm) const override {
         DataItem lhs = vm.pop();
         DataItem rhs = vm.pop();
@@ -529,6 +658,10 @@ struct AddInstr : public Instruction {
 
 struct SubInstr : public Instruction {
 
+    virtual string to_string() const override {
+        return "sub";
+    }
+
     virtual VM& run(VM & vm) const override {
         DataItem lhs = vm.pop();
         DataItem rhs = vm.pop();
@@ -553,6 +686,10 @@ struct SubInstr : public Instruction {
 
 struct MulInstr : public Instruction {
 
+    virtual string to_string() const override {
+        return "mul";
+    }
+
     virtual VM& run(VM & vm) const override {
         DataItem lhs = vm.pop();
         DataItem rhs = vm.pop();
@@ -576,6 +713,10 @@ struct MulInstr : public Instruction {
 };
 
 struct DivInstr : public Instruction {
+
+    virtual string to_string() const override {
+        return "div";
+    }
 
     virtual VM& run(VM & vm) const override {
         DataItem lhs = vm.pop();
@@ -603,6 +744,11 @@ struct DivInstr : public Instruction {
 // and   : logical and
 struct AndInstr : public Instruction {
 
+
+    virtual string to_string() const override {
+        return "and";
+    }
+
     virtual VM& run(VM & vm) const override {
         DataItem lhs = vm.pop();
         DataItem rhs = vm.pop();
@@ -619,6 +765,10 @@ struct AndInstr : public Instruction {
 // or  : logical or
 struct OrInstr : public Instruction {
 
+    virtual string to_string() const override {
+        return "or";
+    }
+
     virtual VM& run(VM & vm) const override {
         DataItem lhs = vm.pop();
         DataItem rhs = vm.pop();
@@ -634,6 +784,11 @@ struct OrInstr : public Instruction {
 
 // nullp
 struct NullPredInstr : public Instruction {
+
+    virtual string to_string() const override {
+        return "nullp";
+    }
+
     virtual VM& run(VM& vm) const override {
         DataItem top = vm.pop();
 
@@ -645,6 +800,10 @@ struct NullPredInstr : public Instruction {
 
 // not  : logical not
 struct NotInstr : public Instruction {
+
+    virtual string to_string() const override {
+        return "not";
+    }
 
     virtual VM& run(VM & vm) const override {
         DataItem lhs = vm.pop();
@@ -660,6 +819,10 @@ struct NotInstr : public Instruction {
 
 // band   : bitwise and
 struct BAndInstr : public Instruction {
+
+    virtual string to_string() const override {
+        return "band";
+    }
 
     virtual VM& run(VM & vm) const override {
         DataItem lhs = vm.pop();
@@ -677,6 +840,10 @@ struct BAndInstr : public Instruction {
 // bor  : logical or
 struct BOrInstr : public Instruction {
 
+    virtual string to_string() const override {
+        return "bot";
+    }
+
     virtual VM& run(VM & vm) const override {
         DataItem lhs = vm.pop();
         DataItem rhs = vm.pop();
@@ -692,6 +859,10 @@ struct BOrInstr : public Instruction {
 
 // bnot  : bitwise not
 struct BNotInstr : public Instruction {
+
+    virtual string to_string() const override {
+        return "bnot";
+    }
 
     virtual VM& run(VM & vm) const override {
         DataItem lhs = vm.pop();
@@ -713,6 +884,10 @@ struct JumpInstr : public Instruction {
 
     JumpInstr(int target_) : target(target_) {}
     JumpInstr(): JumpInstr(-1) {}
+
+    virtual string to_string() const override {
+        return string("jump ") + std::to_string(target);
+    }
 
     virtual VM& run(VM & vm) const override {
         int the_target = target;
@@ -738,6 +913,10 @@ struct BnzInstr : public Instruction {
 
     BnzInstr(int target_) : target(target_) {}
     BnzInstr(): BnzInstr(-1) {}
+
+    virtual string to_string() const override {
+        return string("bnz ") + std::to_string(target);
+    }
 
     virtual VM& run(VM & vm) const override {
         int the_target = target;
@@ -767,6 +946,10 @@ struct BzInstr : public Instruction {
     BzInstr(int target_) : target(target_) {}
     BzInstr(): BzInstr(-1) {}
 
+    virtual string to_string() const override {
+        return string("bz ") + std::to_string(target);
+    }
+
     virtual VM& run(VM & vm) const override {
         int the_target = target;
         if (the_target < 0) {
@@ -794,6 +977,10 @@ struct BNegInstr : public Instruction {
 
     BNegInstr(int target_) : target(target_) {}
     BNegInstr(): BNegInstr(-1) {}
+
+    virtual string to_string() const override {
+        return string("bneg ") + std::to_string(target);
+    }
 
     virtual VM& run(VM & vm) const override {
         int the_target = target;
@@ -823,6 +1010,10 @@ struct BPosInstr : public Instruction {
     BPosInstr(int target_) : target(target_) {}
     BPosInstr(): BPosInstr(-1) {}
 
+    virtual string to_string() const override {
+        return string("bpos ") + std::to_string(target);
+    }
+
     virtual VM& run(VM & vm) const override {
         int the_target = target;
         if (the_target < 0) {
@@ -847,8 +1038,25 @@ struct PC {} ;
 template <>
 struct PushInstr<PC> : public Instruction {
 
+    virtual string to_string() const override {
+        return "push pc";
+    }
+
     virtual VM& run(VM & vm) const override {
         vm.push(vm.pc);
+        return vm;
+    }
+};
+
+struct ExitInstr : public Instruction {
+
+
+    virtual string to_string() const override {
+        return "exit";
+    }
+
+    virtual VM& run(VM & vm) const override {
+        vm.ok_to_go = false;
         return vm;
     }
 };

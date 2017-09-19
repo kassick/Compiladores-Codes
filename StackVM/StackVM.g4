@@ -7,13 +7,9 @@ start
 
 instruction_line
     :
-        WS*
-        (label WS* ':' )?
-        WS*
+        (label ':' )?
         instruction
-        WS*
-        NEWLINE
-        #instruction
+        #instructionLine
     ;
 
 instruction
@@ -25,25 +21,25 @@ instruction
         #dropMark
     |   'crunch'
         #crunchNoArgs
-    |   'crunch' size=intarg
+    |   'crunch' size=non_negative_int_arg
         #crunchBaseIndirect
-    |   'crunch' base=intarg size=intarg
+    |   'crunch' base=non_negative_int_arg size=non_negative_int_arg
         #crunchDirect
     |   'trim'
         #trimIndirect
-    |   'trim' base=intarg
+    |   'trim' base=non_negative_int_arg
         #trimDirect
     |   'swap'
         #swapTopWithNext
-    |   'swap' a=intarg
+    |   'swap' a=non_negative_int_arg
         #swapTopWithArg
-    |   'swap' a=intarg b=intarg
+    |   'swap' a=non_negative_int_arg b=non_negative_int_arg
         #swap
     |  'dup'
         #dupTop
     |  'acreate'
         #arrayCreate
-    |  'acreate' l=intarg
+    |  'acreate' l=non_negative_int_arg
         #arrayCreateArg
     |  'aload'
         #arrayLoad
@@ -51,23 +47,21 @@ instruction
         #arrayLen
     |  'aget'
         #arrayGet
-    |  'aget' i=intarg
+    |  'aget' i=non_negative_int_arg
         #arrayGetArg
     |  'aset'
         #arraySet
-    |  'aset' i=intarg
+    |  'aset' i=non_negative_int_arg
         #arraySetArg
     |  'push' c=chararg
         #pushChar
-    |  'puch' i=intarg
+    |  'push' i=intarg
         #pushInt
-    |  'pushf' f=floatarg
-        #pushFloat
-    |  'pushd' d=doublearg
+    |  'push' d=doublearg
         #pushDouble
     |  'push' s=strarg
         #pushString
-    |  'push' l=label
+    |  'push' l=ref_label
         #pushLabel
     |  'push' 'null'
         #pushNull
@@ -75,14 +69,18 @@ instruction
         #pushStackSize
     |  'pop'
         #pop
+    |  'popn' i=non_negative_int_arg
+        #popNImediate
+    |  'popn'
+        #popN
     |  'store'
         #storeIndirect
-    |  'store' i=intarg
+    |  'store' i=non_negative_int_arg
         #store
     |  'load'
         #loadIndirect
-    |  'load' i=intarg
-        #loadIndirect
+    |  'load' i=non_negative_int_arg
+        #load
     |  'readc'
         #readChar
     |  'readi'
@@ -96,7 +94,7 @@ instruction
     |  'print'
         #print
     |  'prints'
-        #pringString
+        #printString
     |  'add'
         #add
     |  'sub'
@@ -121,34 +119,44 @@ instruction
         #bitwiseNot
     |  'jump'
         #jump
-    |  'jump' target=label
+    |  'jump' target=ref_label
         #jumpImediate
     |  'bz'
         #branchZero
-    |  'bz' target=label
+    |  'bz' target=ref_label
         #branchZeroImediate
     |  'bnz'
         #branchNotZero
-    |  'bnz' target=label
+    |  'bnz' target=ref_label
         #branchNotZeroImediate
     |  'bneg'
         #branchNegative
-    |  'bneg' target=label
+    |  'bneg' target=ref_label
         #branchNegativeImediate
     |  'bpos'
         #branchPositive
-    |  'bpos' target=label
+    |  'bpos' target=ref_label
         #branchPositiveImediate
     |  'push' 'pc'
         #pushPC
+    |  'exit'
+        #exit
     ;
 
 label
-    : [a-zA-Z][a-zA-Z0-9]*
+    : LITERAL_LABEL
+    ;
+
+ref_label
+    : LITERAL_LABEL
     ;
 
 intarg
     : LITERAL_INT | LITERAL_HEX
+    ;
+
+non_negative_int_arg
+    : intarg
     ;
 
 chararg
@@ -167,7 +175,7 @@ strarg : LITERAL_STRING ;
 
 // Tokens
 
-WS : [ \r\t\u000C\n];
+WS : [ \r\t\u000C\n] -> skip;
 
 NEWLINE : '\r'? '\n'; // dos or windows newlines
 
@@ -179,11 +187,12 @@ LITERAL_STRING
         '"'
     ;
 
+LITERAL_LABEL: [a-zA-Z][a-zA-Z0-9]*;
+
 LITERAL_CHAR
     :   '\''
         ( '\\' [a-z] | ~('\'') ) // Um escape (\a, \n, \t) ou qualquer coisa que não seja aspas (a, b, ., z, ...)
-        '\'' ;
-    : '"' (  )
+        '\''
     ;
 
 LITERAL_FLOAT

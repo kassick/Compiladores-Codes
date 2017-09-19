@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 14:06:37 2017"
- *         Updated: "2017-09-18 15:51:18 kassick"
+ *         Updated: "2017-09-19 03:37:12 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -18,28 +18,97 @@
 #include <vector>
 #include <stack>
 #include <unordered_map>
+#include <memory>
+#include <string>
+#include <ostream>
+#include <istream>
+#include <iomanip>
+#include <sstream>
 
 #include "data.H"
 
 struct VM;
 
 struct Instruction {
+    typedef shared_ptr<Instruction> pointer;
+
     virtual VM& run(VM&) const = 0;
+
+    virtual string to_string() const = 0;
 };
 
 struct VM {
 
     std::vector<DataItem> stack;
     std::stack<int> marker_stack;
-    std::vector<Instruction*> instructions;
+
+    std::vector<Instruction::pointer> instructions;
     std::unordered_map<string, int> label_map;
     int pc = 0;
+    bool ok_to_go;
 
-    VM() {
+    istream& in;
+    ostream& out;
+
+    VM(istream& in_, ostream& out_) :
+            in(in_), out(out_), ok_to_go(true)
+    {
         marker_stack.push(0);
     }
 
-    int size() {
+    string to_string() const {
+        stringstream ss;
+        ss << "Stack: " << endl;
+
+        for (int i = stack.size() - 1; i >= 0; i--)
+        {
+            ss << setw(5) << i - marker_stack.top()
+               << " : " << stack[i].to_string()
+               << endl;
+        }
+
+        ss << endl << "Code:" << endl;
+
+        for(int i = 0; i < instructions.size(); i++)
+        {
+            ss << setw(5) << i
+               << " : " << instructions[i]->to_string()
+               << endl;
+        }
+
+        return ss.str();
+    }
+
+    int set_pc_to(const string label) {
+        const auto it = label_map.find(label);
+        if (it == label_map.cend()) {
+            out << "ERROR: can not find target " << label
+                << " to set pc to "
+                << endl;
+            ok_to_go = false;
+        } else {
+            pc = it->second;
+        }
+
+        return pc;
+    }
+
+    void run() {
+        while(ok_to_go) {
+            try {
+                Instruction::pointer instr = instructions[pc++];
+                instr->run(*this);
+            } catch (out_of_range & e) {
+                ok_to_go = false;
+                out << "Tried to access invalid pc " << pc << endl;
+            } catch (logic_error & e) {
+                ok_to_go = false;
+                out << e.what() << endl;
+            }
+        }
+    }
+
+    int size() const {
         return stack.size() - marker_stack.top();
     }
 
@@ -63,7 +132,7 @@ struct VM {
         return item;
     }
 
-    DataItem get(int i) {
+    DataItem get(int i) const {
         int logic_size = stack.size() - marker_stack.top();
 
         if (i < 0 || i >= logic_size)
