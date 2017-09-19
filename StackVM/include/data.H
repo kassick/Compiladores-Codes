@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 11:35:28 2017"
- *         Updated: "2017-09-19 04:06:12 kassick"
+ *         Updated: "2017-09-19 04:10:35 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -52,9 +52,11 @@ struct DataItem {
 
     template <typename T>
     DataItem(T v, DataType _type ) :
-            type(_type),
-            data(&v, &v + sizeof(T))
-    {}
+            type(_type)
+    {
+        data.resize(sizeof(T));
+        memcpy(data.data(), &v, sizeof(T));
+    }
 
     DataItem(const char c) : DataItem(c, Char) {}
 
