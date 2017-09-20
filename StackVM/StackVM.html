@@ -1,0 +1,3445 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt" xml:lang="pt">
+<head>
+<!-- 2017-09-19 ter 22:08 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>StackVM &#x2013; Documentação</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Rodrigo Kassick" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript" src="./stackvm.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2017 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">StackVM &#x2013; Documentação</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org80bd27d">1. Introdução</a></li>
+<li><a href="#orgf6f7b99">2. Compilação</a></li>
+<li><a href="#org843e09c">3. Execução</a></li>
+<li><a href="#org58a420e">4. Formato de Arquivo Fonte para a Máquina Virtual</a></li>
+<li><a href="#org6506540">5. A Pilha de Dados</a></li>
+<li><a href="#orgccf5333">6. Instruções</a>
+<ul>
+<li><a href="#org5d9d6a2">6.1. Instruções Básicas</a></li>
+<li><a href="#orgd622521">6.2. Operações Binárias e Lógicas</a></li>
+<li><a href="#orged52fb3">6.3. Conversões (cast)</a></li>
+<li><a href="#orgb15c2b8">6.4. Entrada e Saída</a></li>
+<li><a href="#org849421a">6.5. Vetores</a></li>
+<li><a href="#org746daa3">6.6. Manipulação da Pilha</a></li>
+<li><a href="#org1614f6d">6.7. Operações <code>push</code> especiais</a></li>
+<li><a href="#org6756a50">6.8. Gerenciamento de Pilhas Aninhadas</a></li>
+<li><a href="#org394a92c">6.9. Controle de Fluxo</a></li>
+</ul>
+</li>
+<li><a href="#orgaf16671">7. Exemplos de Código</a>
+<ul>
+<li><a href="#org8070f7f">7.1. Aritmética Básica</a></li>
+<li><a href="#org3d8c5e0">7.2. Controle de Fluxo</a></li>
+<li><a href="#org6fe6ff3">7.3. Operações Lógicas</a></li>
+<li><a href="#orge4b8663">7.4. I/O</a></li>
+<li><a href="#org994ca78">7.5. Vetores</a></li>
+<li><a href="#orgf0e6787">7.6. Funções</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<script>
+ doParse = function(text, inputstr)
+ {
+     console.log('text is ' + text);
+     console.log('input is ' + inputstr);
+     r = ccall('parse_string_c', 'string', ['string', 'string'], [text, inputstr]);
+     return r;
+ };
+
+ parseSource = function()
+ {
+     d_ta = document.getElementById('esource');
+     d_in = document.getElementById('einput');
+     d_res = document.getElementById('result');
+     d_res.value = '';
+     res = '';
+
+     res = doParse(d_ta.value, d_in.value);
+
+     d_res.value = res;
+ };
+</script>
+
+<p>
+<b>Código Fonte:</b>
+</p>
+
+<textarea name="source" id="esource" rows="10" cols="70">
+readi
+dup
+push 2.0
+div
+swap
+print
+push " dividido por 2.0 eh "
+prints
+print
+</textarea>
+
+<p>
+
+<p>
+<b>Entrada:</b>
+</p>
+
+<textarea name="input" id="einput" rows="10" cols="70">
+3
+</textarea>
+
+<button type="button" onclick='parseSource()'>Parse</button>
+
+<p>
+
+<p>
+<b>Resultado:</b>
+</p>
+
+<textarea id="result" rows="10" cols="70"></textarea>
+
+<div id="outline-container-org80bd27d" class="outline-2">
+<h2 id="org80bd27d"><span class="section-number-2">1</span> Introdução</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Máquina de pilha simples com suporte a vetores de tipos mistos.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf6f7b99" class="outline-2">
+<h2 id="orgf6f7b99"><span class="section-number-2">2</span> Compilação</h2>
+<div class="outline-text-2" id="text-2">
+<ol class="org-ol">
+<li>Obtenha o ZIP com o código.</li>
+
+<li><p>
+Em uma máquina <i>Linux</i><sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>, descompacte o código e entre no diretório
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">unzip StackVM.zip
+<span style="color: #528fd1;">cd</span> Compiladores
+</pre>
+</div></li>
+
+<li><p>
+Em um diretório de Build, execute o CMake
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">mkdir Build
+<span style="color: #528fd1;">cd</span> Build
+cmake ..
+<span style="color: #528fd1;">cd</span> ..
+</pre>
+</div></li>
+
+<li><p>
+Ainda no diretório de build, construa o projeto
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">make
+</pre>
+</div></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org843e09c" class="outline-2">
+<h2 id="org843e09c"><span class="section-number-2">3</span> Execução</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Para executar a StackVM, entre no diretório <code>Build/StackVM</code> e execute (em um terminal) o programa <code>stackvm</code>
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">./stackvm
+</pre>
+</div>
+
+<p>
+Para digitar as instruções diretamente para a máquina, use o redirecionamento de entrada:
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">./stackvm &lt;&lt;EOF
+<span style="color: #ffff00; font-weight: bold;">push 1</span>
+<span style="color: #ffff00; font-weight: bold;">push 2</span>
+<span style="color: #ffff00; font-weight: bold;">add</span>
+<span style="color: #ffff00; font-weight: bold;">EOF</span>
+</pre>
+</div>
+
+<p>
+Pode-se também passar um nome de arquivo como parâmetro. O arquivo deve ser um arquivo texto padrão.
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">./stackvm arquivo.m
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org58a420e" class="outline-2">
+<h2 id="org58a420e"><span class="section-number-2">4</span> Formato de Arquivo Fonte para a Máquina Virtual</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+<b>Comentários</b> são linhas iniciadas por # :
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">esta linha eh um comentario</span>
+push <span style="color: #ab75c3;">1</span>
+</pre>
+</div>
+
+<p>
+O arquivo deve conter uma ou mais <b>Linhas de Instrução</b>
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">push <span style="color: #ab75c3;">1</span>
+push <span style="color: #ab75c3;">2</span>
+push <span style="color: #ab75c3;">3</span>
+add
+div
+</pre>
+</div>
+
+<p>
+Linhas de instrução <b>podem</b> possuir <i>labels</i> que são utilizados para controle de fluxo:
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">um_label :  push <span style="color: #ab75c3;">1</span>
+            push <span style="color: #ab75c3;">2.0</span>
+            div
+            bnz um_label
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6506540" class="outline-2">
+<h2 id="org6506540"><span class="section-number-2">5</span> A Pilha de Dados</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+A pilha de dados pode crescer arbitrariamente.
+</p>
+
+<p>
+Cada posição da pilha possui um <i>item de dados</i>. Este item pode ser um dos tipos básicos suportados (char, int, double) ou uma <i>coleção</i> (vetor).
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgccf5333" class="outline-2">
+<h2 id="orgccf5333"><span class="section-number-2">6</span> Instruções</h2>
+<div class="outline-text-2" id="text-6">
+</div><div id="outline-container-org5d9d6a2" class="outline-3">
+<h3 id="org5d9d6a2"><span class="section-number-3">6.1</span> Instruções Básicas</h3>
+<div class="outline-text-3" id="text-6-1">
+<ol class="org-ol">
+<li><p>
+<b>exit</b>
+</p>
+
+<p>
+Encerra a execução da máquina virtual.
+</p></li>
+
+<li><p>
+<b>push</b> literal
+</p>
+
+<p>
+Carrega um literal para a pilha. São aceitos os seguintes literais:
+</p>
+<ul class="org-ul">
+<li><i>char</i>: símbolos entre aspas simples, alguns com escape. Exemplo: 'a', 'b', '\n', '\t', etc.</li>
+
+<li><i>int</i>: Números inteiros, positivos ou negativos: <code>1</code>, <code>-6</code>, <code>200</code>, etc.</li>
+
+<li><i>double</i>: Números em ponto flutuante: <code>0.1</code>, <code>-94.99</code>, etc.</li>
+
+<li><i>string</i>: Strings literais: "abc", "def"</li>
+</ul>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>push 9.0</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 1</td>
+</tr>
+
+<tr>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 2</td>
+</tr>
+
+<tr>
+<td class="org-left">int 2</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">double 9.0</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Uma vez que a pilha apenas suporta tipos básicos, push de strings literais irão colocar todos as letras que compõem a string, junto com o seu tamanho:
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>push "ab"</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 1</td>
+</tr>
+
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 2</td>
+</tr>
+
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char a</td>
+</tr>
+
+<tr>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char b</td>
+</tr>
+
+<tr>
+<td class="org-left">int 2</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 2</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>pop</b> : Elimina o símbolo no topo da pilha
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>pop</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">int 2</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 2</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>popn n</b> : elimina n símbolos no topo da pilha:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>popn 2</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">int 2</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char a</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>popn</b> : utiliza o elemento no topo da pilha como parâmetro para popn
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>popn</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">int 2</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">int 2</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char a</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>dup</b> : duplica o elemento no topo da pilha:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char a</td>
+</tr>
+
+<tr>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>pop 2</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 1</td>
+</tr>
+
+<tr>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 2</td>
+</tr>
+
+<tr>
+<td class="org-left">int 2</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 2</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>swap</b> : troca dois elementos do topo da pilha:
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>swap</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char a</td>
+</tr>
+
+<tr>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 2</td>
+</tr>
+
+<tr>
+<td class="org-left">int 2</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 1</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>swap i</b> : troca o elemento do topo da pilha pelo elemento na posição <i>i</i> da pilha
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>swap 0</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 2</td>
+</tr>
+
+<tr>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 2</td>
+</tr>
+
+<tr>
+<td class="org-left">int 2</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char a</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>swap i j</b> : troca dois elementos arbitrários da pilha
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>swap 0 1</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 1</td>
+</tr>
+
+<tr>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char a</td>
+</tr>
+
+<tr>
+<td class="org-left">int 2</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 2</td>
+</tr>
+</tbody>
+</table></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-orgd622521" class="outline-3">
+<h3 id="orgd622521"><span class="section-number-3">6.2</span> Operações Binárias e Lógicas</h3>
+<div class="outline-text-3" id="text-6-2">
+<p>
+Operações <i>binárias</i> sempre consomem os dois elementos no topo da pilha e devolvem o resultado da operação
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><i>lhs</i></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>op</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left"><i>rhs</i></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><i>lhs op rhs</i></td>
+</tr>
+</tbody>
+</table>
+
+<p>
+As seguintes operações aritméticas são suportadas:
+</p>
+<ul class="org-ul">
+<li><code>add</code></li>
+<li><code>sub</code></li>
+<li><code>mul</code></li>
+<li><code>div</code></li>
+</ul>
+
+<p>
+Nas operações aritméticas, o tipo resultante será aquele que conseguiria guardar o resultado da operação:
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left"><i>op</i></th>
+<th scope="col" class="org-left"><b>char</b></th>
+<th scope="col" class="org-left"><b>int</b></th>
+<th scope="col" class="org-left"><b>double</b></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><b>char</b></td>
+<td class="org-left">char</td>
+<td class="org-left">int</td>
+<td class="org-left">double</td>
+</tr>
+
+<tr>
+<td class="org-left"><b>int</b></td>
+<td class="org-left">int</td>
+<td class="org-left">int</td>
+<td class="org-left">double</td>
+</tr>
+
+<tr>
+<td class="org-left"><b>double</b></td>
+<td class="org-left">double</td>
+<td class="org-left">double</td>
+<td class="org-left">double</td>
+</tr>
+</tbody>
+</table>
+
+<div class="org-src-container">
+<pre class="src src-sh">push <span style="color: #ab75c3;">1</span>
+push <span style="color: #ab75c3;">2.0</span>
+div
+<span style="color: #656565;"># </span><span style="color: #757575;">resultado: 0.5</span>
+</pre>
+</div>
+
+<p>
+Operações lógicas são suportadas apenas sobre <b>inteiros</b>. Inteiro com valor 0 equivale a falso. Inteiro com valor não-zero equivale a verdadeiro.
+</p>
+
+<p>
+As seguintes operações lógicas são suportadas:
+</p>
+<ul class="org-ul">
+<li><code>and</code></li>
+<li><code>or</code></li>
+<li><code>not</code> : Remove o elemento do topo da pilha e insere o seu resultado negado</li>
+<li><code>nullp</code> : Testa se o elemento no topo da pilha é nulo.</li>
+</ul>
+
+<p>
+As seguintes operações bit-a-bit são suportadas:
+</p>
+<ul class="org-ul">
+<li><code>band</code> : bitwise and</li>
+<li><code>bor</code> : bitwise or</li>
+<li><code>bnot</code> : bitsise not</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orged52fb3" class="outline-3">
+<h3 id="orged52fb3"><span class="section-number-3">6.3</span> Conversões (cast)</h3>
+<div class="outline-text-3" id="text-6-3">
+<p>
+As operações de cast convertem o elemento do topo da pilha para um elemento do tipo alvo:
+</p>
+<ul class="org-ul">
+<li><code>cast_c</code> : converte para <code>char</code></li>
+<li><code>cast_i</code> : converte para <code>int</code></li>
+<li><code>cast_d</code> : converte para <code>double</code></li>
+<li><code>cast_s</code> : converte para string (tamanho + conteúdo na pilha)</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgb15c2b8" class="outline-3">
+<h3 id="orgb15c2b8"><span class="section-number-3">6.4</span> Entrada e Saída</h3>
+<div class="outline-text-3" id="text-6-4">
+<p>
+As seguintes instruções lêem da entrada padrão e colocam o resultado no topo da pilha:
+</p>
+<ul class="org-ul">
+<li><code>readc</code> : lê um char da entrada</li>
+<li><code>readi</code> : lê um int</li>
+<li><code>readd</code> : lê um double</li>
+<li><code>reads</code> : lê uma string (tamanho + dados na pilha)</li>
+</ul>
+
+<p>
+As seguintes instruções imprimem o conteúdo da pilha na saída padrão:
+</p>
+<ul class="org-ul">
+<li><code>print</code> : Coloca o elemento do topo da pilha na saída padrão</li>
+<li><code>prints</code> : Imprime a string no topo da pilha (tamanho + conteúdo)</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-sh">readc
+readc
+push <span style="color: #ab75c3;">2</span>
+prints
+<span style="color: #656565;"># </span><span style="color: #757575;">"concatena" dois chars como uma string</span>
+</pre>
+</div>
+
+<p>
+<b>Atenção</b>: Cuidado ao executar a máquina virtual com o código pela entrada padrão. Para operações de I/O, é necessário utilizar um arquivo de código ou utilizar a interface javascript.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org849421a" class="outline-3">
+<h3 id="org849421a"><span class="section-number-3">6.5</span> Vetores</h3>
+<div class="outline-text-3" id="text-6-5">
+<p>
+Um vetor é um <i>item de dados</i> que possui outros itens de dados. A sua criação é feita com os elementos no topo da pilha de trabalho:
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">elementos: 1 2 3</span>
+push <span style="color: #ab75c3;">1</span>
+push <span style="color: #ab75c3;">2</span>
+push <span style="color: #ab75c3;">3</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">tamanho: 3</span>
+push <span style="color: #ab75c3;">3</span>
+acreate
+<span style="color: #656565;"># </span><span style="color: #757575;">[ 1 2 3 ]</span>
+</pre>
+</div>
+
+<p>
+Vetores podem conter itens de vetores:
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">elementos: 1 2 3</span>
+push <span style="color: #ab75c3;">1</span>
+push <span style="color: #ab75c3;">2</span>
+push <span style="color: #ab75c3;">3</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">tamanho: 3</span>
+push <span style="color: #ab75c3;">3</span>
+acreate
+<span style="color: #656565;"># </span><span style="color: #757575;">[ 1 2 3 ]</span>
+push <span style="color: #bdbc61;">"abc"</span>
+acreate
+<span style="color: #656565;"># </span><span style="color: #757575;">[ a b c ]</span>
+acreate <span style="color: #ab75c3;">2</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">[ [ 1 2 3 ] [ a b c ] ]</span>
+</pre>
+</div>
+
+<p>
+As seguintes operações estão disponíveis para manipulação de vetores:
+</p>
+
+<ol class="org-ol">
+<li><p>
+<b>acreate n</b> : Cria um vetor com os n elementos no topo da pilha
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">0</td>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>acreate 2</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">char b</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">[ (char a) (char b) ]</td>
+<td class="org-right">0</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>acreate</b> : Usa o topo da pilha como quantidade de elementos
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">0</td>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>acreate</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">char b</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-left">int 2</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">[ (char a) (char b) ]</td>
+<td class="org-left">0</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>aload</b> : Desempacota um vetor na pilha de trabalho
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>aload</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char a</td>
+<td class="org-right">0</td>
+</tr>
+
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char b</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-left">0</td>
+<td class="org-left">[ (char a) (char b) ]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 2</td>
+<td class="org-right">2</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>alen</b> : Insere na pilha o tamanho do vetor
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>alen</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">0</td>
+<td class="org-left">[ (char a) (char b) ]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 2</td>
+<td class="org-right">0</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>aget i</b> : Obtém um elemento específico do vetor
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>aget 1</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">0</td>
+<td class="org-left">[ (char a) (char b) ]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char b</td>
+<td class="org-right">0</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>aget</b> : Obtém um elemento específico do vetor, com índice no topo da pilha
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">0</td>
+<td class="org-left">[ (char a) (char b) ]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>aget</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">int 1</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char b</td>
+<td class="org-right">0</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>aset i</b> : Coloca o elemento no topo da pilha na posição <code>i</code> do vetor que está na sequência
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">0</td>
+<td class="org-left">[ (char a) (char b) ]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>aset 0</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">int 1</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">[ (int 1) (char b) ]</td>
+<td class="org-right">0</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>aset</b> : Coloca o elemento no topo da pilha na posição indireta que segue na pilha
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">0</td>
+<td class="org-left">[ (char a) (char b) ]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>aset</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">int 0</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-left">double 9.0</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">[ (double 9.0) (char b) ]</td>
+<td class="org-left">0</td>
+</tr>
+</tbody>
+</table></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org746daa3" class="outline-3">
+<h3 id="org746daa3"><span class="section-number-3">6.6</span> Manipulação da Pilha</h3>
+<div class="outline-text-3" id="text-6-6">
+<ol class="org-ol">
+<li><p>
+<b>crunch base size</b> : Remove, a partir da posição <code>base</code>, <code>size</code> elementos
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>crunch 0 2</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">int 2</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 2</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>crunch size</b> : Consome o elemento (inteiro) no topo da pilha e usa ele como argumento <code>base</code> para o crunch:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>crunch 1</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">int 0</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 1</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>crunch</b> : Consome o elemento (inteiro) no topo da pilha e usa ele como argumento <code>size</code>. Depois consome o próximo elemento e utiliza ele como <code>base</code>:
+</p>
+
+<p>
+O exemplo abaixo faz <code>crunch 0 1</code>
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>crunch</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">char b</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">int 0</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 1</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>trim n</b> : Elimina elementos da pilha a partir da posição n
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>trim 1</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">char b</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">int 0</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char a</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>trim</b> : Consome o elemento no topo da pilha e utiliza ele como parâmetro do trim.
+</p>
+
+<p>
+O seguinte exemplo executa <code>trim 1</code>
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>trim</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">char b</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">int 0</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char a</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>load n</b> : Carrega uma cópia do elemento na posição <code>n</code> para o topo da pilha
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>load 1</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char a</td>
+</tr>
+
+<tr>
+<td class="org-left">char b</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char b</td>
+</tr>
+
+<tr>
+<td class="org-left">int 0</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 0</td>
+</tr>
+
+<tr>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 1</td>
+</tr>
+
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char b</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>load</b> : Consome o elemento no topo da pilha e utiliza ele como parâmetro para o <code>load</code>:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>load</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char a</td>
+</tr>
+
+<tr>
+<td class="org-left">char b</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char b</td>
+</tr>
+
+<tr>
+<td class="org-left">int 0</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 0</td>
+</tr>
+
+<tr>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char b</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>store n</b> : Armazena o elemento no topo da pilha na posição <code>n</code>. O valor que havia antes na posição <code>n</code> é perdido.
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">0</td>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>store 0</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">char b</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 1</td>
+<td class="org-right">0</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-left">int 0</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char b</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">3</td>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 0</td>
+<td class="org-right">2</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>store</b> : Utiliza o elemento no topo da pilha como parâmetro para o store:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">0</td>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>store</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">char b</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-left">int 0</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char a</td>
+<td class="org-right">0</td>
+</tr>
+
+<tr>
+<td class="org-right">3</td>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 0</td>
+<td class="org-right">1</td>
+</tr>
+</tbody>
+</table></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org1614f6d" class="outline-3">
+<h3 id="org1614f6d"><span class="section-number-3">6.7</span> Operações <code>push</code> especiais</h3>
+<div class="outline-text-3" id="text-6-7">
+<ol class="org-ol">
+<li><p>
+<b>push label</b>: Adiciona na pilha o endereço do label no código.
+</p>
+
+<p>
+No código abaixo, o label l2 é a segunda instrução, portanto posição <code>1</code> no código. O valor do label é apenas um identificador numérico da posição da instrução.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">    push <span style="color: #ab75c3;">1</span>
+l2: push <span style="color: #ab75c3;">2</span>
+    push l2
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">0</td>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">int 2</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>push pc</b>: Adiciona na pilha o valor atual do registrador <code>program counter</code>. <b>Importante</b>: No momento da execução do push, o <code>pc</code> aponta para a instrução seguinte
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">instrucao 0:</span>
+push <span style="color: #bdbc61;">'a'</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">instrucao 1:</span>
+push pc
+<span style="color: #656565;"># </span><span style="color: #757575;">instrucao 2</span>
+push <span style="color: #bdbc61;">'c'</span>
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">0</td>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">int 2</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-left">char c</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>push stack_size</b> : Adiciona na pilha o tamanho da pilha no momento da instrução:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">push <span style="color: #bdbc61;">'a'</span>
+push <span style="color: #bdbc61;">'b'</span>
+push stack_size
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">0</td>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">char c</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-left">int 2</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>push null</b> : Adiciona no topo da pilha um literal especial, equivalente a <code>null</code>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">push null
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">0</td>
+<td class="org-left">null</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org6756a50" class="outline-3">
+<h3 id="org6756a50"><span class="section-number-3">6.8</span> Gerenciamento de Pilhas Aninhadas</h3>
+<div class="outline-text-3" id="text-6-8">
+<ol class="org-ol">
+<li><p>
+<b>mark</b> : Cria uma nova pilha, acima da pilha atual, com 0 elementos. Os elementos da pilha anterior ficam inacessíveis
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">push <span style="color: #bdbc61;">'a'</span>
+push <span style="color: #bdbc61;">'b'</span>
+push <span style="color: #ab75c3;">1</span>
+mark
+push <span style="color: #bdbc61;">'z'</span>
+load <span style="color: #ab75c3;">0</span>
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char a</td>
+<td class="org-right">-3</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>mark</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char b</td>
+<td class="org-right">-2</td>
+</tr>
+
+<tr>
+<td class="org-right">0</td>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>push z</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 1</td>
+<td class="org-right">-1</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">char b</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>load 0</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char z</td>
+<td class="org-right">0</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">chat z</td>
+<td class="org-right">1</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>mark n</b> : Idêntico a mark, mas mantém <code>n</code> elementos na nova pilha:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">push <span style="color: #bdbc61;">'a'</span>
+push <span style="color: #bdbc61;">'b'</span>
+push <span style="color: #ab75c3;">1</span>
+mark <span style="color: #ab75c3;">2</span>
+push <span style="color: #bdbc61;">'z'</span>
+load <span style="color: #ab75c3;">0</span>
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char a</td>
+<td class="org-right">-1</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>mark 2</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char b</td>
+<td class="org-right">0</td>
+</tr>
+
+<tr>
+<td class="org-right">0</td>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>push z</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 2</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">char b</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><code>load 0</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char z</td>
+<td class="org-right">2</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-left">int 2</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char b</td>
+<td class="org-right">3</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>pop_mark</b>
+</p>
+
+<p>
+Remove a última marca criada. Coloca a posição da pilha onde essa marca estava definida (a posição do que era o 0 antes do pop_mark).
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">push <span style="color: #bdbc61;">'a'</span>
+push <span style="color: #bdbc61;">'b'</span>
+push <span style="color: #ab75c3;">1</span>
+mark <span style="color: #ab75c3;">2</span>
+push <span style="color: #bdbc61;">'z'</span>
+load <span style="color: #ab75c3;">0</span>
+pop_mark
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">-1</td>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char a</td>
+<td class="org-right">0</td>
+</tr>
+
+<tr>
+<td class="org-right">0</td>
+<td class="org-left">char b</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">pop_mark</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char b</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 1</td>
+<td class="org-right">2</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-left">char z</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char z</td>
+<td class="org-right">3</td>
+</tr>
+
+<tr>
+<td class="org-right">3</td>
+<td class="org-left">char b</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char b</td>
+<td class="org-right">4</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 1</td>
+<td class="org-right">5</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+<b>drop_mark</b> : Como <code>pop_mark</code>, mas descarta a posição da marca
+</p>
+
+<p>
+Remove a última marca criada. Coloca a posição da pilha onde essa marca estava definida (a posição do que era o 0 antes do pop_mark).
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">push <span style="color: #bdbc61;">'a'</span>
+push <span style="color: #bdbc61;">'b'</span>
+push <span style="color: #ab75c3;">1</span>
+mark <span style="color: #ab75c3;">2</span>
+push <span style="color: #bdbc61;">'z'</span>
+load <span style="color: #ab75c3;">0</span>
+drop_mark
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+
+<colgroup>
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">-1</td>
+<td class="org-left">char a</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char a</td>
+<td class="org-right">0</td>
+</tr>
+
+<tr>
+<td class="org-right">0</td>
+<td class="org-left">char b</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">pop_mark</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char b</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">int 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&rarr;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">int 1</td>
+<td class="org-right">2</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-left">char z</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char z</td>
+<td class="org-right">3</td>
+</tr>
+
+<tr>
+<td class="org-right">3</td>
+<td class="org-left">char b</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">char b</td>
+<td class="org-right">4</td>
+</tr>
+</tbody>
+</table></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org394a92c" class="outline-3">
+<h3 id="org394a92c"><span class="section-number-3">6.9</span> Controle de Fluxo</h3>
+<div class="outline-text-3" id="text-6-9">
+<p>
+As instruções de controle de fluxo modificam o <i>program counter</i> para executar partes diferentes do código. Por padrão, a máquina virtual começa a executar a partir de:
+</p>
+<ul class="org-ul">
+<li>label <code>start</code> : Indica onde está o início do programa</li>
+<li>primeira instrução : Apenas se não for definido um símbolo start.</li>
+</ul>
+
+<p>
+As seguintes instruções de controle de fluxo são suportadas:
+</p>
+
+<ol class="org-ol">
+<li><p>
+<b>jump label</b> : Pula para o label especificado
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">l0  :  push <span style="color: #ab75c3;">1</span>
+       jump l0
+</pre>
+</div></li>
+
+<li><p>
+<b>jump</b> : pula para uma posição que está no topo da pilha
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">l0    : push <span style="color: #bdbc61;">"hello"</span>
+        prints
+start : push l0
+        jump
+</pre>
+</div></li>
+
+<li><b>bz label</b> : Branch-if-zero : Vai para a instrução rotulada por <i>label</i> caso o elemento no topo da pilha for 0.</li>
+
+<li><p>
+<b>bz</b> : Usa o elemento do topo da pilha como alvo
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">start      : readi
+again:       push -1
+             add
+             dup
+             push out
+l0         : bz
+             push again
+             jump
+out        : exit
+</pre>
+</div></li>
+
+<li><b>bnz label</b> e <b>bnz</b> : Branch-if-not-zero : Vai para a posição caso o valor não for zero. Funcionamento idêntico a <b>bz</b>.</li>
+
+<li><b>bneg label</b> e <b>bneg</b> : Branch-if-negative : Vai para a posição caso o valor seja negativo.</li>
+
+<li><b>bpos label</b> e <b>bpos</b> : Branch-if-positive : vai para a posição caso o valor seja positivo.</li>
+</ol>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgaf16671" class="outline-2">
+<h2 id="orgaf16671"><span class="section-number-2">7</span> Exemplos de Código</h2>
+<div class="outline-text-2" id="text-7">
+</div><div id="outline-container-org8070f7f" class="outline-3">
+<h3 id="org8070f7f"><span class="section-number-3">7.1</span> Aritmética Básica</h3>
+<div class="outline-text-3" id="text-7-1">
+<ul class="org-ul">
+<li><p>
+Soma
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">push <span style="color: #ab75c3;">1</span>
+push <span style="color: #ab75c3;">2.0</span>
+add
+</pre>
+</div></li>
+
+<li><p>
+Soma, Cast, Divisão
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">push <span style="color: #ab75c3;">1</span>
+push <span style="color: #ab75c3;">2</span>
+add
+push <span style="color: #ab75c3;">3</span>
+push <span style="color: #ab75c3;">4</span>
+add
+cast_d
+div
+</pre>
+</div></li>
+
+<li><p>
+Multiplicação Simples
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">push <span style="color: #ab75c3;">1</span>
+push <span style="color: #ab75c3;">2</span>
+push <span style="color: #ab75c3;">3</span>
+push <span style="color: #bdbc61;">'a'</span> <span style="color: #656565;"># </span><span style="color: #757575;">97</span>
+mul
+mul
+mul
+</pre>
+</div></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org3d8c5e0" class="outline-3">
+<h3 id="org3d8c5e0"><span class="section-number-3">7.2</span> Controle de Fluxo</h3>
+<div class="outline-text-3" id="text-7-2">
+<ul class="org-ul">
+<li><p>
+Jump Simples
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">target1 : push <span style="color: #bdbc61;">'b'</span>
+jump target2
+start   : push <span style="color: #bdbc61;">'a'</span>
+jump target1
+target2 : push <span style="color: #bdbc61;">'c'</span>
+<span style="color: #5180b3;">exit</span>
+</pre>
+</div></li>
+
+<li><p>
+Laço simples : <code>while (i ! = 0)</code>
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">start :  push <span style="color: #ab75c3;">5</span>
+again :  push -1
+         add
+         dup
+         dup
+         bz out
+         jump again
+out   :  pop
+         <span style="color: #5180b3;">exit</span>
+</pre>
+</div></li>
+
+<li><p>
+Laço simples : <code>while (i &gt; 0)</code>
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">start : push <span style="color: #ab75c3;">5</span>
+again:  push -1
+        add
+        dup
+        dup
+        bpos again
+        pop
+        <span style="color: #5180b3;">exit</span>
+</pre>
+</div></li>
+
+<li><p>
+Laço simples : <code>if (i &lt; 0) break</code>
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">start : push <span style="color: #ab75c3;">5</span>
+again : push -1
+        add
+        dup
+        bneg out
+        dup
+        jump again
+out   : pop
+        <span style="color: #5180b3;">exit</span>
+</pre>
+</div></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org6fe6ff3" class="outline-3">
+<h3 id="org6fe6ff3"><span class="section-number-3">7.3</span> Operações Lógicas</h3>
+<div class="outline-text-3" id="text-7-3">
+<ul class="org-ul">
+<li><p>
+And
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">push <span style="color: #ab75c3;">1</span>
+push <span style="color: #ab75c3;">2</span>
+and
+push <span style="color: #ab75c3;">0</span>
+push -1
+and
+push <span style="color: #ab75c3;">9</span>
+push -1
+and
+and
+and
+</pre>
+</div></li>
+
+<li><p>
+Operações bit-a-bit
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">print 1 | 2   = 3</span>
+push <span style="color: #bdbc61;">'\n'</span>
+push <span style="color: #ab75c3;">1</span>
+push <span style="color: #ab75c3;">2</span>
+bor
+<span style="color: #528fd1;">print</span>
+<span style="color: #528fd1;">print</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">print 1 &amp; 3   = 1</span>
+push <span style="color: #ab75c3;">3</span>
+push <span style="color: #ab75c3;">1</span>
+band
+<span style="color: #528fd1;">print</span>
+push <span style="color: #bdbc61;">'\n'</span>
+<span style="color: #528fd1;">print</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">!(~1)        = 0</span>
+push <span style="color: #ab75c3;">1</span>
+bnot
+not
+
+</pre>
+</div></li>
+
+<li><p>
+Função Booleana test_zero para ver se algo é igual 0 para utilizar o booleano em um and
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">(1.0 == 0 || 2 ) &amp;&amp; ('a' == 0 || 0.0 == 0) &amp;&amp;  (9 &amp;&amp; -1)</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">funcao test_zero(arg) -&gt; {0, 1}</span>
+test_zero : bz tz_push_1
+            push <span style="color: #ab75c3;">0</span>
+            jump tz_ret
+tz_push_1 : push <span style="color: #ab75c3;">1</span>
+tz_ret    : pop_mark
+            push -1
+            add
+            load
+            jump
+<span style="color: #656565;"># </span><span style="color: #757575;">chama com 1.0</span>
+start     : push ret1
+            mark
+            push <span style="color: #ab75c3;">1.0</span>
+            jump test_zero
+ret1      : swap
+            pop
+            push <span style="color: #ab75c3;">2</span>
+            or
+<span style="color: #656565;"># </span><span style="color: #757575;">chama novamente com 'a'</span>
+            push ret2
+            mark
+            push <span style="color: #bdbc61;">'a'</span>
+            jump test_zero
+ret2      : swap
+            pop
+<span style="color: #656565;"># </span><span style="color: #757575;">chama com 0.0</span>
+            push ret3
+            mark
+            push <span style="color: #ab75c3;">0.0</span>
+            jump test_zero
+ret3      : swap
+            pop
+            or
+            push <span style="color: #ab75c3;">9</span>
+            push -1
+            and
+            and
+            and
+
+</pre>
+</div></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orge4b8663" class="outline-3">
+<h3 id="orge4b8663"><span class="section-number-3">7.4</span> I/O</h3>
+<div class="outline-text-3" id="text-7-4">
+<p>
+Operações de leitura e escrita
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">readc
+readi
+readd
+reads
+acreate
+aload
+prints
+push <span style="color: #bdbc61;">'\n'</span>
+<span style="color: #528fd1;">print</span>
+cast_s
+acreate
+aload
+prints
+cast_s
+prints
+cast_s
+acreate
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org994ca78" class="outline-3">
+<h3 id="org994ca78"><span class="section-number-3">7.5</span> Vetores</h3>
+<div class="outline-text-3" id="text-7-5">
+<ul class="org-ul">
+<li><p>
+Criação de Vetores
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">push <span style="color: #ab75c3;">1</span>
+push <span style="color: #ab75c3;">2</span>
+push <span style="color: #ab75c3;">3</span>
+push <span style="color: #ab75c3;">4</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">tamanho da array &#233; 4</span>
+push <span style="color: #ab75c3;">4</span>
+acreate
+dup
+aget <span style="color: #ab75c3;">1</span>
+push <span style="color: #bdbc61;">"stringue"</span>
+acreate
+aset
+push <span style="color: #ab75c3;">10</span>
+aset <span style="color: #ab75c3;">2</span>
+</pre>
+</div></li>
+
+<li><p>
+Append em Vetores (com função)
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">array_append(0 = array, 1 = val) = new_array</span>
+array_append : load <span style="color: #ab75c3;">0</span>
+               aload
+               load <span style="color: #ab75c3;">1</span>
+               swap
+               push <span style="color: #ab75c3;">1</span>
+               add
+               acreate
+               crunch <span style="color: #ab75c3;">0</span> <span style="color: #ab75c3;">2</span>
+               swap
+               drop_mark
+               jump
+<span style="color: #656565;"># </span><span style="color: #757575;">main() = cria vetor, manda fazer append</span>
+start : push <span style="color: #ab75c3;">1</span>
+        push <span style="color: #ab75c3;">2</span>
+        acreate <span style="color: #ab75c3;">2</span>
+        push <span style="color: #ab75c3;">3</span>
+        push ret1
+        mark <span style="color: #ab75c3;">3</span>
+        jump array_append
+ret1  : push <span style="color: #bdbc61;">'a'</span>
+        push <span style="color: #bdbc61;">'b'</span>
+        acreate <span style="color: #ab75c3;">2</span>
+        acreate <span style="color: #ab75c3;">2</span>
+        push <span style="color: #bdbc61;">"ola"</span>
+        acreate
+        push ret2
+        mark <span style="color: #ab75c3;">3</span>
+        jump array_append
+ret2:   exit
+
+
+</pre>
+</div></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgf0e6787" class="outline-3">
+<h3 id="orgf0e6787"><span class="section-number-3">7.6</span> Funções</h3>
+<div class="outline-text-3" id="text-7-6">
+<ul class="org-ul">
+<li><p>
+Exemplo 1 : Retorno abaixo da marca. Chamador limpa.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">funcao test_zero(arg) -&gt; {0, 1}</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">retorno fica abaixo da marca.</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">Carrega o ponto de retorno para o topo da pilha com pop_mark.</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">A limpeza &#233; feita por quem chama a fun&#231;&#227;o</span>
+test_zero : bz tz_push_1
+            push <span style="color: #ab75c3;">0</span>
+            jump tz_ret
+tz_push_1 : push <span style="color: #ab75c3;">1</span>
+tz_ret    : pop_mark
+            push -1
+            add
+            load
+            jump
+<span style="color: #656565;"># </span><span style="color: #757575;">chama com 1.0</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">ao inves de calcular o ponto de retorno, usa um label</span>
+start     : push ret1
+            mark
+            push <span style="color: #ab75c3;">1.0</span>
+            jump test_zero
+<span style="color: #656565;"># </span><span style="color: #757575;">faz a limpeza</span>
+ret1      : swap
+            pop
+
+</pre>
+</div></li>
+
+<li><p>
+Exemplo 2 : Retorno abaixo da marca; limpeza pelo chamados
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">funcao test_zero(arg) -&gt; {0, 1}</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">retorno fica abaixo da marca.</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">Carrega o ponto de retorno para o topo da pilha com pop_mark.</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">A limpeza &#233; feita por quem chama a fun&#231;&#227;o</span>
+test_zero : bz tz_push_1
+            push <span style="color: #ab75c3;">0</span>
+            jump tz_ret
+tz_push_1 : push <span style="color: #ab75c3;">1</span>
+tz_ret    : pop_mark
+            push -1
+            add
+            load
+            jump
+<span style="color: #656565;"># </span><span style="color: #757575;">chama com 1.0</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">ao inves de calcular o ponto de retorno, usa um label</span>
+start     : push ret1
+            mark
+            push <span style="color: #ab75c3;">1.0</span>
+            jump test_zero
+<span style="color: #656565;"># </span><span style="color: #757575;">faz a limpeza</span>
+ret1      : swap
+            pop
+
+</pre>
+</div></li>
+
+<li><p>
+Exemplo 3 : Retorno acima dos parâmetros; limpeza pela função chamada
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">array_append(0 = array, 1 = val) = new_array</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">par&#226;metros guardados no in&#237;cio da pilha, no topo da marca</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">pc de retorno acima dos par&#226;metros</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">ao encerrar a fun&#231;&#227;o, elimina as posi&#231;&#245;es dos par&#226;metros e mant&#233;m apenas o pc</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">como eh um unico retorno, faz swap e depois jump</span>
+
+array_append : load <span style="color: #ab75c3;">0</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">desempacota a array no topo da olha</span>
+               aload
+<span style="color: #656565;"># </span><span style="color: #757575;">carrega o elemento novo</span>
+               load <span style="color: #ab75c3;">1</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">troca com o tamanho</span>
+               swap
+<span style="color: #656565;"># </span><span style="color: #757575;">soma 1</span>
+               push <span style="color: #ab75c3;">1</span>
+               add
+<span style="color: #656565;"># </span><span style="color: #757575;">cria novo vetor com n+1 elementos</span>
+               acreate
+<span style="color: #656565;"># </span><span style="color: #757575;">elimina os par&#226;metros da pilha e faz a limpeza</span>
+               crunch <span style="color: #ab75c3;">0</span> <span style="color: #ab75c3;">2</span>
+               swap
+               drop_mark
+               jump
+<span style="color: #656565;"># </span><span style="color: #757575;">main()</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">Cria vetor [1 2]</span>
+start : push <span style="color: #ab75c3;">1</span>
+        push <span style="color: #ab75c3;">2</span>
+        acreate <span style="color: #ab75c3;">2</span>
+        push <span style="color: #ab75c3;">3</span>
+        push ret1
+        mark <span style="color: #ab75c3;">3</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">chama array_append [1 2] 3</span>
+        jump array_append
+<span style="color: #656565;"># </span><span style="color: #757575;">pilha: [1 2 3]</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">cria vetor [a b]</span>
+ret1  : exit
+
+</pre>
+</div></li>
+
+<li><p>
+Exemplo 4 : Retorno acima dos parâmetros; limpeza pela função chamada.
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">array_append(0 = array, 1 = val) = new_array</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">par&#226;metros guardados no in&#237;cio da pilha, no topo da marca</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">pc de retorno acima dos par&#226;metros</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">ao encerrar a fun&#231;&#227;o, carrega o ponto de retorno ao topo</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">elimina os par&#226;metros + retorno</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">faz limpeza, retorna</span>
+
+array_append : load <span style="color: #ab75c3;">0</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">desempacota a array no topo da olha</span>
+               aload
+<span style="color: #656565;"># </span><span style="color: #757575;">carrega o elemento novo</span>
+               load <span style="color: #ab75c3;">1</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">troca com o tamanho</span>
+               swap
+<span style="color: #656565;"># </span><span style="color: #757575;">soma 1</span>
+               push <span style="color: #ab75c3;">1</span>
+               add
+<span style="color: #656565;"># </span><span style="color: #757575;">cria novo vetor com n+1 elementos</span>
+               acreate
+<span style="color: #656565;"># </span><span style="color: #757575;">ponto de retorno no top</span>
+               load <span style="color: #ab75c3;">2</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">elimina os par&#226;metros + ponto de retorno</span>
+               crunch <span style="color: #ab75c3;">0</span> <span style="color: #ab75c3;">3</span>
+               drop_mark
+               jump
+<span style="color: #656565;"># </span><span style="color: #757575;">main()</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">Cria vetor [1 2]</span>
+start : push <span style="color: #ab75c3;">1</span>
+        push <span style="color: #ab75c3;">2</span>
+        acreate <span style="color: #ab75c3;">2</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">Adiciona inteiro 3 na pilha</span>
+        push <span style="color: #ab75c3;">3</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">Prepara chamada de array_append</span>
+        push ret1
+        mark <span style="color: #ab75c3;">3</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">chama array_append [1 2] 3</span>
+        jump array_append
+<span style="color: #656565;"># </span><span style="color: #757575;">pilha: [1 2 3]</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">cria vetor [a b]</span>
+ret1  : exit
+
+</pre>
+</div></li>
+
+<li><p>
+Exemplo 5 : Marca-dupla. Retorno dentro de um frame exclusivo.
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">array_append(0 = array, 1 = val) = new_array</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">marca dupla :</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">+---------------------+</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">|   +--------------+  |</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">|   |   +-------+  |  |</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">| 5 | 3 | 1 arg |  |  |</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">| 4 | 2 | 1 arg |  |  |</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">| 3 | 1 | 0 arg |  |  |</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">| 2 |   +-------+  |  |</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">| 1 | 0 pc retorno |  |</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">|   +--------------+  |</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">| 0  main             |</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">+---------------------+</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">par&#226;metros guardados no in&#237;cio da pilha, no topo da marca</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">pc de retorno abaixo da marca, sozinho.</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">ao encerrar a fun&#231;&#227;o, volta ao escopo anterior e carrega pc da posi&#231;&#227;o 0</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">elimina os par&#226;metros + retorno</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">faz limpeza, retorna</span>
+
+array_append : load <span style="color: #ab75c3;">0</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">desempacota a array no topo da olha</span>
+               aload
+<span style="color: #656565;"># </span><span style="color: #757575;">carrega o elemento novo</span>
+               load <span style="color: #ab75c3;">1</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">troca com o tamanho</span>
+               swap
+<span style="color: #656565;"># </span><span style="color: #757575;">soma 1</span>
+               push <span style="color: #ab75c3;">1</span>
+               add
+<span style="color: #656565;"># </span><span style="color: #757575;">cria novo vetor com n+1 elementos</span>
+               acreate
+<span style="color: #656565;"># </span><span style="color: #757575;">ponto de retorno abaixo da marca, sozinho</span>
+               drop_mark
+               load <span style="color: #ab75c3;">0</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">elimina os par&#226;metros + ponto de retorno</span>
+               crunch <span style="color: #ab75c3;">0</span> <span style="color: #ab75c3;">3</span>
+               drop_mark
+               jump
+<span style="color: #656565;"># </span><span style="color: #757575;">main()</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">Cria vetor [1 2]</span>
+start : push <span style="color: #ab75c3;">1</span>
+        push <span style="color: #ab75c3;">2</span>
+        acreate <span style="color: #ab75c3;">2</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">Adiciona inteiro 3 na pilha</span>
+        push <span style="color: #ab75c3;">3</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">Prepara chamada de array_append</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">PRIMEIRO ponto de retorno</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">DEPOIS par&#226;metros</span>
+        push ret1
+        load <span style="color: #ab75c3;">0</span>
+        load <span style="color: #ab75c3;">1</span>
+        mark <span style="color: #ab75c3;">3</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">segundo contexto, marca mantendo 2</span>
+        mark <span style="color: #ab75c3;">2</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">chama array_append [1 2] 3</span>
+        jump array_append
+<span style="color: #656565;"># </span><span style="color: #757575;">pilha: [1 2 3]</span>
+<span style="color: #656565;"># </span><span style="color: #757575;">cria vetor [a b]</span>
+ret1  : exit
+
+</pre>
+</div></li>
+</ul>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+A StackVM foi desenvolvida em C++ com o sistema de build CMake. Enquanto a plataforma Windows deve ser suportada, a instalação de ambiente e suporte a compilação com Windows não está no escopo desse documento.
+</p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<p class="author">Author: Rodrigo Kassick</p>
+<p class="date">Created: 2017-09-19 ter 22:08</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
