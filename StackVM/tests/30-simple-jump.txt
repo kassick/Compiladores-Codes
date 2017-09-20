@@ -1,0 +1,6 @@
+target1 : push 'b'
+          jump target2
+start   : push 'a'
+          jump target1
+target2 : push 'c'
+          exit

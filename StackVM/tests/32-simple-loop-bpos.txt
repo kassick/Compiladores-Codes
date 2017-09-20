@@ -1,0 +1,8 @@
+start : push 5
+again:  push -1
+        add
+        dup
+        dup
+        bpos again
+        pop
+        exit

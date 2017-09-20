@@ -1,0 +1,40 @@
+# array_append(0 = array, 1 = val) = new_array
+# parâmetros guardados no início da pilha, no topo da marca
+# pc de retorno acima dos parâmetros
+# ao encerrar a função, carrega o ponto de retorno ao topo
+# elimina os parâmetros + retorno
+# faz limpeza, retorna
+
+array_append : load 0
+# desempacota a array no topo da olha
+               aload
+# carrega o elemento novo
+               load 1
+# troca com o tamanho
+               swap
+# soma 1
+               push 1
+               add
+# cria novo vetor com n+1 elementos
+               acreate
+# ponto de retorno no top
+               load 2
+# elimina os parâmetros + ponto de retorno
+               crunch 0 3
+               drop_mark
+               jump
+# main()
+# Cria vetor [1 2]
+start : push 1
+        push 2
+        acreate 2
+# Adiciona inteiro 3 na pilha
+        push 3
+# Prepara chamada de array_append
+        push ret1
+        mark 3
+# chama array_append [1 2] 3
+        jump array_append
+# pilha: [1 2 3]
+# cria vetor [a b]
+ret1  : exit

@@ -1,0 +1,4 @@
+l1: pop
+l2: push 2
+l3: store 0
+l5: store

@@ -1,0 +1,14 @@
+push 1
+push 2
+push 3
+push 4
+# tamanho da array é 4
+push 4
+acreate
+dup
+aget 1
+push "stringue"
+acreate
+aset
+push 10
+aset 2

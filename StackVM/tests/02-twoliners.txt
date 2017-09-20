@@ -1,0 +1,2 @@
+label1  :  mark
+           push 1

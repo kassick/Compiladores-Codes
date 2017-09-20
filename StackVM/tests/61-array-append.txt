@@ -1,0 +1,30 @@
+# array_append(0 = array, 1 = val) = new_array
+array_append : load 0
+               aload
+               load 1
+               swap
+               push 1
+               add
+               acreate
+               crunch 0 2
+               swap
+               drop_mark
+               jump
+# main() = cria vetor, manda fazer append
+start : push 1
+        push 2
+        acreate 2
+        push 3
+        push ret1
+        mark 3
+        jump array_append
+ret1  : push 'a'
+        push 'b'
+        acreate 2
+        acreate 2
+        push "ola"
+        acreate
+        push ret2
+        mark 3
+        jump array_append
+ret2:   exit

@@ -1,0 +1,17 @@
+readc
+readi
+readd
+reads
+acreate
+aload
+prints
+push '\n'
+print
+cast_s
+acreate
+aload
+prints
+cast_s
+prints
+cast_s
+acreate

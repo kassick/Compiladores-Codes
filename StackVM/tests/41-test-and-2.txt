@@ -1,0 +1,40 @@
+# (1.0 == 0 || 2 ) && ('a' == 0 || 0.0 == 0) &&  (9 && -1)
+# funcao test_zero(arg) -> {0, 1}
+test_zero : bz tz_push_1
+            push 0
+            jump tz_ret
+tz_push_1 : push 1
+tz_ret    : pop_mark
+            push -1
+            add
+            load
+            jump
+# chama com 1.0
+start     : push ret1
+            mark
+            push 1.0
+            jump test_zero
+ret1      : swap
+            pop
+            push 2
+            or
+# chama novamente com 'a'
+            push ret2
+            mark
+            push 'a'
+            jump test_zero
+ret2      : swap
+            pop
+# chama com 0.0
+            push ret3
+            mark
+            push 0.0
+            jump test_zero
+ret3      : swap
+            pop
+            or
+            push 9
+            push -1
+            and
+            and
+            and

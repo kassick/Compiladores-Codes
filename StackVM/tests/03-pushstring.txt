@@ -1,0 +1,4 @@
+push "abc"
+push "def"
+cont : pop
+push 'a'

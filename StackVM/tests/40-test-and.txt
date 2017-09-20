@@ -1,0 +1,11 @@
+push 1
+push 2
+and
+push 0
+push -1
+and
+push 9
+push -1
+and
+and
+and

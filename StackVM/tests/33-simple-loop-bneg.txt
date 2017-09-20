@@ -1,0 +1,9 @@
+start : push 5
+again : push -1
+        add
+        dup
+        bneg out
+        dup
+        jump again
+out   : pop
+        exit

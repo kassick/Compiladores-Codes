@@ -1,0 +1,22 @@
+# funcao test_zero(arg) -> {0, 1}
+# retorno fica abaixo da marca.
+# Carrega o ponto de retorno para o topo da pilha com pop_mark.
+# A limpeza é feita por quem chama a função
+test_zero : bz tz_push_1
+            push 0
+            jump tz_ret
+tz_push_1 : push 1
+tz_ret    : pop_mark
+            push -1
+            add
+            load
+            jump
+# chama com 1.0
+# ao inves de calcular o ponto de retorno, usa um label
+start     : push ret1
+            mark
+            push 1.0
+            jump test_zero
+# faz a limpeza
+ret1      : swap
+            pop
