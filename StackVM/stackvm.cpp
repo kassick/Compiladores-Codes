@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Sep 13 11:00:28 2017"
- *         Updated: "2017-09-19 18:36:57 kassick"
+ *         Updated: "2017-09-19 21:44:28 kassick"
  *
  *          Author:
  *
@@ -89,32 +89,32 @@ VM& parse_stream(istream& in, ostream& out, VM& vm)
 
 std::string parsestring(std::string s, std::string input) {
 
-    std::stringstream code_stream(s);
-    std::stringstream input_stream(input);
-    std::stringstream out;
+    std::stringstream code_stream(s, ios_base::in);
+    std::stringstream input_stream(input, ios_base::in);
+    std::stringstream out(ios_base::out);
 
     VM vm(input_stream, out);
+    vm.interactive = false;
 
     parse_stream(code_stream, out, vm);
 
     if (!vm.ok_to_go) {
         out << "Can not run" << endl;
     } else {
-        out << "going to run now" << endl;
-        out << vm.to_string();
-
         if (vm.set_pc_to("start") < 0)
             vm.set_pc_to(0);
 
-        out << "Running: " << endl;
-        out << vm.to_string() << endl << endl;
+        out << "Initial state:" << endl;
+        out << vm.to_string();
+        out << endl;
 
         vm.run();
 
-        out << "Finished " << endl;
-        out << vm.to_string();
+        out << endl << endl
+            << "Finished "
+            << endl << endl;
+        out << vm.to_string() << endl;
     }
-
     return out.str();
 }
 
@@ -129,6 +129,8 @@ int main(int argc, char *argv[])
 {
     stringstream sout;
     istream * in = &cin;
+
+    cout << parse_string_c("readi\nprint\n", "3\n") << endl;
 
     if (argc > 1) {
         fstream * fh = new fstream(argv[1], ios_base::in);
@@ -161,7 +163,8 @@ int main(int argc, char *argv[])
 
         vm.run();
 
-        sout << "Finished " << endl;
+        sout << endl << endl
+             << "Finished " << endl;
         sout << vm.to_string();
     }
 

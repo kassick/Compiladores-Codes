@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 14:14:39 2017"
- *         Updated: "2017-09-19 16:37:55 kassick"
+ *         Updated: "2017-09-19 21:41:01 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -545,9 +545,46 @@ struct ReadInstr : public Instruction {
 
     virtual VM& run(VM & vm) const override {
         T val;
-        vm.in >> val;
+
+        if (vm.interactive)
+            vm.out << "Input (" << typeid(T).name() << ") : ";
+
+        try {
+            vm.in >> val;
+        } catch (exception & e) {
+            vm.out << "Error reading: " << e.what();
+        }
 
         vm.push(val);
+
+        return vm;
+    }
+};
+
+template <>
+struct ReadInstr<int> : public Instruction {
+
+    virtual string to_string() const override {
+        return string( "read_i");
+    }
+
+    virtual VM& run(VM & vm) const override {
+        int val;
+
+        if (vm.interactive)
+            vm.out << "Input (int) : ";
+
+        try {
+            string tmp;
+            vm.in >> tmp;
+            val = stoi(tmp);
+        } catch (exception & e) {
+            vm.out << "Error reading: " << e.what();
+        }
+
+        vm.push(val);
+
+        return vm;
     }
 };
 
@@ -562,6 +599,8 @@ struct ReadInstr<string> : public Instruction {
     virtual VM& run(VM & vm) const override {
         string val;
 
+        if (vm.interactive)
+            vm.out << "Input (string) : ";
         vm.in >> val;
 
         for (const char c: val)
@@ -583,7 +622,11 @@ struct PrintInstr : public Instruction {
     virtual VM& run(VM & vm) const override {
         DataItem val = vm.pop();
 
+        if (vm.interactive)
+            vm.out << "Output : ";
         vm.out << val.value_to_string();
+        if (vm.interactive)
+            vm.out << endl;
 
         return vm;
     }
@@ -616,7 +659,13 @@ struct PrintStringInstr : public Instruction {
             s[l] = c.as<char>();
         }
 
+        if (vm.interactive)
+            vm.out << "Output : ";
+
         vm.out << s;
+
+        if (vm.interactive)
+            vm.out << endl;
 
         return vm;
     }
@@ -664,8 +713,8 @@ struct AddInstr : public Instruction {
     }
 
     virtual VM& run(VM & vm) const override {
-        DataItem lhs = vm.pop();
         DataItem rhs = vm.pop();
+        DataItem lhs = vm.pop();
 
         if (lhs.type == Double || rhs.type == Double)
         {
@@ -690,8 +739,8 @@ struct SubInstr : public Instruction {
     }
 
     virtual VM& run(VM & vm) const override {
-        DataItem lhs = vm.pop();
         DataItem rhs = vm.pop();
+        DataItem lhs = vm.pop();
 
         if (lhs.type == Double || rhs.type == Double)
         {
@@ -715,8 +764,8 @@ struct MulInstr : public Instruction {
     }
 
     virtual VM& run(VM & vm) const override {
-        DataItem lhs = vm.pop();
         DataItem rhs = vm.pop();
+        DataItem lhs = vm.pop();
 
         if (lhs.type == Double || rhs.type == Double)
         {
@@ -740,8 +789,8 @@ struct DivInstr : public Instruction {
     }
 
     virtual VM& run(VM & vm) const override {
-        DataItem lhs = vm.pop();
         DataItem rhs = vm.pop();
+        DataItem lhs = vm.pop();
 
         if (lhs.type == Double || rhs.type == Double)
         {
@@ -768,8 +817,8 @@ struct AndInstr : public Instruction {
     }
 
     virtual VM& run(VM & vm) const override {
-        DataItem lhs = vm.pop();
         DataItem rhs = vm.pop();
+        DataItem lhs = vm.pop();
 
         if (lhs.type != Int || rhs.type != Int)
             throw logic_error("AND requires int types");
@@ -788,8 +837,8 @@ struct OrInstr : public Instruction {
     }
 
     virtual VM& run(VM & vm) const override {
-        DataItem lhs = vm.pop();
         DataItem rhs = vm.pop();
+        DataItem lhs = vm.pop();
 
         if (lhs.type != Int || rhs.type != Int)
             throw logic_error("OR requires int types");
@@ -843,8 +892,8 @@ struct BAndInstr : public Instruction {
     }
 
     virtual VM& run(VM & vm) const override {
-        DataItem lhs = vm.pop();
         DataItem rhs = vm.pop();
+        DataItem lhs = vm.pop();
 
         if (lhs.type != Int || rhs.type != Int)
             throw logic_error("AND requires int types");
@@ -863,8 +912,8 @@ struct BOrInstr : public Instruction {
     }
 
     virtual VM& run(VM & vm) const override {
-        DataItem lhs = vm.pop();
         DataItem rhs = vm.pop();
+        DataItem lhs = vm.pop();
 
         if (lhs.type != Int || rhs.type != Int)
             throw logic_error("OR requires int types");

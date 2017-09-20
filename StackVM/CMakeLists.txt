@@ -1,10 +1,10 @@
-# add_custom_target(StackVM_html
-#   ALL
-#   COMMAND cp ${CMAKE_CURRENT_LIST_DIR}/StackVM_html
-#   BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/index.html
-#   DEPENDS ${CMAKE_CURRENT_LIST_DIR}/StackVM_html
-#   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-#   )
+ add_custom_target(StackVM_html
+   ALL
+   COMMAND cp ${CMAKE_CURRENT_LIST_DIR}/StackVM.html ${CMAKE_CURRENT_BINARY_DIR}/index.html
+   BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/index.html
+   DEPENDS ${CMAKE_CURRENT_LIST_DIR}/StackVM.html
+   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+   )
 
 SET(GRAMMAR_FILE ${CMAKE_CURRENT_SOURCE_DIR}/StackVM.g4)
 SET(GENERATED_PATH ${CMAKE_CURRENT_BINARY_DIR}/generated)
@@ -19,7 +19,7 @@ add_executable(stackvm
   ${stackvm_antlr_GENERATED_SRC}
   )
 add_dependencies(stackvm
-  #antlr_html
+  StackVM_html
   generate_stackvm_antlr
   )
 target_link_libraries(stackvm antlr4static)

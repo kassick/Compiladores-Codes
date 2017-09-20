@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 14:06:37 2017"
- *         Updated: "2017-09-19 17:52:06 kassick"
+ *         Updated: "2017-09-19 20:54:53 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -49,6 +49,7 @@ struct VM {
     int pc = 0;
     int last_pc = -1;
     bool ok_to_go; // if the machine was correctly loaded
+    bool interactive = true;
 
     istream& in;
     ostream& out;
@@ -126,15 +127,15 @@ struct VM {
                 Instruction::pointer instr = instructions[pc++];
                 instr->run(*this);
 
-                #ifndef NDEBUG
-                cout << "--------------------"
-                     << endl
-                     << this->to_string()
-                     << "--------------------"
-                     << endl;
-                std::this_thread::sleep_for (std::chrono::seconds(1));
-                #endif
-
+                if (interactive) {
+                    cout << endl << endl
+                         << "--------------------"
+                         << endl
+                         << this->to_string()
+                         << "--------------------"
+                         << endl;
+                    std::this_thread::sleep_for (std::chrono::seconds(1));
+                }
             } catch (out_of_range & e) {
                 out << "Tried to access invalid pc " << pc << endl;
                 pc = -1;

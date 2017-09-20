@@ -14,6 +14,73 @@
 #+STARTUP: overview indent
 #+OPTIONS: ^:nil
 #+OPTIONS: _:nil
+#+HTML_HEAD: <script type="text/javascript" src="./stackvm.js"></script>
+
+#+BEGIN_EXPORT html
+<script>
+ doParse = function(text, inputstr)
+ {
+     console.log('text is ' + text);
+     console.log('input is ' + inputstr);
+     r = ccall('parse_string_c', 'string', ['string', 'string'], [text, inputstr]);
+     return r;
+ };
+
+ parseSource = function()
+ {
+     d_ta = document.getElementById('esource');
+     d_in = document.getElementById('einput');
+     d_res = document.getElementById('result');
+     d_res.value = '';
+     res = '';
+
+     res = doParse(d_ta.value, d_in.value);
+
+     d_res.value = res;
+ };
+</script>
+#+END_EXPORT
+
+* Entrada                                                            :ignore:
+
+*Código Fonte:*
+
+#+BEGIN_EXPORT html
+<textarea name="source" id="esource" rows="10" cols="70">
+readi
+dup
+push 2.0
+div
+swap
+print
+push " dividido por 2.0 eh "
+prints
+print
+</textarea>
+
+<p>
+#+END_EXPORT
+
+*Entrada:*
+
+#+BEGIN_EXPORT html
+<textarea name="input" id="einput" rows="10" cols="70">
+3
+</textarea>
+
+<button type="button" onclick='parseSource()'>Parse</button>
+
+#+END_EXPORT
+
+#+HTML: <p>
+
+* Resultado                                                          :ignore:
+
+*Resultado:*
+
+#+BEGIN_EXPORT html
+<textarea id="result" rows="10" cols="70"></textarea>
+#+END_EXPORT
 
 * Introdução
 
@@ -80,8 +147,1027 @@ add
 div
 #+END_SRC
 
-Linhas de instrução *podem* possuir /labels/ que são utilizados para controle de fluxo
+Linhas de instrução *podem* possuir /labels/ que são utilizados para controle de fluxo:
+#+BEGIN_SRC sh :eval never
+um_label :  push 1
+            push 2.0
+            div
+            bnz um_label
+#+END_SRC
 
+* A Pilha de Dados
+
+A pilha de dados pode crescer arbitrariamente.
+
+Cada posição da pilha possui um /item de dados/. Este item pode ser um dos tipos básicos suportados (char, int, double) ou uma /coleção/ (vetor).
+
+* Instruções
+
+** Instruções Básicas
+
+1. *exit*
+
+   Encerra a execução da máquina virtual.
+
+2. *push* literal
+
+   Carrega um literal para a pilha. São aceitos os seguintes literais:
+   - /char/: símbolos entre aspas simples, alguns com escape. Exemplo: 'a', 'b', '\n', '\t', etc.
+
+   - /int/: Números inteiros, positivos ou negativos: =1=, =-6=, =200=, etc.
+
+   - /double/: Números em ponto flutuante: =0.1=, =-94.99=, etc.
+
+   - /string/: Strings literais: "abc", "def"
+
+   |---+-------+---+----------+---+------------|
+   | / | <>    |   |          |   | <>         |
+   |   |       |   | =push 9.0= |   | int 1      |
+   |   | int 1 |   | \rightarrow        |   | int 2      |
+   |   | int 2 |   |          |   | double 9.0 |
+   |---+-------+---+----------+---+------------|
+
+   Uma vez que a pilha apenas suporta tipos básicos, push de strings literais irão colocar todos as letras que compõem a string, junto com o seu tamanho:
+   |---+-------+---+-----------+---+--------|
+   | / | <>    |   |           |   | <>     |
+   |   |       |   | =push "ab"= |   | int 1  |
+   |   |       |   | \rightarrow         |   | int 2  |
+   |   |       |   |           |   | char a |
+   |   | int 1 |   |           |   | char b |
+   |   | int 2 |   |           |   | int 2  |
+   |---+-------+---+-----------+---+--------|
+
+3. *pop* : Elimina o símbolo no topo da pilha
+
+   |---+-------+---+-----+---+-------|
+   | / | <>    |   |     |   | <>    |
+   |   | int 1 |   | =pop= |   |       |
+   |   | int 2 |   | \rightarrow   |   | int 2 |
+   |---+-------+---+-----+---+-------|
+
+4. *popn n* : elimina n símbolos no topo da pilha:
+
+   |---+--------+---+--------+---+--------|
+   | / | <>     |   |        |   | <>     |
+   |   | char a |   | =popn 2= |   |        |
+   |   | int 1  |   | \rightarrow      |   |        |
+   |   | int 2  |   |        |   | char a |
+   |---+--------+---+--------+---+--------|
+
+5. *popn* : utiliza o elemento no topo da pilha como parâmetro para popn
+
+   |---+--------+---+------+---+--------|
+   | / | <>     |   |      |   | <>     |
+   |   | char a |   | =popn= |   |        |
+   |   | int 1  |   | \rightarrow    |   |        |
+   |   | int 2  |   |      |   |        |
+   |   | int 2  |   |      |   | char a |
+   |---+--------+---+------+---+--------|
+
+6. *dup* : duplica o elemento no topo da pilha:
+
+   |---+--------+---+-------+---+--------|
+   | / | <>     |   |       |   | <>     |
+   |   |        |   |       |   | char a |
+   |   | char a |   | =pop 2= |   | int 1  |
+   |   | int 1  |   | \rightarrow     |   | int 2  |
+   |   | int 2  |   |       |   | int 2  |
+   |---+--------+---+-------+---+--------|
+
+7. *swap* : troca dois elementos do topo da pilha:
+   |---+--------+---+------+---+--------|
+   | / | <>     |   |      |   | <>     |
+   |   | char a |   | =swap= |   | char a |
+   |   | int 1  |   | \rightarrow    |   | int 2  |
+   |   | int 2  |   |      |   | int 1  |
+   |---+--------+---+------+---+--------|
+
+8. *swap i* : troca o elemento do topo da pilha pelo elemento na posição /i/ da pilha
+   |---+--------+---+--------+---+--------|
+   | / | <>     |   |        |   | <>     |
+   |   | char a |   | =swap 0= |   | int 2  |
+   |   | int 1  |   | \rightarrow      |   | int 2  |
+   |   | int 2  |   |        |   | char a |
+   |---+--------+---+--------+---+--------|
+
+9. *swap i j* : troca dois elementos arbitrários da pilha
+   |---+--------+---+----------+---+--------|
+   | / | <>     |   |          |   | <>     |
+   |   | char a |   | =swap 0 1= |   | int 1  |
+   |   | int 1  |   | \rightarrow        |   | char a |
+   |   | int 2  |   |          |   | int 2  |
+   |---+--------+---+----------+---+--------|
+
+** Operações Binárias e Lógicas
+
+Operações /binárias/ sempre consomem os dois elementos no topo da pilha e devolvem o resultado da operação
+
+|---+-----+---+----+---+------------|
+| / | <>  |   |    |   | <>         |
+|   | /lhs/ |   | =op= |   |            |
+|   | /rhs/ |   | \to  |   | /lhs op rhs/ |
+|---+-----+---+----+---+------------|
+
+As seguintes operações aritméticas são suportadas:
+- =add=
+- =sub=
+- =mul=
+- =div=
+
+Nas operações aritméticas, o tipo resultante será aquele que conseguiria guardar o resultado da operação:
+| /op/     | *char*   | *int*    | *double* |
+| /      | <>     | <>     | <>     |
+|--------+--------+--------+--------|
+| *char*   | char   | int    | double |
+| *int*    | int    | int    | double |
+| *double* | double | double | double |
+
+#+BEGIN_SRC sh :eval never
+push 1
+push 2.0
+div
+# resultado: 0.5
+#+END_SRC
+
+Operações lógicas são suportadas apenas sobre *inteiros*. Inteiro com valor 0 equivale a falso. Inteiro com valor não-zero equivale a verdadeiro.
+
+As seguintes operações lógicas são suportadas:
+- =and=
+- =or=
+- =not= : Remove o elemento do topo da pilha e insere o seu resultado negado
+- =nullp= : Testa se o elemento no topo da pilha é nulo.
+
+As seguintes operações bit-a-bit são suportadas:
+- =band= : bitwise and
+- =bor= : bitwise or
+- =bnot= : bitsise not
+
+** Conversões (cast)
+
+As operações de cast convertem o elemento do topo da pilha para um elemento do tipo alvo:
+- =cast_c= : converte para =char=
+- =cast_i= : converte para =int=
+- =cast_d= : converte para =double=
+- =cast_s= : converte para string (tamanho + conteúdo na pilha)
+
+** Entrada e Saída
+
+As seguintes instruções lêem da entrada padrão e colocam o resultado no topo da pilha:
+- =readc= : lê um char da entrada
+- =readi= : lê um int
+- =readd= : lê um double
+- =reads= : lê uma string (tamanho + dados na pilha)
+
+As seguintes instruções imprimem o conteúdo da pilha na saída padrão:
+- =print= : Coloca o elemento do topo da pilha na saída padrão
+- =prints= : Imprime a string no topo da pilha (tamanho + conteúdo)
+
+#+BEGIN_SRC sh :eval never
+readc
+readc
+push 2
+prints
+# "concatena" dois chars como uma string
+#+END_SRC
+
+*Atenção*: Cuidado ao executar a máquina virtual com o código pela entrada padrão. Para operações de I/O, é necessário utilizar um arquivo de código ou utilizar a interface javascript.
+
+** Vetores
+
+Um vetor é um /item de dados/ que possui outros itens de dados. A sua criação é feita com os elementos no topo da pilha de trabalho:
+#+BEGIN_SRC sh :eval never
+# elementos: 1 2 3
+push 1
+push 2
+push 3
+# tamanho: 3
+push 3
+acreate
+# [ 1 2 3 ]
+#+END_SRC
+
+Vetores podem conter itens de vetores:
+#+BEGIN_SRC sh :eval never
+# elementos: 1 2 3
+push 1
+push 2
+push 3
+# tamanho: 3
+push 3
+acreate
+# [ 1 2 3 ]
+push "abc"
+acreate
+# [ a b c ]
+acreate 2
+# [ [ 1 2 3 ] [ a b c ] ]
+#+END_SRC
+
+As seguintes operações estão disponíveis para manipulação de vetores:
+
+1. *acreate n* : Cria um vetor com os n elementos no topo da pilha
+
+   |---+--------+---+-----------+---+-----------------------+---|
+   | / | <>     |   |           |   | <>                    |   |
+   | 0 | char a |   | =acreate 2= |   |                       |   |
+   | 1 | char b |   | \to         |   | [ (char a) (char b) ] | 0 |
+
+2. *acreate* : Usa o topo da pilha como quantidade de elementos
+
+   |---+--------+---+---------+---+-----------------------+---|
+   | / | <>     |   |         |   | <>                    |   |
+   | 0 | char a |   | =acreate= |   |                       |   |
+   | 1 | char b |   | \to       |   |                       |   |
+   | 2 | int 2  |   |         |   | [ (char a) (char b) ] | 0 |
+
+3. *aload* : Desempacota um vetor na pilha de trabalho
+
+   |---+-----------------------+---+-------+---+--------+---|
+   | / | <>                    |   |       |   | <>     |   |
+   |   |                       |   | =aload= |   | char a | 0 |
+   |   |                       |   | \to     |   | char b | 1 |
+   | 0 | [ (char a) (char b) ] |   |       |   | int 2  | 2 |
+
+4. *alen* : Insere na pilha o tamanho do vetor
+
+   |---+-----------------------+---+------+---+-------+---|
+   | / | <>                    |   |      |   | <>    |   |
+   |   |                       |   | =alen= |   |       |   |
+   | 0 | [ (char a) (char b) ] |   | \to    |   | int 2 | 0 |
+
+5. *aget i* : Obtém um elemento específico do vetor
+
+   |---+-----------------------+---+--------+---+--------+---|
+   | / | <>                    |   |        |   | <>     |   |
+   |   |                       |   | =aget 1= |   |        |   |
+   | 0 | [ (char a) (char b) ] |   | \to      |   | char b | 0 |
+
+6. *aget* : Obtém um elemento específico do vetor, com índice no topo da pilha
+
+   |---+-----------------------+---+------+--------+----+---|
+   | / | <>                    |   |      |        | <> |   |
+   | 0 | [ (char a) (char b) ] |   | =aget= |        |    |   |
+   | 1 | int 1                 | \to |      | char b |  0 |   |
+
+7. *aset i* : Coloca o elemento no topo da pilha na posição =i= do vetor que está na sequência
+
+   |---+-----------------------+---+--------+----------------------+----+---|
+   | / | <>                    |   |        |                      | <> |   |
+   | 0 | [ (char a) (char b) ] |   | =aset 0= |                      |    |   |
+   | 1 | int 1                 | \to |        | [ (int 1) (char b) ] |  0 |   |
+
+7. *aset* : Coloca o elemento no topo da pilha na posição indireta que segue na pilha
+
+   |---+-----------------------+---+------+---------------------------+----|
+   | / | <>                    |   |      |                           | <> |
+   | 0 | [ (char a) (char b) ] |   | =aset= |                           |    |
+   | 1 | int 0                 | \to |      |                           |    |
+   | 2 | double 9.0            |   |      | [ (double 9.0) (char b) ] |  0 |
+
+** Manipulação da Pilha
+
+1. *crunch base size* : Remove, a partir da posição =base=, =size= elementos
+
+   |---+--------+---+------------+---+--------|
+   | / | <>     |   |            |   | <>     |
+   |   | char a |   | =crunch 0 2= |   |        |
+   |   | int 1  |   | \rightarrow          |   |        |
+   |   | int 2  |   |            |   | int 2  |
+   |---+--------+---+------------+---+--------|
+
+2. *crunch size* : Consome o elemento (inteiro) no topo da pilha e usa ele como argumento =base= para o crunch:
+
+   |---+--------+---+----------+---+-------|
+   | / | <>     |   |          |   | <>    |
+   |   | char a |   | =crunch 1= |   |       |
+   |   | int 1  |   | \rightarrow        |   |       |
+   |   | int 0  |   |          |   | int 1 |
+   |---+--------+---+----------+---+-------|
+
+3. *crunch* : Consome o elemento (inteiro) no topo da pilha e usa ele como argumento =size=. Depois consome o próximo elemento e utiliza ele como =base=:
+
+   O exemplo abaixo faz =crunch 0 1=
+   |---+--------+---+--------+---+-------|
+   | / | <>     |   |        |   | <>    |
+   |   | char a |   | =crunch= |   |       |
+   |   | char b |   | \rightarrow      |   |       |
+   |   | int 0  |   |        |   |       |
+   |   | int 1  |   |        |   | int 1 |
+   |---+--------+---+--------+---+-------|
+
+4. *trim n* : Elimina elementos da pilha a partir da posição n
+   |---+--------+---+--------+---+--------|
+   | / | <>     |   |        |   | <>     |
+   |   | char a |   | =trim 1= |   |        |
+   |   | char b |   | \rightarrow      |   |        |
+   |   | int 0  |   |        |   |        |
+   |   | int 1  |   |        |   | char a |
+   |---+--------+---+--------+---+--------|
+
+5. *trim* : Consome o elemento no topo da pilha e utiliza ele como parâmetro do trim.
+
+   O seguinte exemplo executa =trim 1=
+   |---+--------+---+------+---+--------|
+   | / | <>     |   |      |   | <>     |
+   |   | char a |   | =trim= |   |        |
+   |   | char b |   | \rightarrow    |   |        |
+   |   | int 0  |   |      |   |        |
+   |   | int 1  |   |      |   | char a |
+   |---+--------+---+------+---+--------|
+
+6. *load n* : Carrega uma cópia do elemento na posição =n= para o topo da pilha
+   |---+--------+---+--------+---+--------|
+   | / | <>     |   |        |   | <>     |
+   |   | char a |   | =load 1= |   | char a |
+   |   | char b |   | \rightarrow      |   | char b |
+   |   | int 0  |   |        |   | int 0  |
+   |   | int 1  |   |        |   | int 1  |
+   |   |        |   |        |   | char b |
+   |---+--------+---+--------+---+--------|
+
+7. *load* : Consome o elemento no topo da pilha e utiliza ele como parâmetro para o =load=:
+
+   |---+--------+---+------+---+--------|
+   | / | <>     |   |      |   | <>     |
+   |   | char a |   | =load= |   | char a |
+   |   | char b |   | \rightarrow    |   | char b |
+   |   | int 0  |   |      |   | int 0  |
+   |   | int 1  |   |      |   | char b |
+   |---+--------+---+------+---+--------|
+
+8. *store n* : Armazena o elemento no topo da pilha na posição =n=. O valor que havia antes na posição =n= é perdido.
+
+   |---+--------+---+---------+---+--------+---|
+   | / | <>     |   |         |   | <>     |   |
+   | 0 | char a |   | =store 0= |   |        |   |
+   | 1 | char b |   | \rightarrow       |   | int 1  | 0 |
+   | 2 | int 0  |   |         |   | char b | 1 |
+   | 3 | int 1  |   |         |   | int 0  | 2 |
+   |---+--------+---+---------+---+--------+---|
+
+9. *store* : Utiliza o elemento no topo da pilha como parâmetro para o store:
+
+   |---+--------+---+-------+---+--------+---|
+   | / | <>     |   |       |   | <>     |   |
+   | 0 | char a |   | =store= |   |        |   |
+   | 1 | char b |   | \rightarrow     |   |        |   |
+   | 2 | int 0  |   |       |   | char a | 0 |
+   | 3 | int 1  |   |       |   | int 0  | 1 |
+   |---+--------+---+-------+---+--------+---|
+
+** Operações =push= especiais
+
+1. *push label*: Adiciona na pilha o endereço do label no código.
+
+   No código abaixo, o label l2 é a segunda instrução, portanto posição =1= no código. O valor do label é apenas um identificador numérico da posição da instrução.
+
+   #+BEGIN_SRC sh :eval never
+       push 1
+   l2: push 2
+       push l2
+   #+END_SRC
+
+   |---+-------+---+---+---|
+   | / | <>    |   |   |   |
+   | 0 | int 1 |   |   |   |
+   | 1 | int 2 |   |   |   |
+   | 2 | int 1 |   |   |   |
+
+2. *push pc*: Adiciona na pilha o valor atual do registrador =program counter=. *Importante*: No momento da execução do push, o =pc= aponta para a instrução seguinte
+
+   #+BEGIN_SRC sh :eval never
+   # instrucao 0:
+   push 'a'
+   # instrucao 1:
+   push pc
+   # instrucao 2
+   push 'c'
+   #+END_SRC
+
+   |---+--------+---+---+---|
+   | / | <>     |   |   |   |
+   | 0 | char a |   |   |   |
+   | 1 | int 2  |   |   |   |
+   | 2 | char c |   |   |   |
+
+3. *push stack_size* : Adiciona na pilha o tamanho da pilha no momento da instrução:
+
+   #+BEGIN_SRC sh :eval never
+   push 'a'
+   push 'b'
+   push stack_size
+   #+END_SRC
+
+   |---+--------+---+---+---|
+   | / | <>     |   |   |   |
+   | 0 | char a |   |   |   |
+   | 1 | char c |   |   |   |
+   | 2 | int 2  |   |   |   |
+
+4. *push null* : Adiciona no topo da pilha um literal especial, equivalente a =null=
+
+   #+BEGIN_SRC sh :eval never
+   push null
+   #+END_SRC
+
+   |---+--------+---+---+---|
+   | / | <>     |   |   |   |
+   | 0 | null   |   |   |   |
+
+** Gerenciamento de Pilhas Aninhadas
+
+1. *mark* : Cria uma nova pilha, acima da pilha atual, com 0 elementos. Os elementos da pilha anterior ficam inacessíveis
+
+   #+BEGIN_SRC sh :eval never
+   push 'a'
+   push 'b'
+   push 1
+   mark
+   push 'z'
+   load 0
+   #+END_SRC
+
+   |---+--------+---+--------+---+--------+----|
+   | / | <>     |   |        |   | <>     |    |
+   |   |        |   |        |   | char a | -3 |
+   |   |        |   | =mark=   |   | char b | -2 |
+   | 0 | char a |   | =push z= |   | int 1  | -1 |
+   | 1 | char b |   | =load 0= |   | char z |  0 |
+   | 2 | int 1  |   |        |   | chat z |  1 |
+   |---+--------+---+--------+---+--------+----|
+
+2. *mark n* : Idêntico a mark, mas mantém =n= elementos na nova pilha:
+
+   #+BEGIN_SRC sh :eval never
+   push 'a'
+   push 'b'
+   push 1
+   mark 2
+   push 'z'
+   load 0
+   #+END_SRC
+
+   |---+--------+---+--------+---+--------+----|
+   | / | <>     |   |        |   | <>     |    |
+   |   |        |   |        |   | char a | -1 |
+   |   |        |   | =mark 2= |   | char b |  0 |
+   | 0 | char a |   | =push z= |   | int 2  |  1 |
+   | 1 | char b |   | =load 0= |   | char z |  2 |
+   | 2 | int 2  |   | \to      |   | char b |  3 |
+   |---+--------+---+--------+---+--------+----|
+
+3. *pop_mark*
+
+   Remove a última marca criada. Coloca a posição da pilha onde essa marca estava definida (a posição do que era o 0 antes do pop_mark).
+
+   #+BEGIN_SRC sh :eval never
+   push 'a'
+   push 'b'
+   push 1
+   mark 2
+   push 'z'
+   load 0
+   pop_mark
+   #+END_SRC
+
+   |----+--------+---+----------+---+--------+---|
+   |  / | <>     |   |          |   | <>     |   |
+   | -1 | char a |   |          |   | char a | 0 |
+   |  0 | char b |   | pop_mark |   | char b | 1 |
+   |  1 | int 1  |   | \to        |   | int 1  | 2 |
+   |  2 | char z |   |          |   | char z | 3 |
+   |  3 | char b |   |          |   | char b | 4 |
+   |    |        |   |          |   | int 1  | 5 |
+   |----+--------+---+----------+---+--------+---|
+
+3. *drop_mark* : Como =pop_mark=, mas descarta a posição da marca
+
+   Remove a última marca criada. Coloca a posição da pilha onde essa marca estava definida (a posição do que era o 0 antes do pop_mark).
+
+   #+BEGIN_SRC sh :eval never
+   push 'a'
+   push 'b'
+   push 1
+   mark 2
+   push 'z'
+   load 0
+   drop_mark
+   #+END_SRC
+
+   |----+--------+---+----------+---+--------+---|
+   |  / | <>     |   |          |   | <>     |   |
+   | -1 | char a |   |          |   | char a | 0 |
+   |  0 | char b |   | pop_mark |   | char b | 1 |
+   |  1 | int 1  |   | \to        |   | int 1  | 2 |
+   |  2 | char z |   |          |   | char z | 3 |
+   |  3 | char b |   |          |   | char b | 4 |
+   |----+--------+---+----------+---+--------+---|
+
+** Controle de Fluxo
+
+As instruções de controle de fluxo modificam o /program counter/ para executar partes diferentes do código. Por padrão, a máquina virtual começa a executar a partir de:
+- label =start= : Indica onde está o início do programa
+- primeira instrução : Apenas se não for definido um símbolo start.
+
+As seguintes instruções de controle de fluxo são suportadas:
+
+1. *jump label* : Pula para o label especificado
+
+   #+BEGIN_SRC sh :eval never
+   l0  :  push 1
+          jump l0
+   #+END_SRC
+
+2. *jump* : pula para uma posição que está no topo da pilha
+
+   #+BEGIN_SRC sh :eval never
+   l0    : push "hello"
+           prints
+   start : push l0
+           jump
+   #+END_SRC
+
+3. *bz label* : Branch-if-zero : Vai para a instrução rotulada por /label/ caso o elemento no topo da pilha for 0.
+
+4. *bz* : Usa o elemento do topo da pilha como alvo
+   #+BEGIN_SRC sh :eval never
+   start      : readi
+   again:       push -1
+                add
+                dup
+                push out
+   l0         : bz
+                push again
+                jump
+   out        : exit
+   #+END_SRC
+
+5. *bnz label* e *bnz* : Branch-if-not-zero : Vai para a posição caso o valor não for zero. Funcionamento idêntico a *bz*.
+
+6. *bneg label* e *bneg* : Branch-if-negative : Vai para a posição caso o valor seja negativo.
+
+7. *bpos label* e *bpos* : Branch-if-positive : vai para a posição caso o valor seja positivo.
+
+* Exemplos de Código
+
+** Aritmética Básica
+
+- Soma
+  #+BEGIN_SRC sh :eval never
+  push 1
+  push 2.0
+  add
+  #+END_SRC
+
+- Soma, Cast, Divisão
+  #+BEGIN_SRC sh :eval never
+  push 1
+  push 2
+  add
+  push 3
+  push 4
+  add
+  cast_d
+  div
+  #+END_SRC
+
+- Multiplicação Simples
+  #+BEGIN_SRC sh :eval never
+  push 1
+  push 2
+  push 3
+  push 'a' # 97
+  mul
+  mul
+  mul
+  #+END_SRC
+
+** Controle de Fluxo
+
+- Jump Simples
+  #+BEGIN_SRC sh :eval never
+  target1 : push 'b'
+  jump target2
+  start   : push 'a'
+  jump target1
+  target2 : push 'c'
+  exit
+  #+END_SRC
+
+- Laço simples : =while (i ! = 0)=
+  #+BEGIN_SRC sh :eval never
+    start :  push 5
+    again :  push -1
+             add
+             dup
+             dup
+             bz out
+             jump again
+    out   :  pop
+             exit
+  #+END_SRC
+
+- Laço simples : =while (i > 0)=
+  #+BEGIN_SRC sh :eval never
+  start : push 5
+  again:  push -1
+          add
+          dup
+          dup
+          bpos again
+          pop
+          exit
+  #+END_SRC
+
+- Laço simples : =if (i < 0) break=
+  #+BEGIN_SRC sh :eval never
+  start : push 5
+  again : push -1
+          add
+          dup
+          bneg out
+          dup
+          jump again
+  out   : pop
+          exit
+  #+END_SRC
+
+** Operações Lógicas
+- And
+  #+BEGIN_SRC sh :eval never
+  push 1
+  push 2
+  and
+  push 0
+  push -1
+  and
+  push 9
+  push -1
+  and
+  and
+  and
+  #+END_SRC
+
+- Operações bit-a-bit
+  #+BEGIN_SRC sh :eval never
+  # print 1 | 2   = 3
+  push '\n'
+  push 1
+  push 2
+  bor
+  print
+  print
+  # print 1 & 3   = 1
+  push 3
+  push 1
+  band
+  print
+  push '\n'
+  print
+  # !(~1)        = 0
+  push 1
+  bnot
+  not
+
+  #+END_SRC
+
+- Função Booleana test_zero para ver se algo é igual 0 para utilizar o booleano em um and
+  #+BEGIN_SRC sh :eval never
+  # (1.0 == 0 || 2 ) && ('a' == 0 || 0.0 == 0) &&  (9 && -1)
+  # funcao test_zero(arg) -> {0, 1}
+  test_zero : bz tz_push_1
+              push 0
+              jump tz_ret
+  tz_push_1 : push 1
+  tz_ret    : pop_mark
+              push -1
+              add
+              load
+              jump
+  # chama com 1.0
+  start     : push ret1
+              mark
+              push 1.0
+              jump test_zero
+  ret1      : swap
+              pop
+              push 2
+              or
+  # chama novamente com 'a'
+              push ret2
+              mark
+              push 'a'
+              jump test_zero
+  ret2      : swap
+              pop
+  # chama com 0.0
+              push ret3
+              mark
+              push 0.0
+              jump test_zero
+  ret3      : swap
+              pop
+              or
+              push 9
+              push -1
+              and
+              and
+              and
+
+  #+END_SRC
+
+** I/O
+
+Operações de leitura e escrita
+
+#+BEGIN_SRC sh :eval never
+readc
+readi
+readd
+reads
+acreate
+aload
+prints
+push '\n'
+print
+cast_s
+acreate
+aload
+prints
+cast_s
+prints
+cast_s
+acreate
+#+END_SRC
+
+** Vetores
+
+- Criação de Vetores
+
+  #+BEGIN_SRC sh :eval nevert
+  push 1
+  push 2
+  push 3
+  push 4
+  # tamanho da array é 4
+  push 4
+  acreate
+  dup
+  aget 1
+  push "stringue"
+  acreate
+  aset
+  push 10
+  aset 2
+  #+END_SRC
+
+- Append em Vetores (com função)
+
+  #+BEGIN_SRC sh :eval never
+  # array_append(0 = array, 1 = val) = new_array
+  array_append : load 0
+                 aload
+                 load 1
+                 swap
+                 push 1
+                 add
+                 acreate
+                 crunch 0 2
+                 swap
+                 drop_mark
+                 jump
+  # main() = cria vetor, manda fazer append
+  start : push 1
+          push 2
+          acreate 2
+          push 3
+          push ret1
+          mark 3
+          jump array_append
+  ret1  : push 'a'
+          push 'b'
+          acreate 2
+          acreate 2
+          push "ola"
+          acreate
+          push ret2
+          mark 3
+          jump array_append
+  ret2:   exit
+
+
+  #+END_SRC
+
+** Funções
+
+- Exemplo 1 : Retorno abaixo da marca. Chamador limpa.
+
+  #+BEGIN_SRC sh :eval never
+  # funcao test_zero(arg) -> {0, 1}
+  # retorno fica abaixo da marca.
+  # Carrega o ponto de retorno para o topo da pilha com pop_mark.
+  # A limpeza é feita por quem chama a função
+  test_zero : bz tz_push_1
+              push 0
+              jump tz_ret
+  tz_push_1 : push 1
+  tz_ret    : pop_mark
+              push -1
+              add
+              load
+              jump
+  # chama com 1.0
+  # ao inves de calcular o ponto de retorno, usa um label
+  start     : push ret1
+              mark
+              push 1.0
+              jump test_zero
+  # faz a limpeza
+  ret1      : swap
+              pop
+
+  #+END_SRC
+
+- Exemplo 2 : Retorno abaixo da marca; limpeza pelo chamados
+
+  #+BEGIN_SRC sh :eval nevert
+  # funcao test_zero(arg) -> {0, 1}
+  # retorno fica abaixo da marca.
+  # Carrega o ponto de retorno para o topo da pilha com pop_mark.
+  # A limpeza é feita por quem chama a função
+  test_zero : bz tz_push_1
+              push 0
+              jump tz_ret
+  tz_push_1 : push 1
+  tz_ret    : pop_mark
+              push -1
+              add
+              load
+              jump
+  # chama com 1.0
+  # ao inves de calcular o ponto de retorno, usa um label
+  start     : push ret1
+              mark
+              push 1.0
+              jump test_zero
+  # faz a limpeza
+  ret1      : swap
+              pop
+
+  #+END_SRC
+
+- Exemplo 3 : Retorno acima dos parâmetros; limpeza pela função chamada
+  #+BEGIN_SRC sh :eval never
+  # array_append(0 = array, 1 = val) = new_array
+  # parâmetros guardados no início da pilha, no topo da marca
+  # pc de retorno acima dos parâmetros
+  # ao encerrar a função, elimina as posições dos parâmetros e mantém apenas o pc
+  # como eh um unico retorno, faz swap e depois jump
+
+  array_append : load 0
+  # desempacota a array no topo da olha
+                 aload
+  # carrega o elemento novo
+                 load 1
+  # troca com o tamanho
+                 swap
+  # soma 1
+                 push 1
+                 add
+  # cria novo vetor com n+1 elementos
+                 acreate
+  # elimina os parâmetros da pilha e faz a limpeza
+                 crunch 0 2
+                 swap
+                 drop_mark
+                 jump
+  # main()
+  # Cria vetor [1 2]
+  start : push 1
+          push 2
+          acreate 2
+          push 3
+          push ret1
+          mark 3
+  # chama array_append [1 2] 3
+          jump array_append
+  # pilha: [1 2 3]
+  # cria vetor [a b]
+  ret1  : exit
+
+  #+END_SRC
+
+- Exemplo 4 : Retorno acima dos parâmetros; limpeza pela função chamada.
+  #+BEGIN_SRC sh :eval never
+  # array_append(0 = array, 1 = val) = new_array
+  # parâmetros guardados no início da pilha, no topo da marca
+  # pc de retorno acima dos parâmetros
+  # ao encerrar a função, carrega o ponto de retorno ao topo
+  # elimina os parâmetros + retorno
+  # faz limpeza, retorna
+
+  array_append : load 0
+  # desempacota a array no topo da olha
+                 aload
+  # carrega o elemento novo
+                 load 1
+  # troca com o tamanho
+                 swap
+  # soma 1
+                 push 1
+                 add
+  # cria novo vetor com n+1 elementos
+                 acreate
+  # ponto de retorno no top
+                 load 2
+  # elimina os parâmetros + ponto de retorno
+                 crunch 0 3
+                 drop_mark
+                 jump
+  # main()
+  # Cria vetor [1 2]
+  start : push 1
+          push 2
+          acreate 2
+  # Adiciona inteiro 3 na pilha
+          push 3
+  # Prepara chamada de array_append
+          push ret1
+          mark 3
+  # chama array_append [1 2] 3
+          jump array_append
+  # pilha: [1 2 3]
+  # cria vetor [a b]
+  ret1  : exit
+
+  #+END_SRC
+
+- Exemplo 5 : Marca-dupla. Retorno dentro de um frame exclusivo.
+  #+BEGIN_SRC sh :eval never
+  # array_append(0 = array, 1 = val) = new_array
+  # marca dupla :
+  # +---------------------+
+  # |   +--------------+  |
+  # |   |   +-------+  |  |
+  # | 5 | 3 | 1 arg |  |  |
+  # | 4 | 2 | 1 arg |  |  |
+  # | 3 | 1 | 0 arg |  |  |
+  # | 2 |   +-------+  |  |
+  # | 1 | 0 pc retorno |  |
+  # |   +--------------+  |
+  # | 0  main             |
+  # +---------------------+
+  # parâmetros guardados no início da pilha, no topo da marca
+  # pc de retorno abaixo da marca, sozinho.
+  # ao encerrar a função, volta ao escopo anterior e carrega pc da posição 0
+  # elimina os parâmetros + retorno
+  # faz limpeza, retorna
+
+  array_append : load 0
+  # desempacota a array no topo da olha
+                 aload
+  # carrega o elemento novo
+                 load 1
+  # troca com o tamanho
+                 swap
+  # soma 1
+                 push 1
+                 add
+  # cria novo vetor com n+1 elementos
+                 acreate
+  # ponto de retorno abaixo da marca, sozinho
+                 drop_mark
+                 load 0
+  # elimina os parâmetros + ponto de retorno
+                 crunch 0 3
+                 drop_mark
+                 jump
+  # main()
+  # Cria vetor [1 2]
+  start : push 1
+          push 2
+          acreate 2
+  # Adiciona inteiro 3 na pilha
+          push 3
+  # Prepara chamada de array_append
+  # PRIMEIRO ponto de retorno
+  # DEPOIS parâmetros
+          push ret1
+          load 0
+          load 1
+          mark 3
+  # segundo contexto, marca mantendo 2
+          mark 2
+  # chama array_append [1 2] 3
+          jump array_append
+  # pilha: [1 2 3]
+  # cria vetor [a b]
+  ret1  : exit
+
+  #+END_SRC
 * Footnotes
+:LOGBOOK:
+- State "TODO"       from              [2017-09-19 ter 21:50]
+:END:
 
 [fn:1] A StackVM foi desenvolvida em C++ com o sistema de build CMake. Enquanto a plataforma Windows deve ser suportada, a instalação de ambiente e suporte a compilação com Windows não está no escopo desse documento.
