@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Sep 13 11:00:28 2017"
- *         Updated: "2017-09-19 21:44:28 kassick"
+ *         Updated: "2017-09-19 22:20:19 kassick"
  *
  *          Author:
  *
@@ -44,13 +44,13 @@ VM& parse_labels(tree::ParseTree & tree, VM& vm, ostream& out )
         vm.instructions.resize(label_listener.cur_line);
     }
 
-    for (const auto &kv: vm.label_map)
-    {
-        out << "found label "
-            << kv.first
-            << " at " << kv.second
-            << endl;
-    }
+    // for (const auto &kv: vm.label_map)
+    // {
+    //     out << "found label "
+    //         << kv.first
+    //         << " at " << kv.second
+    //         << endl;
+    // }
 
     return vm;
 }
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
     stringstream sout;
     istream * in = &cin;
 
-    cout << parse_string_c("readi\nprint\n", "3\n") << endl;
+    // cout << parse_string_c("readi\nprint\n", "3\n") << endl;
 
     if (argc > 1) {
         fstream * fh = new fstream(argv[1], ios_base::in);

@@ -45,6 +45,8 @@
 
 *Código Fonte:*
 
+Ver mais exemplos de código em [[*Exemplos de Código][Exemplos de Código]].
+
 #+BEGIN_EXPORT html
 <textarea name="source" id="esource" rows="10" cols="70">
 readi
@@ -109,6 +111,17 @@ Máquina de pilha simples com suporte a vetores de tipos mistos.
    make
    #+END_SRC
 
+** Geração do Código ASM.js
+
+O arquivo [[/home/kassick/Sources/Compiladores/StackVM/stackvm.js][stackvm.js]] é compilado para ASM.js via emscripten. Ele foi gerado com a versão 1.37.18-64bit.
+#+BEGIN_SRC sh :eval never
+mkdir JS
+pushd JS
+source PATH/TO/emsdk-portable/emsdk_env.sh
+emconfigure cmake ..
+emmake make
+#+END_SRC
+
 * Execução
 
 Para executar a StackVM, entre no diretório =Build/StackVM= e execute (em um terminal) o programa =stackvm=
@@ -125,18 +138,23 @@ add
 EOF
 #+END_SRC
 
-Pode-se também passar um nome de arquivo como parâmetro. O arquivo deve ser um arquivo texto padrão.
+Pode-se também passar um nome de arquivo como parâmetro. O arquivo deve ser um arquivo texto padrão. Inspecione a pasta [[/home/kassick/Sources/Compiladores/StackVM/tests/.][tests]] para ver alguns exemplos.
+
 #+BEGIN_SRC sh :eval never
 ./stackvm arquivo.m
 #+END_SRC
 
-* Formato de Arquivo Fonte para a Máquina Virtual
+* Estrutura da Linguagem Assembly para a Máquina Virtual
+
+O arquivo [[/home/kassick/Sources/Compiladores/StackVM/StackVM.g4][StackVM.g4]] possui a gramática LL( * ) utilizada para definir a entrada.
 
 *Comentários* são linhas iniciadas por # :
 #+BEGIN_SRC sh :eval never
 # esta linha eh um comentario
 push 1
 #+END_SRC
+
+Não são permitidos comentários ao lado das instruções
 
 O arquivo deve conter uma ou mais *Linhas de Instrução*
 #+BEGIN_SRC sh :eval never
@@ -1170,4 +1188,4 @@ acreate
 - State "TODO"       from              [2017-09-19 ter 21:50]
 :END:
 
-[fn:1] A StackVM foi desenvolvida em C++ com o sistema de build CMake. Enquanto a plataforma Windows deve ser suportada, a instalação de ambiente e suporte a compilação com Windows não está no escopo desse documento.
+[fn:1] A StackVM foi desenvolvida em C++ com o sistema de build CMake. Enquanto a plataforma Windows deve ser suportada, a instalação de ambiente e suporte a compilação com Windows não está no escopo desse documento. O ZIP contém um diretório com um projeto do CodeBlocks (CodeBlocks/Project.cbp). Este projeto não foi testado, porém deve ser suficiente para o CodeBlocks carregá-lo e compilá-lo.
