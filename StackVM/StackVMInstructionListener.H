@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 18:08:15 2017"
- *         Updated: "2017-09-19 16:47:30 kassick"
+ *         Updated: "2017-09-20 15:45:36 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -56,6 +56,8 @@ struct InstructionListener : public StackVMBaseListener
             override
     {
         if (!instr) {
+            vm.ok_to_go = false;
+            errors++;
             throw logic_error("Arrived at the end of instruction line without an instruction");
         }
 

@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Sep 13 11:00:28 2017"
- *         Updated: "2017-09-19 22:20:19 kassick"
+ *         Updated: "2017-09-20 16:03:08 kassick"
  *
  *          Author:
  *
@@ -22,6 +22,7 @@
 #include "StackVMLexer.h"
 #include "StackVMLabelListener.H"
 #include "StackVMInstructionListener.H"
+#include "StackVMErrorListener.H"
 
 using namespace std;
 using namespace antlr4;
@@ -71,20 +72,30 @@ VM& parse_full(tree::ParseTree& tree, VM& vm, ostream& out )
 
 VM& parse_stream(istream& in, ostream& out, VM& vm)
 {
-    ANTLRInputStream ain(in);
+    try {
+        ANTLRInputStream ain(in);
 
-    StackVMLexer lexer(&ain);
+        StackVMLexer lexer(&ain);
 
-    CommonTokenStream tokens(&lexer);
-    tokens.fill();
+        CommonTokenStream tokens(&lexer);
+        tokens.fill();
 
-    StackVMParser parser(&tokens);
+        StackVMParser parser(&tokens);
 
-    tree::ParseTree* tree = parser.start();
+        ErrorListener errl(out);
 
-    return parse_full(*tree,
-                      parse_labels(*tree, vm, out),
-                      out);
+        parser.addErrorListener(&errl);
+
+        tree::ParseTree* tree = parser.start();
+
+        return parse_full(*tree,
+                          parse_labels(*tree, vm, out),
+                          out);
+    } catch (exception& e) {
+        out << "Error during parse : " << e.what() << endl;
+        vm.ok_to_go = false;
+        return vm;
+    }
 }
 
 std::string parsestring(std::string s, std::string input) {
