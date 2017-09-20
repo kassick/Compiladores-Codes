@@ -1,6 +1,6 @@
 # Informação
 
-Parser de S-expressões desenvolvido em C++.
+## Parser de S-expressões desenvolvido em C++.
 
 Versões:
 
@@ -16,9 +16,13 @@ Versões:
 
 *Extra*: Projeto em C#, sem código ainda: [Código](./CSharp)
 
+## StackVM -- Máquina Virtual de Pilha
+
+Máquina Virtual (inspirada em Java) de pilha. Suporta tipos básicos (char, int, double) e listas (de listas)* .
+
 # Versão Javascript
 
-O código em C/C++ pode ser compilado para *asm.js* e executado no navegador. Os arquivos org incluem o arquivo javascript correto e executam a função de parse e apresentam o resultado em um textarea.
+O código em C/C++ pode ser compilado para *asm.js* e executado no navegador. Os arquivos org incluem o arquivo javascript correto e executam a função de parse e apresentam o resultado em uma textarea.
 
 Deve-se utilizar o [EMScripten](https://github.com/juj/emsdk) para compilar o código C++ -> Javascript.
 
