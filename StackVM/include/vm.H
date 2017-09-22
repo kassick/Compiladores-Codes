@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 14:06:37 2017"
- *         Updated: "2017-09-19 20:54:53 kassick"
+ *         Updated: "2017-09-22 15:18:43 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -60,7 +60,7 @@ struct VM {
         marker_stack.push(0);
     }
 
-    string to_string() const {
+    string to_string(int window_size=0) const {
         stringstream ss;
         ss << "Stack: " << endl;
 
@@ -76,9 +76,15 @@ struct VM {
         if (display_pc < 0)
             display_pc = last_pc;
 
-        int window_size = 10;
-        int start = display_pc - window_size/2;
-        int end = display_pc + window_size/2;
+        int start, end;
+        if (window_size > 0)
+        {
+            start = display_pc - window_size/2;
+            end = display_pc + window_size/2;
+        } else {
+            start = 0;
+            end = this->instructions.size();
+        }
 
         if (start < 0) {
             end += -1 * start;
@@ -120,7 +126,7 @@ struct VM {
         return pc;
     }
 
-    void run() {
+    void run(int window_size = 0) {
         while(pc >= 0 && pc < instructions.size()) {
             try {
                 last_pc = pc;
@@ -131,7 +137,7 @@ struct VM {
                     cout << endl << endl
                          << "--------------------"
                          << endl
-                         << this->to_string()
+                         << this->to_string(window_size)
                          << "--------------------"
                          << endl;
                     std::this_thread::sleep_for (std::chrono::seconds(1));

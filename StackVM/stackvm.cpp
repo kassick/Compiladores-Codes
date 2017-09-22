@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Sep 13 11:00:28 2017"
- *         Updated: "2017-09-20 16:03:08 kassick"
+ *         Updated: "2017-09-22 15:21:35 kassick"
  *
  *          Author:
  *
@@ -138,7 +138,6 @@ extern "C" {
 
 int main(int argc, char *argv[])
 {
-    stringstream sout;
     istream * in = &cin;
 
     // cout << parse_string_c("readi\nprint\n", "3\n") << endl;
@@ -160,23 +159,23 @@ int main(int argc, char *argv[])
     VM vm(cin, cout);
 
     // Parse stream from stdin or a file
-    parse_stream(*in, sout, vm);
-    cout << sout.str();
+    parse_stream(*in, cout, vm);
 
     if (!vm.ok_to_go) {
-        sout << "Can not run" << endl;
+        cout << "Can not run" << endl;
     } else {
         if (vm.set_pc_to("start") < 0)
             vm.set_pc_to(0);
 
-        sout << "Running: " << endl;
-        sout << vm.to_string() << endl << endl;
+        cout << "Running: " << endl;
+        cout << vm.to_string() << endl << endl;
 
-        vm.run();
+        // Run with a display window size of 10
+        vm.run(10);
 
-        sout << endl << endl
+        cout << endl << endl
              << "Finished " << endl;
-        sout << vm.to_string();
+        cout << vm.to_string();
     }
 
     return 0;
