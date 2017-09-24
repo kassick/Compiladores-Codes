@@ -1,0 +1,66 @@
+#+TITLE: Expressões Matemáticas
+#+AUTHOR: Rodrigo Kassick
+#+LANGUAGE: pt
+#+LATEX_HEADER: \usepackage[margin=2cm,a4paper]{geometry}
+#+LATEX_HEADER: \ifxetex
+#+LATEX_HEADER:     \usepackage{tgtermes}
+#+LATEX_HEADER: \else
+#+LATEX_HEADER:     \usepackage{times}              % pacote para usar fonte Adobe Times
+#+LATEX_HEADER: \fi
+#+TAGS: noexport(n) deprecated(d) success(s) failed(f) pending(p)
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+SEQ_TODO: TODO(t!) STARTED(s!) WAITING(w!) REVIEW(r!) PENDING(p!) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
+#+STARTUP: overview indent
+#+OPTIONS: ^:nil
+#+OPTIONS: _:nil
+#+HTML_HEAD: <script type="text/javascript" src="./mathexpr.js"></script>
+
+#+BEGIN_EXPORT html
+<script>
+ doParse = function(text)
+ {
+     console.log('text is ' + text);
+     r = ccall('parse_string_c', 'string', ['string'], [text]);
+     return r;
+ };
+
+ parseSource = function()
+ {
+     d_ta = document.getElementById('esource');
+     d_res = document.getElementById('result');
+     d_res.value = '';
+     res = '';
+
+     res = doParse(d_ta.value);
+
+     d_res.value = res;
+ };
+</script>
+#+END_EXPORT
+
+* Entrada                                                            :ignore:
+
+*Código Fonte:*
+
+Expressões matemáticas envolvendo números inteiros ou ponto flutuante.
+
+#+BEGIN_EXPORT html
+<textarea name="source" id="esource" rows="10" cols="70">
+1 + 2 * 3
+</textarea>
+
+<button type="button" onclick='parseSource()'>Parse</button>
+
+<p>
+#+END_EXPORT
+
+#+HTML: <p>
+
+* Resultado                                                          :ignore:
+
+*Resultado:*
+
+#+BEGIN_EXPORT html
+<textarea id="result" rows="10" cols="70"></textarea>
+#+END_EXPORT
