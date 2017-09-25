@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 14:06:37 2017"
- *         Updated: "2017-09-19 20:54:53 kassick"
+ *         Updated: "2017-09-20 15:43:13 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -94,10 +94,11 @@ struct VM {
 
         for(int i = start; i < end; i++)
         {
-            ss << (pc == i? "*" : (last_pc == i? ">" : " "))
-               << setw(5) << i
-               << " : " << instructions[i]->to_string()
-               << endl;
+            if (i < instructions.size() && instructions[i])
+                ss << (pc == i? "*" : (last_pc == i? ">" : " "))
+                   << setw(5) << i
+                   << " : " << instructions[i]->to_string()
+                   << endl;
         }
 
 
