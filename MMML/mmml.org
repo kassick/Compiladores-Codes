@@ -8,6 +8,7 @@
 #+STARTUP: overview indent
 #+OPTIONS: ^:nil
 #+OPTIONS: _:nil toc:nil num:nil
+#+MACRO: mml @@latex:\ensuremath{\mu}mML@@@@html:\(\mu\)mML@@
 #+HTML_HEAD: <script type="text/javascript" src="./sparser.js"></script>
 
 * PlayGround Javascript Helpers                                      :ignore:
@@ -33,7 +34,6 @@
 </script>
 #+END_EXPORT
 
-
 * Utils                                                     :noexport:ignore:
 #+NAME: mmml_gen_tree
 #+BEGIN_SRC sh :var TEST="" :output file :results file :cache t
@@ -49,22 +49,22 @@ RULE="program"
 # output=""...
 
 if [ -z "$TEST" ]; then
-    echo "Missing test"
+    echo -n "Missing test"
     return 1
 fi
 
 if [! -f "$TEST" ]; then
-    echo "NO TEST AVAILABLE"
+    echo -n "NO TEST AVAILABLE"
     return 1
 fi
 
 if [ -z "$RULE" ] ; then
-    echo "missing rule"
+    echo -n "missing rule"
     return 1
 fi
 
 if [ -z "$GRAMMAR" ] ; then
-    echo "missing grammar"
+    echo -n "missing grammar"
     return 1
 fi
 
@@ -75,7 +75,7 @@ output="${outdir}/${output}.png"
 if java -cp "${ANTLR_JAR}:${GRAMMAR}" "$ANTLR_TESTRIG" MMML $RULE $TEST -ps /dev/stdout 2>/tmp/antlr.tool.out | convert - "$output" ; then
     echo -n "$output"
 else
-    echo erro: `cat /tmp/antlr.tool.out`
+    echo -n erro: `cat /tmp/antlr.tool.out | tr -s '\n' ' '`
 fi
 #+END_SRC
 
@@ -104,90 +104,13 @@ fi
 <textarea id="result" rows="10" cols="70"></textarea>
 #+END_EXPORT
 
-* Entradas e Árvores de Análise
-- Exemplo 1
-  #+INCLUDE: "inputs/main.mmml" example
-
-  #+CALL: mmml_gen_tree(TEST="inputs/main.mmml") :results file
-
-  #+RESULTS:
- [[file:inputs/main.png]]
-
-- Exemplo 2
-
-  #+INCLUDE: "inputs/main2.mmml" example
-
-  #+CALL: mmml_gen_tree(TEST="inputs/main2.mmml") :results file
-
-  #+RESULTS:
- [[file:inputs/main2.png]]
-
-- Exemplo 3
-  #+INCLUDE: "inputs/main3.mmml" example
-
-  #+CALL: mmml_gen_tree(TEST="inputs/main3.mmml") :results file
-
-  #+RESULTS:
-[[file:inputs/main3.png]]
-
-- Exemplo 4: Funções
-  #+INCLUDE: "inputs/fun1.mmml" example
-
-  #+CALL: mmml_gen_tree(TEST="inputs/fun1.mmml") :results file
-
-  #+RESULTS:
-[[file:inputs/fun1.png]]
-
-- Exemplo 5: if
-
-  #+INCLUDE: "inputs/if.mmml" example
-
-  #+CALL: mmml_gen_tree("inputs/if.mmml") :results file
-
-  #+RESULTS:
-  [[file:inputs/if.png]]
-
-- Exemplo 6: let
-
-  #+INCLUDE: "inputs/let.mmml" example
-
-  #+CALL: mmml_gen_tree("inputs/let.mmml")
-
-  #+RESULTS:
-  [[file:inputs/let.png]]
-
-- Exemplo 7 : expressões booleanas
-  #+INCLUDE: "inputs/expr1.mmml" example
-  #+CALL: mmml_gen_tree("inputs/expr1.mmml")
-
-  #+RESULTS:
-  [[file:inputs/expr1.png]]
-
-- Exemplo 8 : Chamada de Função
-
-  #+INCLUDE: "inputs/funcall1.mmml" example
-
-  #+CALL: mmml_gen_tree("inputs/funcall1.mmml")
-
-  #+RESULTS:
-  [[file:inputs/funcall1.png]]
-
-- Exemplo 9 : Chamada de Função 2
-  #+INCLUDE: "inputs/funcall2.mmml" example
-
-  #+CALL: mmml_gen_tree("inputs/funcall2.mmml")
-
-  #+RESULTS:
-  [[file:inputs/funcall2.png]]
-
-
 * A Linguagem Micro Mini ML
 
-\mml é uma linguagem da família ML (F#, OCaML, Nemerle, dentre outras). Ela é uma linguagem funcional /pura/ -- isto é, cada variável é atribuída uma única vez, não sendo permitidas alterações posteriores. Iterações devem ser feitas utilizando recursão.
+{{{mml}}} é uma linguagem da família ML (F#, OCaML, Nemerle, dentre outras). Ela é uma linguagem funcional /pura/ -- isto é, cada variável é atribuída uma única vez, não sendo permitidas alterações posteriores. Iterações devem ser feitas utilizando recursão.
 
 A gramática da linguagem é fornecida juntamente com este documento. A gramática pode ser livremente alterada, desde que a linguagem reconhecida permaneça a mesma.
 
-As próximas seções exemplificam os conceitos básicos da linguagem \mml.
+As próximas seções exemplificam os conceitos básicos da linguagem {{{mml}}}.
 
 ** Tipos Básicos
 
@@ -214,13 +137,13 @@ A linguagem suporta os seguintes literais em seu código:
   - /Números com ponto decimal/ (~123.01~, ~-123.09~)
   - /Números com expoente/ (~123.01E11~, ~123.09E-10~)
 - *Literais String*
-  - Sequências de caracteres entre aspas duplas (\texttt{"abc"})
-  - Caracteres com escape entre aspas ("abc\textbackslash{}noutralinha" )
+  - Sequências de caracteres entre aspas duplas (="abc"=)
+  - Caracteres com escape entre aspas ("abc\noutralinha" )
 - *Literal Char*:
-  - Um único caractere entre aspas simples (\texttt{'a'})
-  - Caracteres com escape entre aspas simples ('\textbackslash\textbackslash{}')
+  - Um único caractere entre aspas simples (='a'=)
+  - Caracteres com escape entre aspas simples ('\\')
 - *Literal Expecial Nulo*
-  - O literal ~nil~, que representa /nenhum valor armazenado/
+  - O literal ~nil~, que representa uma sequência vazia.
 
 ** Expressões Booleanas
 
@@ -254,11 +177,12 @@ c // C é nao nulo?
 
 ** Expressões Aritméticas
 
-As expressões aritméticas são as mesmas utilizadas nas etapas anteriores:
+As expressões aritméticas são as operações aritméticas básicas de linguagens de programação:
 - Soma: ~+~
 - Subtração: ~-~
 - Multiplicação: ~*~
 - Divisão: ~/~
+- Resto da Divisão: ~%~
 
 A precedência de operadores garante que Exponenciação tem prioridade sobre Multiplicação e Divisão, que por sua vez têm prioridade sobre Soma e Subtração.
 
@@ -282,7 +206,7 @@ else expr2
 
 O comportamento é como esperado: Se a espressão /boolexpr/ for /verdadeira/, é executado a primeira expresão; caso contrário, a segunda.
 
-Uma diferença do /if/ da \mml para o /if/ de linguagens imperativas é que ele é uma /expressão/: o /if/ *retorna* o resultado da expressão avaliada. Ou seja, o código
+Uma diferença do /if/ da {{{mml}}} para o /if/ de linguagens imperativas é que ele é uma /expressão/: o /if/ *retorna* o resultado da expressão avaliada. Ou seja, o código
 #+BEGIN_SRC fsharp
 if x == 1
 then 10
@@ -308,7 +232,7 @@ Uma vez que o /if/ é, ele próprio, uma /expressão/, ele pode ser utilizado de
 (if x == 0 then 10 * x else 20 / x) * 2
 #+END_SRC
 
-retora $10 * x * 2$ quando ~x~ é zero e $(20 / x) * 2$ quando x é diferente de zero.
+retorna $10 * x * 2$ quando ~x~ é zero e $(20 / x) * 2$ quando x é diferente de zero.
 
 Uma vez que a condição do if é uma /expressão/, podemos utilizar parênteses, igualdades, operadores lógicos, etc.
 #+BEGIN_SRC fsharp
@@ -319,22 +243,22 @@ then if z
 else 10
 #+END_SRC
 
-*Observação*: Em \mml, o /else/ *não é opcional*. Se não há resultado a ser retornado quando a condição for /falsa/, então deve-se retornar um valor padrão -- ou /nil/:
+*Observação*: Em {{{mml}}}, o /else/ *não é opcional*. Se não há resultado a ser retornado quando a condição for /falsa/, então deve-se retornar um valor padrão.
 #+BEGIN_SRC fsharp
 if x == 0
 then x * 2
-else nil
+else -1
 #+END_SRC
 
 ** Declarações de Símbolos
 
-A linguagem é \mml é uma linguagem funcional /pura/: uma vez que um valor é atribuído a um /símbolo/, este símbolo não pode ser alterado. Uma ``variável'' em \mml, portanto, não é /variável/ -- é como uma declaração de constante.
+A linguagem é {{{mml}}} é uma linguagem funcional /pura/: uma vez que um valor é atribuído a um /símbolo/, este símbolo não pode ser alterado. Uma ``variável'' em {{mml}}, portanto, não é /variável/ -- é como uma declaração de constante.
 
 A declaração de símbolos é feita com a primitiva /let/:
 #+BEGIN_SRC fsharp
 let x = 1 * 2 + y
 in
-  x * 2 ^ 10
+  x * 2 / 10
 #+END_SRC
 
 A primitiva /let/ pode declarar vários símbolos. Para isso, deve-se utilizar vírgula:
@@ -352,11 +276,11 @@ let x = if z && t
         then z * t             // ambos verdade, pode multiplicar
         else if z then z * 10  // apenas z
         else if t then t * 10  // apenas t
-        else nil               // nenhum
+        else -1                // nenhum
 in
    if x
    then x * 100                // x nao recebeu nil
-   else nil                    // x recebeu nil
+   else 0                      // x recebeu 0
 #+END_SRC
 
 Assim como o /if/, o /let/ é, também, uma *expressão* e, portanto, retorna valor:
@@ -388,7 +312,7 @@ in
 
 ** Chamadas de Função
 
-Para invocar uma função em \mml, deve-se utilizar o nome da função seguido de seus parâmetros. O código a seguir chama a função ~funct~ com os parâmetros ~a~, ~b~ e ~c~.
+Para invocar uma função em {{{mml}}}, deve-se utilizar o nome da função seguido de seus parâmetros. O código a seguir chama a função ~funct~ com os parâmetros ~a~, ~b~ e ~c~.
 #+BEGIN_SRC fsharp
 funct a b c
 #+END_SRC
@@ -400,7 +324,7 @@ funct x + 1 x - 2 x * 2
 
 Uma vez que os parâmetros são expressões, pode-se utilizar parênteses para isolá-los no código:
 #+BEGIN_SRC fsharp
-funct ( x + 1 ) ( x - 2 ) ( x ^ 2 )
+funct ( x + 1 ) ( x - 2 ) ( x * 2 )
 #+END_SRC
 
 Esta sintáxe de chamada de função pode introduzir ambiguidades: O seguinte código poderia ser interpretado como a chamada da função ~print_results~ com 3 parâmetros ou como a chamada da função ~print_results~ com 2 parâmetros, um deles o resultado da função ~funct~ ou com apenas um resultado.
@@ -435,18 +359,35 @@ else 20
 
 ** Declaração de Funções
 
-Uma função na linguagem \mml é declarada com a primitiva ~def~:
+Uma função na linguagem {{{mml}}} é declarada com a primitiva ~def~:
 #+BEGIN_SRC fsharp
 def print_results r : int =
-   print_str (concat "Resultado: " (str r))
+   print (concat "Resultado: " (str r))
 #+END_SRC
 
-Pode-se declara um cabeçalho para a função para definir claramente qual o tipo de retorno:
+Os parâmetros de uma função devem sempre possuir tipos definidos após o símbolo ~:~ .
+
+Pode-se declarar um cabeçalho para a função para definir claramente qual o tipo de retorno. A declaração do tipo de retorno, no entanto, é /opcional/ -- o tipo de retorno de uma função deve ser *deduzido* a partir da expressão de retorno.
 #+BEGIN_SRC fsharp
 def print_results r -> int
 #+END_SRC
 
-Os parâmetros de uma função devem sempre possuir tipos definidos após o símbolo ~:~. Uma função não possui a palavra chave *returns*. O retorno é sempre o resultado de uma *expressão* -- e o tipo de retorno de uma função é definido pelo resultado da expressão.
+A declaração de tipos de retorno, no entanto, é necessária para deduzir o tipo de funções /mutuamente recursivas/:
+#+BEGIN_SRC fsharp
+def f1 a : int, b : float -> float
+def f2 a : int, b : float -> float
+
+def f1 a : int, b : float =
+    if a == 0
+    then f2 a
+            b + b
+    else b
+
+def f2 a : int, b : float =
+    f1 (a - 1), b
+#+END_SRC
+
+Uma função não possui a palavra chave *returns*. O retorno é sempre o resultado de uma *expressão* -- e o tipo de retorno de uma função é definido pelo resultado da expressão.
 #+BEGIN_SRC fsharp
 // media 1 devolve a media de 3. O tipo de retorno eh int
 def media1 a : int,
@@ -459,6 +400,9 @@ def media2 a : int,
            b : int,
            c : int =
     (a + b + c) / 3.0
+
+// expressão booleana, resultado é bool
+def andPred a : bool, b : bool = a && b
 #+END_SRC
 
 O /corpo/ de uma função é sempre uma expressão. Assim, pode-se utilizar /if/ e /let/ dentro de uma função:
@@ -470,7 +414,7 @@ def max2int a : int,
     else b
 #+END_SRC
 
-Toda função retorna algum valor. Uma função chamada ~print~, por exemplo, pode retornar um valor inteiro indicando quantos símbolos foram colocados na tela.
+Toda função retorna algum valor. Uma função de nome ~print~, por exemplo, pode retornar um valor inteiro indicando quantos símbolos foram colocados na tela.
 
 Quando o valor de uma função não necessitar ser armazenado, pode-se, no ~let~, utilizar o símbolo especial ~_~:
 #+BEGIN_SRC fsharp
@@ -480,9 +424,24 @@ in
   x * 10
 #+END_SRC
 
+** Funções Especiais
+
+Algumas funções são consideradas especiais da linguagem e devem estar disponíveis para o usuário nativamente:
+- ~read_char _ -> char~ : Lê um caractere da entrada
+- ~read_int _ -> int~ : Lê um int da entrada
+- ~read_float _ -> float~ : Lê um float da entrada
+- ~read_string _ -> char[]~ : Lê uma string da entrada
+- ~print a : T -> int~ : Coloca na tela o valor de ~a~. Aceita qualquer tipo primitivo (~char~, ~int~, ~float~) e strings (~char[]~)
+- ~str a : T -> char[]~ : Deve funcionar para um tipo T ~int~, ~char~, ~float~ e mesmo ~char[]~ . Converte o valor a para uma representação em string.
+- ~nth n : int, v : T[] -> T~ : Recebe como parâmetro uma posição ~n~ e uma sequência ~v~, retorna a ~n~-ésima posição do vetor
+- ~let_nth n : int, value : T, v : T[] -> T[]~ : Recebe como parâmetro uma sequência ~v~, uma posição ~n~ e um valor ~value~. Retorna uma nova sequência onde a posição ~n~ foi alterada para ~value~.
+- ~length v : T[] -> int~ : retorna a quantidade de elementos de uma sequência.
+
+  *Obs.:* =length nil= sempre retorna 0.
+
 ** Tipos Sequência
 
-Um tipo sequência em \mml é equivalente a um vetor ou uma lista em outras linguagens. Toda sequência possui tamanho definido. Uma função especial chamada ~length~ é responsável por indicar quantos elementos existem na sequência.
+Um tipo sequência em {{{mml}}} é equivalente a um vetor ou uma lista em outras linguagens. Toda sequência possui tamanho definido. Uma função especial chamada ~length~ é responsável por indicar quantos elementos existem na sequência.
 
 Uma sequência é criada utilizando o operador ~[]~:
 #+BEGIN_SRC fsharp
@@ -546,14 +505,30 @@ def filter_gt_10 s : int[] =
    filter_gt_10__ [] s
 #+END_SRC
 
-*Observação*: Uma /string/ na linguagem \mml deve se comportar como uma sequência. Isto é, \mint{fsharp}{h::t = "lala"} deve quebrar a string no caracter 'l' e a string "ala".
+*Observação*: Uma /string/ na linguagem {{{mml}}} é uma sequência de caracteres. Por exemplo, a seguinte função possui tipo de retorno src_fsharp[:exports code]{char[]} :
+#+BEGIN_SRC fsharp :exports code
+def stringConstante n : int =
+   "string"
+#+END_SRC
+
+O mesmo vale para as operações de desempacotamento de lista, concatenação e criação:
+#+BEGIN_SRC fsharp :exports code
+def retString n : int =
+  let a = ['a'],     // a eh tipo char[]
+      b = "bbb",     // b eh tipo char[]
+      c::d2 = "cdd"  // c eh tipo char, d2 eh tipo char[]
+  in
+    a :: b :: [c] :: d2 // retorna ['a', 'b', 'b', 'b', 'c', 'd', 'd']
+                        // ou "abbbcdd"
+#+END_SRC
 
 ** Conversão entre Tipos
 
-Quando for necessário converter um tipo primitivo para outro tipo primitivo, devemos usar uma operação de /cast/. Em \mml, um cast funciona como uma chamada de função cujo nome é o tipo destino. \mint{fsharp}{int 0.2} converte para inteiro o valor em ponto flutuante 0.2 .
+Quando for necessário converter um tipo primitivo para outro tipo primitivo, devemos usar uma operação de /cast/. Em {{{mml}}}, um cast funciona como uma chamada de função cujo nome é o tipo destino. src_fsharp[:exports code]{int 0.2} converte para inteiro o valor em ponto flutuante 0.2 .
 
 #+BEGIN_SRC fsharp
-let x = int y
+let y = 2.2,
+    x = int y // x = 2
 in
    x * 10
 #+END_SRC
@@ -587,89 +562,163 @@ def avg_seq seq : int[] =
                     // -> retorna float
 #+END_SRC
 
-As seguintes conversões de tipos são aceitas na linguagem \mml:
+As seguintes conversões de tipos são aceitas na linguagem {{{mml}}}:
 #+ATTR_LaTeX: :align r|r|c|p{10cm}
-| Tipo Origem | Tipo Destino |   | Obs                            |
-|-------------+--------------+---+--------------------------------|
-|             |              |   | <30>                           |
-| Inteiro     | Float        | \check | Número em ponto flutuante com 0s depois da vírgula (1 \to 1.0) |
-| Float       | Inteiro      | \check | Número inteiro descartando a parte fracionária. Pode perder precisão (1.9 \to 1). Compilador deve alertar (/Warning/) |
-| Inteiro     | String       | \check | Representa o número como uma string |
-| Float       | String       | \check | Representa o número como uma string |
-| String      | Float        | \check | Converte a string para Float   |
-| String      | Int          | \check | Converte a string para um inteiro. Aceita *apenas* strings em base 10. |
-| Char        | Int          | \check | Devolve o número da tabela ASCII correspondente ao caractere |
-| Int         | Char         | \check | Devolve o caractere associado ao valor da tabela ASCII |
-| Char        | Str          | \check | Converte uma letra para uma string de um único caractere |
-| Qualquer    | Booleano     | \check | /false/ se nulo; /true/ caso contrário |
+|   | Tipo Origem |    | Tipo Destino |    | Obs                            |
+| / | <>          | <> | <>           | <> | <>                             |
+|---+-------------+----+--------------+----+--------------------------------|
+|   |             |    |              |    | <30>                           |
+|   | Inteiro     | \to  | Float        | \check  | Número em ponto flutuante com 0s depois da vírgula (1 \to 1.0) |
+|   | Float       | \to  | Inteiro      | \check  | Número inteiro descartando a parte fracionária. Pode perder precisão (1.9 \to 1). Compilador deve alertar (/Warning/) |
+|   | Char        | \to  | Int          | \check  | Devolve o número da tabela ASCII correspondente ao caractere |
+|   | Int         | \to  | Char         | \check  | Devolve o caractere associado ao valor da tabela ASCII |
+|   | Qualquer    | \to  | Booleano     | \check  | /false/ se nulo; /true/ caso contrário |
+
+*Obs.:* Casts não são definidos para tipos sequência, apenas para tipos básicos.
 
 #+BEGIN_SRC fsharp
+// intToString__ 512 10 "" ->
+//     intToString__ 51 10 "2" ->
+//         intToString__ 5 10 "12" ->
+//           intToString__ 0 10 "512" ->
+//             "512"
+
+def intToString__ x : int,
+                  b : int,
+                  r : char [] =
+  let lastDigit = x % b,            // x = 51, lastDigit = 1
+      rest = x / b                  //         rest = 5
+      r1 = [ '0' + lastDigit ] :: r // r1 = "2", ['1'] :: ['2'] = "12"
+  in
+    if rest == 0
+    then r1
+    else intToString__ rest b r1
+
+// funciona para base < 10
+def intToStringBase x : int, b : int -> char[] = intToString__ x b ""
+
+def intToString x : int -> char[] = intToStringBase x 10
+
+def charToString c : char = [c]
+
 let s = "101010",
-    i = int s, // converte para um inteiro, base 10
     c = 'a',
     c_ascii = int c, // 97
-    c2 = char 98 // 'b'
+    c2 = char 98     // 'b'
 in
-   ( str  i ) :: (str  c2) // "101010" :: "b" -> "101010b"
+   ( intToString  i ) :: (charToString  c2) // "101010" :: "b" -> "101010b"
 #+END_SRC
 
-** Aritmética de Tipos na linguagem \mml
+** Tipos Tupla
 
-O único lugar em que tipos são definidos na linguagem \mml é na definição de parâmetros de função. Portanto, os tipos de símbolos em \mml são sempre /derivados/ da expressão, em função dos /tipos/ nos parâmetros de uma função.
+Uma /tupla/ é como um vetor que suporta tipos distintos em cada posição. Tuplas são úteis para retornar mais de um valor em uma função.
+#+BEGIN_SRC fsharp
+def doisRetornos x : int = {x, x + 1}
+#+END_SRC
+
+Diferente de um tipo sequência, que pode conter de 0 a n valores, um tipo tupla possui tamanho fixo. O retorno da função acima, por exemplo, é uma tupla de tamanho 2.
+
+#+BEGIN_SRC fsharp
+def doisRetornos x : int -> {int, int}
+#+END_SRC
+
+** Tipos Definidos pelo Usuário
+
+Um tipo definido pelo usuário é algo parecido com /structs/ de C ou /classes/ de C++/Java, etc.
+
+A declaração de tipo de usuário é feita com a palavra-chave ~class~:
+#+BEGIN_SRC fsharp
+class MeuTipo =
+  campo1 : int,
+  campo2 : {char[], int}
+  // , outros : campos
+#+END_SRC
+
+Para construir uma "instância" de um tipo definido pelo usuário, deve-se usar a palavra chave ~make~ em uma expressão. É obrigatório fornecer valor para *todos os campos da instância*:
+#+BEGIN_SRC fsharp
+let x = make MeuTipo {1, {"string", length "string"}}
+in
+   // ...
+#+END_SRC
+
+Pode-se, no entanto, criar uma função "construtora" para um tipo:
+#+BEGIN_SRC
+def construct_MeuTipo a : int =
+  make MeuTipo{1, {"default", length "default"}}
+#+END_SRC
+
+** Aritmética de Tipos na linguagem {{{mml}}}
+
+Na linguagem {{{mml}}}, tipos são definidos explicitamente
+- nos parâmetros de uma função
+- na declaração de tipo de retorno de uma função
+- na construção de tipos definidos pelo usuário.
+
+Já os tipos de símbolos (equivalenes a variáveis) em {{mml}} são sempre /derivados/ da expressão, em função dos /tipos/ nos parâmetros de uma função.
+#+BEGIN_SRC fsharp
+let x = read_int _ // tipo de x eh derivado do retorno de read_int
+in // ...
+#+END_SRC
 
 Torna-se necessário, portanto, /inferir/, a partir das operações básicas da linguagem e dos tipos dos operandos, quais os serão os tipos resultantes.
 
-Na linguagem \mml, os operadores aritméticos devem respeitar a seguinte /aritmética de tipos/
-| Lado Esquerdo | (Operadores) | Lado Direito |   | Resultado |
-|---------------+--------------+--------------+---+-----------|
-| Inteiro       | + - / *      | Inteiro      | \to | Inteiro   |
-| Inteiro       | + - / *      | Float        | \to | Float     |
-| Float         | + - / *      | Inteiro      | \to | Float     |
-| Inteiro       | ^            | Inteiro      | \to | Float     |
-| Inteiro       | ^            | Float        | \to | Float     |
-| Float         | ^            | Inteiro      | \to | Float     |
-| Float         | + - / * ^    | Float        | \to | Float     |
+Na linguagem {{{mml}}}, os operadores aritméticos devem respeitar a seguinte /aritmética de tipos/;
 
-O operador ~::~ possui dois usos: concatenar /sequências/ de mesmo tipo e concatenar /strings/:
-| Lado Esquerdo | (Operadores) | Lado Direito |   | Resultado |
-|---------------+--------------+--------------+---+-----------|
-| String        | ::           | String       | \to | String    |
-| int[]         | ::           | int[]        | \to | int[]     |
-| int[][]       | ::           | int[][]      | \to | int[][]   |
-| int[][][]     | ::           | int[][][]    | \to | int[][][] |
-| ...           |              | ...          |   | ...       |
-| float[]       | ::           | float[]      | \to | float[]   |
-| int[]         | ::           | float[]      | \to | *ERRO*      |
-| int[]         | ::           | int[][]      | \to | *ERRO*      |
-| String        | ::           | int[]        | \to | *ERRO*      |
+|   | Lado Esquerdo | (Operadores) | Lado Direito  |    | Resultado |
+| / | <>            | <>           | <>            | <> | <>        |
+|---+---------------+--------------+---------------+----+-----------|
+|   | Char          | + - / * %    | Char          | \to  | Char      |
+|   | Char          | + - / * %    | Inteiro       | \to  | Inteiro   |
+|   | Inteiro       | + - / * %    | Char/Inteiro  | \to  | Inteiro   |
+|   | Inteiro       | + - / *      | Float         | \to  | Float     |
+|   | Float         | + - / *      | Inteiro/Float | \to  | Float     |
 
-Concatenação de strings com números é considerado *erro*. O número deve ser *convertido* para string.
+Para o operator ~::~ (concatenação), a operação só deve ser permitida com tipos base e dimensão *idênticas*:
+|   | Lado Esquerdo | (Operadores) | Lado Direito |   | Resultado |
+| / | <>            | <>           | <>           |   | <>        |
+|---+---------------+--------------+--------------+---+-----------|
+|   | int[]         | ::           | int[]        | \to | int[]     |
+|   | int[][]       | ::           | int[][]      | \to | int[][]   |
+|   | int[][][]     | ::           | int[][][]    | \to | int[][][] |
+|   | char[]        | ::           | char[]       | \to | char[]    |
+|   | ...           |              | ...          |   | ...       |
+|   | float[]       | ::           | float[]      | \to | float[]   |
+|   | int[]         | ::           | float[]      | \to | *ERRO*      |
+|   | int[]         | ::           | int[][]      | \to | *ERRO*      |
+|   | char[]        | ::           | int[]        | \to | *ERRO*      |
 
-Todas as operações booleanas devolvem tipo /bool/. É importante lembrar que uma /expressão/ que devolve ~int~ ou ~float~ pode ser considerada uma expressão booleana também -- sendo /falsa/ se seu resultado é ~nil~ e verdadeira, caso contrário.
+Todas as operações booleanas devolvem tipo /bool/. É importante lembrar que uma /expressão/ que devolve ~int~ ou ~float~ pode ser considerada uma expressão booleana também -- sendo /falsa/ se seu resultado é 0 e verdadeira, caso contrário. Já listas são convertidas para "verdadeiro" caso sejam não-vazias. ~nil~ é sempre avaliado como falso.
 
-| Lado Esquerdo              | Operadores | Lado Direito               |   | Resultado                             |
-|----------------------------+------------+----------------------------+---+---------------------------------------|
-| Float/Int/String/Sequência | &&         | Float/Int/String/Sequência | \to | true, ambos guardam algum valor       |
-| Float/Int/String/Sequência | &&         | Float/Int/String/Sequência | \to | false, algum deles é ~nil~              |
-| Float/Int/String/Sequência | \vert\vert         | Float/Int/String/Sequência | \to | true, algum dos lados guarda valor    |
-| Float/Int/String/Sequência | \vert\vert         | Float/Int/String/Sequência | \to | false, ambos são  ~nil~                 |
-| Bool                       | &&         | Bool                       | \to | true, ambos são verdadeiros           |
-| Bool                       | &&         | Bool                       | \to | false, um dos dois é falso            |
-| Bool                       | \vert\vert         | Bool                       | \to | true, um dos dois é verdadeiro        |
-| Bool                       | \vert\vert         | Bool                       | \to | false, um dos dois é falso            |
-|                            | !          | Float/Int/String/Sequência | \to | true, lado direito não armazena valor |
-|                            | !          | Float/Int/String/Sequência | \to | false, lado direito armazena valor    |
+| Lado Esquerdo            | Operadores | Lado Direito             |   | Resultado                             |
+|--------------------------+------------+--------------------------+---+---------------------------------------|
+| Float/Int/Char/Sequência | &&         | Float/Int/Char/Sequência | \to | true, ambos guardam algum valor       |
+| Float/Int/Char/Sequência | &&         | Float/Int/Char/Sequência | \to | false, algum deles é 0 ou ~nil~         |
+| Float/Int/Char/Sequência | \vert\vert         | Float/Int/Char/Sequência | \to | true, algum dos lados guarda valor    |
+| Float/Int/Char/Sequência | \vert\vert         | Float/Int/Char/Sequência | \to | false, ambos são 0 ou ~nil~             |
+| Bool                     | &&         | Bool                     | \to | true, ambos são verdadeiros           |
+| Bool                     | &&         | Bool                     | \to | false, um dos dois é falso            |
+| Bool                     | \vert\vert         | Bool                     | \to | true, um dos dois é verdadeiro        |
+| Bool                     | \vert\vert         | Bool                     | \to | false, um dos dois é falso            |
+|                          | !          | Float/Int/Char/Sequência | \to | true, lado direito não armazena valor |
+|                          | !          | Float/Int/Char/Sequência | \to | false, lado direito armazena valor    |
 
-Em uma expressão booleana, pode-se considerar que qualquer símbolo que armazene algo não-nulo é equivalente a ~true~.
-
+Em uma expressão booleana, pode-se considerar que qualquer símbolo que armazene algo não-nulo é equivalente a ~true~. Isso pode ser obtido através de /coearção de tipos/.
 
 *** Coerção de Tipos
 
-Quando um tipo inteiro for passado como parâmetro para uma função que espera um /float/ este tipo pode ser convertido automaticamente para float, sem que o usuário do compilador solicite a conversão explicitamente. Isso se chama /coerção de tipos/. As seguintes coerções de tipos são válidas:
-| Integer  | \to | Float   |
-| Char     | \to | Integer |
-| Char     | \to | Float   |
+Quando um tipo inteiro for passado como parâmetro para uma função que espera um /float/, este tipo pode ser convertido automaticamente para float, sem que o usuário do compilador solicite explicitamente o /cast/. Isso se chama /coerção de tipos/.
+
+As seguintes coerções de tipos são válidas:
+
+| Integer  | \to | Float    |
+| Char     | \to | Integer  |
+| Char     | \to | Float    |
 | Qualquer | \to | Booleano |
+
+No caso da coerção para /booleano/, o /valor/ obtido será equivalente a /false/ caso o valor coagido for:
+- sequência vazia
+- constante ~nil~
+- Char, Inteiro, Float, com valor 0
 
 O seguinte código deve, portanto, funcionar corretamente:
 #+BEGIN_SRC fsharp
@@ -683,19 +732,20 @@ def funct =
       media x y // x eh coagido para float , y eh coagido para float
 #+END_SRC
 
-*Observação*: A coerção deve acontecer durante a chamada de funções. Durante avaliação de expressões, as coerções não devem ser feitas. O seguinte código deve falhar:
+Uma coerção especial é a da constante nula ~nil~ para algum tipo lista. A constante ~nil~ pode ser coagida para qualquer tipo sequência durante chamadas de função ou concatenação de sequências:
 #+BEGIN_SRC fsharp
-let x = 'a' + 2 // não pode coagir 'a' para int,
-                // deve fazer o cast explicito
-                // x = (int 'a') + 2  , se quer um int
-                //   ou
-                // x = char ( (int a) + 2 ) se quer um char
-in ...
+def concat a : int[] , b : int[] = a :: b
+
+def main =
+    let tmp = [1] :: [2] :: nil  // Coage para int[] por que
+                                 // [1] :: [1] é int
+    in concat tmp nil            // Coage para int[] por que eh o
+                                 // que o parametro 2 de concat espera
 #+END_SRC
 
-** Um Programa em \mml
+** Um Programa em {{{mml}}}
 
-Um programa em \mml deve possuir uma função chamada /main/ que não recebe nenhum parâmetro. A execução do programa se inicia por esta função:
+Um programa em {{{mml}}} deve possuir uma função chamada /main/ que não recebe nenhum parâmetro. A execução do programa se inicia por esta função:
 #+BEGIN_SRC fsharp
 def fib x : int =
     if x <= 0 then nil // 0 nao eh valido
@@ -704,7 +754,7 @@ def fib x : int =
     else (fib x - 1) + (fib x - 2)
 
 def main =
-    let _ = print_str "Digite um numero : ",
+    let _ = print "Digite um numero : ",
         n = read_int _ ,
         fib_n = fib n
     in
@@ -713,6 +763,102 @@ def main =
        else let _ = print ("Fib de " :: (str n) :: " eh " :: (str fib_n) in nil
 #+END_SRC
 
-* Footnotes
+* Entradas e Árvores de Análise
+- Exemplo 1
+  #+INCLUDE: "inputs/main.mmml" example
 
-[fn:1] Um mapeamento entre um /nome/ e um /tipo/ para um compilador pode ser feito com uma tabela /hash/
+  #+CALL: mmml_gen_tree(TEST="inputs/main.mmml") :results file
+
+  #+RESULTS:
+  [[file:inputs/main.png]]
+
+- Exemplo 2
+
+  #+INCLUDE: "inputs/main2.mmml" example
+
+  #+CALL: mmml_gen_tree(TEST="inputs/main2.mmml") :results file
+
+  #+RESULTS:
+ [[file:inputs/main2.png]]
+
+- Exemplo 3
+  #+INCLUDE: "inputs/main3.mmml" example
+
+  #+CALL: mmml_gen_tree(TEST="inputs/main3.mmml") :results file
+
+  #+RESULTS:
+[[file:inputs/main3.png]]
+
+- Exemplo 4: Funções
+  #+INCLUDE: "inputs/fun1.mmml" example
+
+  #+CALL: mmml_gen_tree(TEST="inputs/fun1.mmml") :results file
+
+  #+RESULTS:
+  [[file:inputs/fun1.png]]
+
+- Exemplo 5: if
+
+  #+INCLUDE: "inputs/if.mmml" example
+
+  #+CALL: mmml_gen_tree("inputs/if.mmml") :results file
+
+  #+RESULTS:
+  [[file:inputs/if.png]]
+
+- Exemplo 6: let
+
+  #+INCLUDE: "inputs/let.mmml" example
+
+  #+CALL: mmml_gen_tree("inputs/let.mmml")
+
+  #+RESULTS:
+  [[file:inputs/let.png]]
+
+- Exemplo 7 : expressões booleanas
+  #+INCLUDE: "inputs/expr1.mmml" example
+  #+CALL: mmml_gen_tree("inputs/expr1.mmml")
+
+  #+RESULTS:
+  [[file:inputs/expr1.png]]
+
+- Exemplo 8 : Chamada de Função
+
+  #+INCLUDE: "inputs/funcall1.mmml" example
+
+  #+CALL: mmml_gen_tree("inputs/funcall1.mmml")
+
+  #+RESULTS:
+  [[file:inputs/funcall1.png]]
+
+- Exemplo 9 : Chamada de Função 2
+  #+INCLUDE: "inputs/funcall2.mmml" example
+
+  #+CALL: mmml_gen_tree("inputs/funcall2.mmml")
+
+  #+RESULTS:
+  [[file:inputs/funcall2.png]]
+
+- Exemplo 10 : Tuplas
+  #+INCLUDE: "inputs/tuples.mmml" example
+
+  #+CALL: mmml_gen_tree("inputs/tuples.mmml")
+
+  #+RESULTS:
+  [[file:inputs/tuples.png]]
+
+- Exemplo 11 : Tipos Definidos pelo Usuário
+  #+INCLUDE: "inputs/custom_types.mmml" example
+
+  #+CALL: mmml_gen_tree("inputs/custom_types.mmml")
+
+  #+RESULTS:
+  [[file:inputs/custom_types.png]]
+
+- Exemplo 12 : Listas
+  #+INCLUDE: "inputs/lists.mmml" example
+
+  #+CALL: mmml_gen_tree("inputs/lists.mmml")
+
+  #+RESULTS:
+  [[file:inputs/lists.png]]

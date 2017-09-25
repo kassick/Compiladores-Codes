@@ -17,15 +17,15 @@ COMMENT : '//' ~('\n'|'\r')* '\r'? '\n' -> channel(HIDDEN);
 
 // Código de Programa µmML
 program
-    : fdecls maindecl EOF
+    : decls maindecl EOF
     ;
 
 // Declarações de Funções
 // def f1 a : int, c : int = a + b
 // def f2 a : int, c : int = (float a) / b
-fdecls
-    : fdecl fdecls  #fdecls_one_decl_rule
-    | /*empty*/     #fdecls_end_rule
+decls
+    : decl decls  #decls_one_decl_rule
+    | /*empty*/   #decls_end_rule
     ;
 
 // Declaração da função principal
@@ -39,40 +39,38 @@ maindecl
 // def f2 a : int, b : int -> float
 // Implementação de Função:
 // def f2 a : int, b : int = a / (float b)
-fdecl
-    :  'def' functionname fdeclparams '=' funcbody #funcdef_rule
-    |  'def' functionname fdeclparams '->' type    #funcdef_definition
+decl
+    :   'def' functionname typed_arg_list '=' funcbody
+        #funcdef_impl
+    |   'def' functionname typed_arg_list '->' type
+        #funcdef_definition
+    |   custom_type_decl
+        #decl_custom_type
     ;
 
 // Lista de Parâmetros:
 //   a : int      , b : int, c : int
 // |----------| |--------------------|
 //    param             cont
-fdeclparams
-  :   fdeclparam fdeclparams_cont #fdeclparams_one_param_rule
-  |                               #fdeclparams_no_params
-  ;
 
-// Continuacao da Lista de Parâmetros
-//   b : int          , c : int
-// |----------| |--------------------|
-//    param             cont
-fdeclparams_cont
-  : ',' fdeclparam fdeclparams_cont #fdeclparams_cont_rule
-  |  /*vazio*/                      #fdeclparams_end_rule
-  ;
+typed_arg_list
+    :   typed_arg typed_arg_list_cont
+        #typed_arg_list_rule
+    ;
 
-// Declaração de Parâmetro
-//    a        :      int
-// |-------|      |---------|
-//  symbol          type
-fdeclparam
-  : symbol ':' type #fdecl_param_rule
-  ;
+typed_arg
+    :   symbol ':' type
+    ;
 
-// Nome de Função
-functionname
-    : TOK_ID                                 #fdecl_funcname_rule
+typed_arg_list_cont
+    :   ',' typed_arg_list #typed_arg_list_cont_rule
+    |   /*vazio*/          #typed_arg_list_end
+    ;
+
+// class MeuTipo = a : int, b : float, c : char[], d : {int, int}
+custom_type_decl
+    :   'class' custom_type_name '=' typed_arg_list
+        #custom_type_decl_rule
     ;
 
 // Tipo
@@ -80,26 +78,29 @@ functionname
 // int[], char[], etc
 // int[], char[][], etc.
 type
-    : basic_type    #basictype_rule
-    | sequence_type #sequencetype_rule
+    :   basic_type               #type_basictype_rule
+    |   '{' type (',' type)* '}' #type_tuple_rule
+    |   custom_type_name         #type_custom_rule
+    |   type '[]'                #type_sequence_rule
     ;
 
-// Tipos Básicos da Linguagem
+custom_type_name
+    :   symbol                 #custom_type_name_rule
+    ;
+
+// // Tipos Básicos da Linguagem
 basic_type
     :   'char'
     |   'int'
     |   'bool'
-    |   'str'
     |   'float'
     ;
 
-// Tipos Sequência:
-// Sequência de um tipo base: int[], char[], etc.
-// Sequência de um tipo sequência: int[][], etc
-sequence_type
-  :   basic_type '[]'      #sequencetype_basetype_rule
-  |   s=sequence_type '[]' #sequencetype_sequence_rule
-  ;
+// Nome de Função
+functionname
+    : TOK_ID                                 #fdecl_funcname_rule
+    ;
+
 
 // Corpo de Função:
 // if x == y then x else x + y
@@ -163,8 +164,19 @@ letvarexpr
 // f a b
 // Cast
 // int a
+tuple_ctor
+    :   '{' funcbody (',' funcbody)* '}'
+    ;
+
+class_ctor
+    : 'make'
+        name=symbol tuple_ctor
+    ;
+
 metaexpr
     : '(' funcbody ')'                           #me_exprparens_rule     // Anything in parenthesis -- if, let, funcion call, etc
+    | tuple_ctor                                 #me_tup_create_rule     // tuple creation
+    | class_ctor                                 #me_class_ctor_rule     // create a class from
     | sequence_expr                              #me_list_create_rule    // creates a list [x]
     | TOK_NEG symbol                             #me_boolneg_rule        // Negate a variable
     | TOK_NEG '(' funcbody ')'                   #me_boolnegparens_rule  // or anything in between ( )
@@ -174,6 +186,10 @@ metaexpr
     | metaexpr TOK_CMP_GT_LT metaexpr            #me_boolgtlt_rule       // < <= >= > are equal
     | metaexpr TOK_CMP_EQ_DIFF metaexpr          #me_booleqdiff_rule     // == and != are egual
     | metaexpr TOK_BOOL_AND_OR metaexpr          #me_boolandor_rule      // &&   and  ||  are equal
+    | 'get' pos=DECIMAL funcbody                 #me_tuple_access_rule   // get 0 funcTup
+    | 'set' pos=DECIMAL funcbody                 #me_tuple_access_rule   // get 0 funcTup
+    | 'get' name=symbol funcbody                 #me_class_access_rule   // get campo
+    | 'set' name=symbol funcbody                 #me_class_access_rule   // get campo
     | symbol                                     #me_exprsymbol_rule     // a single symbol
     | literal                                    #me_exprliteral_rule    // literal value
     | funcall                                    #me_exprfuncall_rule    // a funcion call
@@ -214,7 +230,7 @@ funcall_params_cont
 // int b
 // char 65
 cast
-  : c=type funcbody #cast_rule
+  : c=basic_type funcbody #cast_rule
   ;
 
 literal
@@ -257,7 +273,8 @@ TOK_STR_LIT
 TOK_CHAR_LIT
     :   '\''
         ( '\\' [a-z] | ~('\'') ) // Um escape (\a, \n, \t) ou qualquer coisa que não seja aspas (a, b, ., z, ...)
-        '\'' ;
+        '\''
+    ;
 
 FLOAT : '-'? DEC_DIGIT+ '.' DEC_DIGIT+([eE][+-]? DEC_DIGIT+)? ;
 

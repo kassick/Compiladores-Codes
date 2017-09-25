@@ -1,0 +1,11 @@
+def make_tuple_int x : int, y : int -> {int, int}
+
+def make_tuple_int x : int,
+                   y : int =
+    {x + 1,
+     if x == 0
+     then y + 1
+     else y + x
+    }
+
+def main = make_tuple_int 1 2

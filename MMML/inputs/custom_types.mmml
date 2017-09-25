@@ -1,0 +1,9 @@
+class MeuTipo =
+  campo1 : int,
+  campo4 : {int, int[]}[]
+
+def construct_MeuTipo a : int =
+  make MeuTipo {a, {0, nil}}
+
+def funct a : MeuTipo =
+  get campo1 make MeuTipo {1, {1, [1]}}
