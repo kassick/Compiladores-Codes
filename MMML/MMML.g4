@@ -1,8 +1,5 @@
 grammar MMML;
 
-@parser::namespace { mimimil }
-@lexer::namespace { mimimil }
-
 /*
 Programa: Declarações de funções e uma função main SEMPRE
 
@@ -18,65 +15,108 @@ WS : [ \r\t\u000C\n]+ -> skip;
 
 COMMENT : '//' ~('\n'|'\r')* '\r'? '\n' -> channel(HIDDEN);
 
+// Código de Programa µmML
 program
-    : fdecls maindecl
+    : fdecls maindecl EOF
     ;
 
+// Declarações de Funções
+// def f1 a : int, c : int = a + b
+// def f2 a : int, c : int = (float a) / b
 fdecls
     : fdecl fdecls  #fdecls_one_decl_rule
     | /*empty*/     #fdecls_end_rule
     ;
 
+// Declaração da função principal
+// def main = 1 + 1
 maindecl
   : 'def' 'main' '=' funcbody #programmain_rule
   ;
 
+// Declaração de uma função
+// Header de Função:
+// def f2 a : int, b : int -> float
+// Implementação de Função:
+// def f2 a : int, b : int = a / (float b)
 fdecl
     :  'def' functionname fdeclparams '=' funcbody #funcdef_rule
     |  'def' functionname fdeclparams '->' type    #funcdef_definition
     ;
 
+// Lista de Parâmetros:
+//   a : int      , b : int, c : int
+// |----------| |--------------------|
+//    param             cont
 fdeclparams
   :   fdeclparam fdeclparams_cont #fdeclparams_one_param_rule
   |                               #fdeclparams_no_params
   ;
 
+// Continuacao da Lista de Parâmetros
+//   b : int          , c : int
+// |----------| |--------------------|
+//    param             cont
 fdeclparams_cont
   : ',' fdeclparam fdeclparams_cont #fdeclparams_cont_rule
-  |                                 #fdeclparams_end_rule
+  |  /*vazio*/                      #fdeclparams_end_rule
   ;
 
+// Declaração de Parâmetro
+//    a        :      int
+// |-------|      |---------|
+//  symbol          type
 fdeclparam
   : symbol ':' type #fdecl_param_rule
   ;
 
+// Nome de Função
 functionname
     : TOK_ID                                 #fdecl_funcname_rule
     ;
 
+// Tipo
+// int , char, etc.
+// int[], char[], etc
+// int[], char[][], etc.
 type
     : basic_type    #basictype_rule
     | sequence_type #sequencetype_rule
     ;
 
+// Tipos Básicos da Linguagem
 basic_type
-    : 'int'
-    | 'bool'
-    | 'str'
-    | 'float'
+    :   'char'
+    |   'int'
+    |   'bool'
+    |   'str'
+    |   'float'
     ;
 
+// Tipos Sequência:
+// Sequência de um tipo base: int[], char[], etc.
+// Sequência de um tipo sequência: int[][], etc
 sequence_type
   :   basic_type '[]'      #sequencetype_basetype_rule
   |   s=sequence_type '[]' #sequencetype_sequence_rule
   ;
 
+// Corpo de Função:
+// if x == y then x else x + y
+// ou
+// let x = 1 + 2, y = 3+1 in (f x y)
+// ou
+// 1 + 2 + 3
 funcbody
   :   'if' cond=funcbody 'then' bodytrue=funcbody 'else' bodyfalse=funcbody #fbody_if_rule
   |   'let' letlist 'in' fnested=funcbody                                   #fbody_let_rule
   |   metaexpr                                                              #fbody_expr_rule
   ;
 
+// Lista de declarações
+//   x = 1        , y = 2
+// |--------|  |----------|
+//  expr           cont
 letlist
   : letvarexpr  letlist_cont  #letlist_rule
   ;
@@ -85,18 +125,49 @@ letlist_cont
   :   ',' letvarexpr letlist_cont #letlist_cont_rule
   |   /*empty*/                   #letlist_cont_end ;
 
+// Atribuição:
+// x = 1 + 2
+// ou
+// _ = 1 + 2
+// ou
+// x::rest = l
 letvarexpr
   :   sym=symbol '=' funcbody          #letvarattr_rule
   |    '_'    '=' funcbody             #letvarresult_ignore_rule
   |    symbol '::' symbol '=' funcbody #letunpack_rule
   ;
 
+// Meta Expressão:
+// Booleanas
+// a && b
+// a || b
+// !a
+// Concatenação de listas
+// a :: b
+// Criação de lista
+// [a]
+// Matemáticas
+// a / b
+// a + b
+// Relacionais
+// a <= b
+// a >= b
+// Símbolo
+// a
+// Literais
+// 1
+// 2.4
+// 0xafbe
+// 1010b
+// Chamada de Função
+// f a b
+// Cast
+// int a
 metaexpr
     : '(' funcbody ')'                           #me_exprparens_rule     // Anything in parenthesis -- if, let, funcion call, etc
     | sequence_expr                              #me_list_create_rule    // creates a list [x]
     | TOK_NEG symbol                             #me_boolneg_rule        // Negate a variable
     | TOK_NEG '(' funcbody ')'                   #me_boolnegparens_rule  // or anything in between ( )
-    | l=metaexpr op=TOK_POWER r=metaexpr         #me_exprpower_rule      // Exponentiation
     | l=metaexpr op=TOK_CONCAT r=metaexpr        #me_listconcat_rule     // Sequence concatenation
     | l=metaexpr op=TOK_DIV_OR_MUL r=metaexpr    #me_exprmuldiv_rule     // Div and Mult are equal
     | l=metaexpr op=TOK_PLUS_OR_MINUS r=metaexpr #me_exprplusminus_rule  // Sum and Sub are equal
@@ -109,45 +180,52 @@ metaexpr
     | cast                                       #me_exprcast_rule       // cast a type to other
     ;
 
+// Criação de sequência:
+// [a + b]
 sequence_expr
   : '[' funcbody ']'                               #se_create_seq
   ;
 
+// Chamada de função
+// f a b
 funcall
   : symbol funcall_params #funcall_rule
   ;
 
+// Parâmetros de Função
+//    a + b        c d
+// |-------|   |-------|
+//   expr         cont
+funcall_params
+    :   metaexpr funcall_params_cont #funcallparams_rule
+    |   '_'                          #funcallnoparam_rule
+    ;
+
+// Continuação dos Parâmetros
+//   c       d
+// |----|  |-------|
+//  expr    cont
+funcall_params_cont
+    :   metaexpr funcall_params_cont #funcall_params_cont_rule
+    |   /*empty*/                    #funcall_params_end_rule
+    ;
+
+// Cast
+// int b
+// char 65
 cast
   : c=type funcbody #cast_rule
   ;
 
-funcall_params
-  :   metaexpr funcall_params_cont #funcallparams_rule
-  |   '_'                          #funcallnoparam_rule
-  ;
-
-funcall_params_cont
-  :   metaexpr funcall_params_cont #funcall_params_cont_rule
-  |   /*empty*/                    #funcall_params_end_rule
-  ;
-
 literal
-  :   'nil'              #literalnil_rule
-  |   ('true' | 'false') #literaltrueorfalse_rule
-  |   number             #literalnumber_rule
-  |   strlit             #literalstring_rule
-  |   charlit            #literal_char_rule
-  ;
-
-strlit: TOK_STR_LIT ;
-
-charlit : TOK_CHAR_LIT ;
-
-number
-    :   FLOAT       #numberfloat_rule
-    |   DECIMAL     #numberdecimal_rule
-    |   HEXADECIMAL #numberhexadecimal_rule
-    |   BINARY      #numberbinary_rule
+    :   'nil'              #literalnil_rule
+    |   ('true' | 'false') #literaltrueorfalse_rule
+    |   FLOAT              #literal_float_rule
+    |   DECIMAL            #literal_decimal_rule
+    |   HEXADECIMAL        #literal_hexadecimal_rule
+    |   BINARY             #literal_binary_rule
+    |   TOK_STR_LIT        #literalstring_rule
+    |   TOK_CHAR_LIT       #literal_char_rule
     ;
 
 symbol
@@ -171,9 +249,9 @@ TOK_REL_OP : ('>'|'<'|'=='|'>='|'<=') ;
 // ;
 
 TOK_STR_LIT
-    :   '"'
-        ( ~('"' | [\n\r] ) | '\\' [a-z] )*
-        '"'
+    :   '"' // open string
+        ( ~('"' | '\n' | '\r' ) | '\\' [a-z"] )*
+        '"' // close string
     ;
 
 TOK_CHAR_LIT

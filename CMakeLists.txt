@@ -5,6 +5,8 @@ cmake_minimum_required(VERSION 3.3)
     # system
     # filesystem)
 
+include(UseJava)
+
 set(CMAKE_CXX_FLAGS "-std=c++11")
 if(${CMAKE_CXX_COMPILER} MATCHES "em\\+\\+")
   set(CMAKE_EXE_LINKER_FLAGS "-s EXPORTED_FUNCTIONS=\"['_parse_string_c']\"")
@@ -91,7 +93,6 @@ function(AddAntlrTarget target parser_g4 lexer_g4 path)
    DEPENDS ${parser_g4} ${lexer_g4}
    )
  foreach( src_file ${the_sources} )
-   message(INFO "Source ${src_file} is generated")
    set_source_files_properties(
      ${src_file}
      PROPERTIES GENERATED TRUE
@@ -100,11 +101,62 @@ function(AddAntlrTarget target parser_g4 lexer_g4 path)
  add_custom_target(generate_${target} DEPENDS ${the_sources})
 endfunction()
 
+function(AddAntlrJavaTarget target jar_name parser_g4 path extra_opts)
+ get_filename_component(g4base ${parser_g4} NAME_WE)
+ message(INFO "g4 base is ${g4base}")
+ set(${target}_GENERATED_SRC
+   ${path}/${g4base}BaseListener.java
+   ${path}/${g4base}Listener.java
+   ${path}/${g4base}BaseVisitor.java
+   ${path}/${g4base}Visitor.java
+   ${path}/${g4base}Lexer.java
+   ${path}/${g4base}Parser.java
+   PARENT_SCOPE
+   )
+ set(the_sources
+   ${path}/${g4base}BaseListener.java
+   ${path}/${g4base}Listener.java
+   ${path}/${g4base}BaseVisitor.java
+   ${path}/${g4base}Visitor.java
+   ${path}/${g4base}Lexer.java
+   ${path}/${g4base}Parser.java
+   )
+ message("Fontes do Antlr ${the_sources}")
+ add_custom_command(
+   OUTPUT ${the_sources}
+   COMMAND ${CMAKE_COMMAND} -E make_directory ${path}
+   COMMAND "${Java_JAVA_EXECUTABLE}" -jar ${ANTLR_JAR_LOCATION} -Werror -Dlanguage=Java -listener -visitor ${extra_opts} -o ${path} ${lexer_g4} ${parser_g4}
+   WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+   DEPENDS ${parser_g4} ${lexer_g4}
+   )
+ foreach( src_file ${the_sources} )
+   message(INFO "Source ${src_file} is generated")
+   set_source_files_properties(
+     ${src_file}
+     PROPERTIES GENERATED TRUE
+     )
+ endforeach()
+ add_custom_target(generate_${target} DEPENDS ${the_sources})
+ add_jar(generate_jar_${target}
+        SOURCES ${the_sources}
+        INCLUDE_JARS ${ANTLR_JAR_LOCATION}
+        OUTPUT_NAME ${jar_name}
+        )
+endfunction()
+
+function(AntlrGenerateParseTreePng grammar_jar grammar_name start_rule input output)
+  add_custom_command(
+    OUTPUT ${output}
+    COMMAND "${Java_JAVA_EXECUTABLE}" -cp "${ANTLR_JAR_LOCATION}:${grammar_jar}" org.antlr.v4.gui.TestRig ${grammar_name} ${start_rule} -ps ${output}
+    )
+endfunction()
+
 add_subdirectory(./SExpr/Antlr/)
 add_subdirectory(./SExpr/AntlrListener/)
 add_subdirectory(./SExpr/AntlrVisitor/)
 add_subdirectory(./SExpr/LL1/)
 add_subdirectory(./SExpr/Naive/)
 add_subdirectory(./SExpr/Naive-Tokens/)
-# add_subdirectory(./MMML)
+add_subdirectory(./MMML)
 add_subdirectory(./StackVM)
+add_subdirectory(./MathExprParser)

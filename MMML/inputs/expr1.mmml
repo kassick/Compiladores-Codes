@@ -1,0 +1,4 @@
+def main =
+  if x + 1 == 2 && x - 1 == 0 || y
+  then "correto"
+  else "wtf"
