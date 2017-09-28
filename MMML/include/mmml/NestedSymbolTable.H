@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep  8 20:55:04 2017"
- *         Updated: "2017-09-08 22:02:40 kassick"
+ *         Updated: "2017-09-27 21:12:22 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -18,6 +18,7 @@
 #include <unordered_map>
 #include <string>
 #include <memory>
+#include <vector>
 
 #include "mmml/Symbol.H"
 
@@ -27,43 +28,53 @@ using namespace std;
 
 class NestedSymbolTable : public enable_shared_from_this<NestedSymbolTable>
 {
-    typedef shared_ptr<NestedSymbolTable> pointer;
-
-    int offset;
-    int size;
-    unordered_map<string, Symbol> data;
-
-    NestedSymbolTable::pointer parent;
+  private:
+    int _size;
+    unordered_map<Symbol::name_type, Symbol::const_pointer> data;
 
   public:
+    typedef shared_ptr<NestedSymbolTable> pointer;
+    typedef shared_ptr<const NestedSymbolTable> const_pointer;
+    typedef weak_ptr<NestedSymbolTable> weak_pointer;
+    typedef weak_ptr<const NestedSymbolTable> const_weak_pointer;
+
+    const int level;
+    const int offset;
+    NestedSymbolTable::const_weak_pointer parent;
+    std::vector<NestedSymbolTable::const_pointer> children;
+
     NestedSymbolTable() :
+            parent(),
+            level(0),
             offset(0),
-            size(0),
-            parent(nullptr)
+            _size(0)
     {}
 
     NestedSymbolTable(NestedSymbolTable::pointer parent_) :
+            parent(parent_),
+            level(parent_->level + 1),
             offset(parent_->offset),
-            size(0),
-            parent(parent_)
-    {}
-
-    Symbol find(const string name) const;
-
-    NestedSymbolTable::pointer adopt(NestedSymbolTable::pointer nested)
+            _size(0)
     {
-        nested->offset = this->size;
-        return nested;
+        parent_->children.push_back(shared_from_this());
     }
 
-    void add(const Symbol s);
+    NestedSymbolTable(const NestedSymbolTable& parent_) = delete;
+    NestedSymbolTable(NestedSymbolTable&& parent_) = delete;
+
+    Symbol::const_pointer find(const Symbol::name_type name) const;
+
+    void add(const Symbol::pointer s);
+
+    int size() const;
+
 
   private:
+    Symbol::const_pointer find_local(const Symbol::name_type name) const ;
 
-    Symbol find_local(const string name) const ;
+    Symbol::const_pointer findSymbolRecursive(const Symbol::name_type name) const;
 
-    Symbol findSymbolRecursive(const string name) const;
-
+    int sizeRecursiveDown() const;
 };
 
 
