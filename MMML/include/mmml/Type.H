@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep  8 20:55:04 2017"
- *         Updated: "2017-09-27 20:20:09 kassick"
+ *         Updated: "2017-09-28 02:17:21 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -27,26 +27,47 @@ struct Type : public enable_shared_from_this<Type>
     typedef std::shared_ptr<const Type> const_pointer;
     typedef std::weak_ptr<Type> weak_pointer;
     typedef std::weak_ptr<const Type> const_weak_pointer;
+    typedef int id_type;
 
-    const int id;
-    const string name;
-    const int size;
+    int _id;
+    const string _name;
+    const int _size;
 
-    Type(const int id_, const string name_, const int size_):
-            id(id_),
-            name(name_),
-            size(size_)
+    Type(const string name_, const int size_):
+            _id(-1),
+            _name(name_),
+            _size(size_)
     {}
+
+    int id() const {return _id;}
+    void set_id(int id) { _id = id; }
+
+    virtual string name() const {return _name;}
+    virtual int size() const {return _size;}
+    virtual string to_string() const {
+        return string("Type ") +
+                std::to_string(_id) +
+                string(" -> ") +
+                _name;
+    }
+
+    virtual bool equals(Type::pointer other) {
+        Type* other_ptr = other.get();
+        if (other_ptr == nullptr)
+            return false;
+
+        return typeid(*this) == typeid(other_ptr);
+    }
 };
 
+// end namespace mmml /////////////////////////////////////////////////////////
 }
 
 namespace std {
 static
 string to_string(const mmml::Type &t) {
-    return string("Type ") +
-           to_string(t.id) +
-            string(" -> ") +
-            t.name;
+    return t.to_string();
 }
+
+// end namespace  /////////////////////////////////////////////////////////////
 }

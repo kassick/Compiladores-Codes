@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Sep 27 21:53:47 2017"
- *         Updated: "2017-09-27 23:49:20 kassick"
+ *         Updated: "2017-09-28 00:17:49 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -21,7 +21,7 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    auto type = make_shared<const Type>(0, "padrao", 1);
+    auto type = make_shared<const Type>("padrao", 1);
     auto mainTable = make_shared<NestedSymbolTable>();
     mainTable->add(make_shared<Symbol>("a", type, 0, 0));
     mainTable->add(make_shared<Symbol>("b", type, 1, 0));

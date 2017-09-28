@@ -20,6 +20,7 @@ include_directories(include/)
 add_executable(mmmlc
   mmmlc.cpp
   Symbol.cpp
+  TypeRegistry.cpp
   NestedSymbolTable.cpp
   ${mmml_parser_GENERATED_SRC})
 add_dependencies(mmmlc mmmlc_html generate_mmml_parser)
