@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep  8 21:28:33 2017"
- *         Updated: "2017-09-27 20:33:16 kassick"
+ *         Updated: "2017-09-27 22:45:46 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -18,7 +18,7 @@ namespace mmml {
 using namespace std;
 
 string Symbol::to_string() const {
-    return name + "@ " +
+    return name + " @ " +
             std::to_string(line) +
             ":" +
             std::to_string(col);
@@ -36,7 +36,7 @@ int Symbol::size() const {
 }
 
 namespace std {
-string to_string(const mmml::Symbol &s) {
+string to_string(mmml::Symbol const &s) {
     return s.to_string();
 }
 }

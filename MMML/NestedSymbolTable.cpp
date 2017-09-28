@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep  8 21:28:33 2017"
- *         Updated: "2017-09-27 21:26:46 kassick"
+ *         Updated: "2017-09-27 23:47:50 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -23,9 +23,9 @@ void NestedSymbolTable::add(Symbol::pointer s) {
     auto si = data.find(s->name);
     if (si != data.cend()) {
         throw runtime_error(string("Name class in symbol table: ") +
-                            to_string(*s) +
+                            std::to_string(*s) +
                             " would shadow " +
-                            to_string(*si->second) +
+                            std::to_string(*si->second) +
                             " on the same namespace");
     }
 
@@ -74,14 +74,62 @@ int NestedSymbolTable::size() const {
 
 int NestedSymbolTable::sizeRecursiveDown() const {
     if (this->children.size() == 0)
-        return this->offset + this->_size;
+        return this->_size;
 
-    int max = 1;
+    int max = -1;
     for (const auto& child : this->children)
         if (child->sizeRecursiveDown() > max)
             max = child->sizeRecursiveDown();
 
     return max;
+}
+
+int NestedSymbolTable::fullNestedSize() const {
+    NestedSymbolTable::const_pointer
+            cur = shared_from_this(),
+            cur_parent = cur->parent.lock();
+
+    while(cur_parent) {
+        cur = cur_parent;
+        cur_parent = cur->parent.lock();
+    }
+
+    return cur->size();
+}
+
+string NestedSymbolTable::to_string() const {
+    stringstream out;
+
+    for (int i = 0; i < this->level; i++)
+        out << "  ";
+    out << "--------" << endl;
+
+    for (int i = 0; i < this->level; i++)
+        out << "  ";
+    out << "Starting offset: " << this->offset << endl;
+    for (int i = 0; i < this->level; i++)
+        out << "  ";
+    out << "Size (local): " << this->_size << endl;
+
+    for (const auto s : this->data) {
+        for (int i = 0; i < this->level; i++)
+            out << "  ";
+
+        out << std::to_string(*s.second)
+            << " at position " << s.second->pos
+            << endl;
+    }
+
+    for (const auto& child : children)
+    {
+        out << child->to_string();
+    }
+
+    for (int i = 0; i < this->level; i++)
+        out << "  ";
+    out << "--------" << endl;
+
+    return out.str();
 }
 
 }

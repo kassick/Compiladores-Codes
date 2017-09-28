@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep  8 21:51:48 2017"
- *         Updated: "2017-09-27 20:36:53 kassick"
+ *         Updated: "2017-09-27 22:23:36 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -56,5 +56,5 @@ class Symbol : public std::enable_shared_from_this<Symbol>
 }
 
 namespace std {
-string to_string(const mmml::Symbol &);
+string to_string(mmml::Symbol const &);
 }

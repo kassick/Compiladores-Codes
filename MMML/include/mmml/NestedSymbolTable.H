@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep  8 20:55:04 2017"
- *         Updated: "2017-09-27 21:12:22 kassick"
+ *         Updated: "2017-09-27 23:48:14 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -19,6 +19,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <sstream>
 
 #include "mmml/Symbol.H"
 
@@ -50,13 +51,21 @@ class NestedSymbolTable : public enable_shared_from_this<NestedSymbolTable>
             _size(0)
     {}
 
+  private:
     NestedSymbolTable(NestedSymbolTable::pointer parent_) :
             parent(parent_),
             level(parent_->level + 1),
-            offset(parent_->offset),
-            _size(0)
-    {
-        parent_->children.push_back(shared_from_this());
+            offset(parent_->_size),
+            _size(parent_->_size)
+    {}
+
+  public:
+
+    NestedSymbolTable::pointer make_nested() {
+        shared_ptr<NestedSymbolTable> nt(new NestedSymbolTable(shared_from_this()));
+        this->children.push_back(nt);
+
+        return nt;
     }
 
     NestedSymbolTable(const NestedSymbolTable& parent_) = delete;
@@ -67,6 +76,10 @@ class NestedSymbolTable : public enable_shared_from_this<NestedSymbolTable>
     void add(const Symbol::pointer s);
 
     int size() const;
+
+    int fullNestedSize() const;
+
+    string to_string() const ;
 
 
   private:

@@ -24,3 +24,5 @@ add_executable(mmmlc
   ${mmml_parser_GENERATED_SRC})
 add_dependencies(mmmlc mmmlc_html generate_mmml_parser)
 target_link_libraries(mmmlc antlr4static)
+
+add_subdirectory(tests/)
