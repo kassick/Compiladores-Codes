@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep  8 20:55:04 2017"
- *         Updated: "2017-09-29 03:29:32 kassick"
+ *         Updated: "2017-09-29 11:18:03 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -44,6 +44,18 @@ struct Type : public enable_shared_from_this<Type>
 
     virtual string name() const {return _name;}
     virtual int size() const {return _size;}
+
+    // smart pointer cast:
+    // t = registry.find_by_name(...).as<SequenceType>()
+    template <class Target>
+    using const_target= const typename std::decay<Target>::type;
+
+    template <class Target>
+    std::shared_ptr<const_target<Target>> as() const {
+        return dynamic_pointer_cast<const_target<Target>>(shared_from_this());
+    }
+
+
     virtual string to_string() const {
         return string("Type ") +
                 std::to_string(_id) +
@@ -62,6 +74,27 @@ struct Type : public enable_shared_from_this<Type>
     virtual
     size_t hash() const {
         return std::hash<string>()(_name);
+    }
+
+    virtual
+    bool equal_name(Type::const_pointer other) const
+    {
+        if (!other)
+            return false;
+
+        return this->name() == other->name();
+    }
+
+    virtual
+    bool equivalent(Type::const_pointer other) const
+    {
+        return equals(other);
+    }
+
+    virtual
+    bool equal_storage(Type::const_pointer other) const
+    {
+        return equals(other);
     }
 };
 

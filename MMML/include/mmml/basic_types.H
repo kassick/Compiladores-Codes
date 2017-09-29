@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Thu Sep 28 00:18:58 2017"
- *         Updated: "2017-09-29 03:37:45 kassick"
+ *         Updated: "2017-09-29 11:33:10 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -55,9 +55,10 @@ class SequenceType : public Type
     int dim;
 
     SequenceType(Type::const_pointer base_, int dim_ = 1) :
-            Type(make_name(base_, dim_), 1)
+            Type(make_name(base_, dim_), 1),
+            dim(dim_)
     {
-        auto base_sequence = dynamic_pointer_cast<const SequenceType>(base_);
+        auto base_sequence = base_->as<SequenceType>();
         if (base_sequence) {
             this->base_type = base_sequence->base_type;
             this->decayed_type = base_sequence;
@@ -90,14 +91,22 @@ class SequenceType : public Type
     static string make_name(Type::const_pointer base_, int dim)
     {
         std::stringstream name_buf;
+        Type::const_pointer base_type;
 
-        auto seq_decay = dynamic_pointer_cast<const SequenceType>(base_);
-        if (seq_decay) {
-            name_buf << seq_decay->name();
-            dim = seq_decay->dim + 1;
+        auto base_sequence = base_->as<SequenceType>();
+
+        if (base_sequence) {
+            base_type = base_sequence->base_type.lock();
+            dim = base_sequence->dim + 1;
         } else {
-            name_buf << base_->name();
+            base_type = base_;
+            dim = 1;
         }
+
+        if (!base_type)
+            name_buf << "INVALID BASE";
+
+        name_buf << base_type->name();
 
         while (dim-- > 0)
             name_buf << "[]";
@@ -292,7 +301,7 @@ class ClassType : public Type
         #endif
     }
 
-    bool equal_name(Type::const_pointer other) const
+    virtual bool equal_name(Type::const_pointer other) const override
     {
         auto other_class = dynamic_pointer_cast<const ClassType>(other);
         if (!other_class)
@@ -301,7 +310,7 @@ class ClassType : public Type
         return (this->custom_name == other_class->custom_name);
     }
 
-    bool equivalent(Type::const_pointer other) const
+    virtual bool equivalent(Type::const_pointer other) const override
     {
         // true if both are classes, both have the same storage
         auto other_class = dynamic_pointer_cast<const ClassType>(other);
@@ -317,7 +326,7 @@ class ClassType : public Type
         return other_class_tuple && this_tuple->equals(other_class_tuple);
     }
 
-    bool equal_storage(Type::const_pointer other) const
+    virtual bool equal_storage(Type::const_pointer other) const override
     {
         auto this_tuple = this->base_tuple.lock();
         if (!this_tuple)
@@ -349,7 +358,7 @@ class ClassType : public Type
 
         std::stringstream name_buf;
 
-        name_buf << custom_name
+        name_buf << Type::to_string()
                  << " { ";
 
         auto begin = name_map.cbegin();
