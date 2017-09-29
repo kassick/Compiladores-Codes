@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Thu Sep 28 00:18:58 2017"
- *         Updated: "2017-09-28 22:26:50 kassick"
+ *         Updated: "2017-09-29 03:27:25 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -21,6 +21,7 @@
 #include <iterator>
 #include <unordered_map>
 #include <initializer_list>
+#include <iostream>
 
 namespace mmml {
 
@@ -51,42 +52,58 @@ class SequenceType : public Type
     typedef std::weak_ptr<const SequenceType> const_weak_pointer;
 
     Type::const_weak_pointer base_type, decayed_type;
-    int arity;
+    int dim;
 
-    SequenceType(Type::const_pointer base_, int arity_ = 1) :
-            Type(make_name(base_, arity_), 1)
+    SequenceType(Type::const_pointer base_, int dim_ = 1) :
+            Type(make_name(base_, dim_), 1)
     {
-        auto seq_decay = dynamic_pointer_cast<const SequenceType>(base_);
-        if (seq_decay) {
-            this->base_type = seq_decay->base_type;
-            this->decayed_type = seq_decay;
-            this->arity = seq_decay->arity + 1;
+        auto base_sequence = dynamic_pointer_cast<const SequenceType>(base_);
+        if (base_sequence) {
+            this->base_type = base_sequence->base_type;
+            this->decayed_type = base_sequence;
+            this->dim = base_sequence->dim + 1;
         } else {
             this->base_type = base_;
             this->decayed_type = base_;
+            this->dim = 1;
         }
     }
 
+    virtual
+    bool equals(Type::const_pointer other) const
+            override
+    {
+        auto other_seq = dynamic_pointer_cast<const SequenceType>(other);
+        if (!other_seq)
+            return false;
+
+        if (this->dim != other_seq->dim)
+            return false;
+
+        auto this_base_type = this->base_type.lock();
+        auto other_base_type = other_seq->base_type.lock();
+
+        return this_base_type->equals(other_base_type);
+    }
+
   private:
-    static string make_name(Type::const_pointer base_, int arity)
+    static string make_name(Type::const_pointer base_, int dim)
     {
         std::stringstream name_buf;
 
         auto seq_decay = dynamic_pointer_cast<const SequenceType>(base_);
         if (seq_decay) {
             name_buf << seq_decay->name();
-            arity = seq_decay->arity + 1;
+            dim = seq_decay->dim + 1;
         } else {
             name_buf << base_->name();
         }
 
-        while (arity-- > 0)
+        while (dim-- > 0)
             name_buf << "[]";
 
         return name_buf.str();
     }
-
-
 };
 
 class TupleType : public Type
@@ -166,22 +183,47 @@ class TupleType : public Type
     template <class ForwardIt>
     static string make_name(ForwardIt begin, ForwardIt end)
     {
+        int i = 0;
         std::stringstream name_buf;
 
         if (begin == end)
             return "INVALID TUPLE";
 
-        name_buf << '{';
+        name_buf << "{ ";
+        while (begin != end) {
 
-        name_buf << type_name(*begin);
-
-        while (++begin != end)
-        {
-            name_buf << ", "
+            name_buf << "@" << i << " "
                      << type_name(*begin);
+            begin++;
+            i++;
+
+            if (begin != end)
+                name_buf << ", ";
+
         }
 
+        name_buf << " }";
+
         return name_buf.str();
+    }
+};
+
+struct ClassField {
+    std::string name;
+    Type::const_weak_pointer type;
+};
+
+struct class_field_name {
+    string
+    operator()(const ClassField& f) const {
+        return f.name;
+    }
+};
+
+struct class_field_type {
+    Type::const_weak_pointer
+    operator()(const ClassField& f) {
+        return f.type;
     }
 };
 
@@ -193,28 +235,30 @@ class ClassType : public Type
     typedef std::weak_ptr<ClassType> weak_pointer;
     typedef std::weak_ptr<const ClassType> const_weak_pointer;
 
-    struct Field {
-        std::string name;
-        Type::const_weak_pointer type;
-    };
+    typedef std::vector<ClassField> base_field_vector_t;
 
   public:
 
-    ClassType(string custom_name,
-              const std::vector<Field> fields) :
-            Type(make_name(custom_name,
-                           fields),
-                 1)
+    template <class T,
+              class GetName=class_field_name,
+              class GetType=class_field_type>
+    ClassType(string custom_name, T v,
+              GetName get_name=GetName(),
+              GetType get_type=GetType())
+            :
+            Type(custom_name, 1),
+            custom_name(custom_name)
     {
-        TupleType::base_types_vector_t field_types(fields.size());
+        TupleType::base_types_vector_t field_types(v.size());
 
         int i = 0;
-        for (const auto field : fields)
+        for (const auto field : v)
         {
-            if (name_map.find(field.name) == name_map.end())
+            auto name = get_name(field);
+            if (name_map.find(name) == name_map.end())
             {
-                name_map[field.name] = i;
-                field_types[i] = field.type.lock();
+                name_map[name] = i;
+                field_types[i] = get_type(field).lock();
                 i++;
             } else {
                 // should never happen!
@@ -223,9 +267,7 @@ class ClassType : public Type
         }
 
         Type::pointer tup = make_shared<TupleType>(field_types);
-        this->base_tuple =
-                static_pointer_cast<const TupleType>(
-                    TypeRegistry::instance().add(tup));
+        this->base_tuple = static_pointer_cast<const TupleType>(TypeRegistry::instance().add(tup)) ;
     }
 
     Type::const_pointer get_type(string name) const {
@@ -236,46 +278,102 @@ class ClassType : public Type
         return nullptr;
     }
 
-  private:
-    TupleType::const_weak_pointer base_tuple;
-    std::unordered_map<std::string, int> name_map;
+    const string custom_name;
 
-    static string make_name(string custom_name,
-                            const std::vector< Field> fields)
+    virtual
+    bool equals(Type::const_pointer other)
+            const
+            override
     {
-        if (fields.size() == 0) {
-            return "CAN NOT INSTANTIATE 0 SIZED CLASS";
+        #ifdef CLASS_EQUALS_IS_EQUIV
+        return equivalent(other);
+        #else
+        return equal_name(other);
+        #endif
+    }
+
+    bool equal_name(Type::const_pointer other) const
+    {
+        auto other_class = dynamic_pointer_cast<const ClassType>(other);
+        if (!other_class)
+            return false;
+
+        return (this->custom_name == other_class->custom_name);
+    }
+
+    bool equivalent(Type::const_pointer other) const
+    {
+        // true if both are classes, both have the same storage
+        auto other_class = dynamic_pointer_cast<const ClassType>(other);
+        if (!other_class)
+            return false;
+
+        auto this_tuple = this->base_tuple.lock();
+        if (!this_tuple)
+            return false;
+
+        auto other_class_tuple = other_class->base_tuple.lock();
+
+        return other_class_tuple && this_tuple->equals(other_class_tuple);
+    }
+
+    bool equal_storage(Type::const_pointer other) const
+    {
+        auto this_tuple = this->base_tuple.lock();
+        if (!this_tuple)
+            return false;
+
+        // Class / Tuple:  Same Storage -> equivalent
+        auto other_tuple = dynamic_pointer_cast<const TupleType>(other);
+        if (other_tuple)
+        {
+            return this_tuple->equals(other_tuple);
         }
+
+        // Class / Class : same base tuples, ok
+        auto other_class = dynamic_pointer_cast<const ClassType>(other);
+        if (!other_class)
+            return false;
+
+        auto other_class_tuple = other_class->base_tuple.lock();
+
+        return other_class_tuple && this_tuple->equals(other_class_tuple);
+    }
+
+    virtual
+    string to_string() const override
+    {
+        auto this_tuple = base_tuple.lock();
+        if (!this_tuple)
+            return "ERROR NULL TUPLE";
 
         std::stringstream name_buf;
 
-        auto b = fields.cbegin();
-
         name_buf << custom_name
-                 << " { "
-                 << b->name
-                 << " : ";
+                 << " { ";
 
-        auto btype = b->type.lock();
-        if (!btype)
-            name_buf << "ERROR ERROR ERROR";
-        else
-            name_buf << btype->name();
+        auto begin = name_map.cbegin();
+        while(begin != name_map.cend()) {
+            int nth = begin->second;
+            name_buf << begin->first
+                     << " : "<< "@" << nth << " "
+                     << mmml::type_name(this_tuple->get_nth_type(nth));
 
-        while (++b != fields.cend())
-        {
-            name_buf << ", "
-                     << b->name
-                     << " : ";
-            btype = b->type.lock();
-            if (!btype)
-                name_buf << "ERROR ERROR ERROR";
-            else
-                name_buf << btype->name();
+            begin++;
+
+            if(begin != name_map.cend())
+                name_buf << ", ";
+
         }
+
+        name_buf << " }";
 
         return name_buf.str();
     }
+
+  private:
+    TupleType::const_weak_pointer base_tuple;
+    std::unordered_map<std::string, int> name_map;
 };
 
 void __attribute__ ((constructor)) init_basic_types()

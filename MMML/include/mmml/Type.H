@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep  8 20:55:04 2017"
- *         Updated: "2017-09-28 22:07:31 kassick"
+ *         Updated: "2017-09-29 03:29:32 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -48,7 +48,7 @@ struct Type : public enable_shared_from_this<Type>
         return string("Type ") +
                 std::to_string(_id) +
                 string(" -> ") +
-                _name;
+                name();
     }
 
     virtual bool equals(Type::const_pointer other) const {
