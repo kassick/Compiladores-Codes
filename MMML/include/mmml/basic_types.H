@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Thu Sep 28 00:18:58 2017"
- *         Updated: "2017-09-28 02:25:23 kassick"
+ *         Updated: "2017-09-28 22:26:50 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -18,6 +18,7 @@
 #include "mmml/TypeRegistry.H"
 #include <sstream>
 #include <vector>
+#include <iterator>
 #include <unordered_map>
 #include <initializer_list>
 
@@ -100,38 +101,84 @@ class TupleType : public Type
 
     base_types_vector_t base_types;
 
-    TupleType(base_types_vector_t v) :
-            base_types(v),
-            Type(make_name(v), 1)
+    template <class T>
+    TupleType(std::initializer_list<T> l) :
+            base_types(l),
+            Type(make_name(std::begin(l), end(l)), 1)
     {}
+    template <class T>
+    TupleType(T&& v) :
+            base_types(std::forward<T>(v)),
+            Type(make_name(std::begin(v), end(v)), 1)
+    {}
+
+    // TupleType(std::vector<Type::const_pointer> v):
+    //         base_types(make_weak_vector(v.begin(), v.end())),
+    //         Type(make_name(make_weak_vector(v.begin(), v.end())), 1)
+    // {}
 
     Type::const_pointer get_nth_type(int n) const {
         auto wp = this->base_types[n];
         return wp.lock();
     }
 
+    virtual
+    bool equals(Type::const_pointer other) const
+    {
+        auto other_tuple = dynamic_pointer_cast<const TupleType>(other);
+        if (!other_tuple)
+            return false;
+
+        if (this->base_types.size() != other_tuple->base_types.size())
+            return false;
+
+        auto lit = this->base_types.cbegin();
+        auto rit = other_tuple->base_types.cbegin();
+
+        while(lit != this->base_types.cend())
+        {
+            auto lptr = lit->lock();
+            auto rptr = rit->lock();
+
+            if (!lptr || !rptr || !lptr->equals(rptr))
+                return false;
+
+            lit++;
+            rit++;
+        }
+
+        return true;
+    }
+
   private:
 
-    static string make_name(const base_types_vector_t v)
+    // template <typename ForwardIt>
+    // static base_types_vector_t make_weak_vector(ForwardIt begin, ForwardIt end)
+    // {
+    //     base_types_vector_t ret(end - begin);
+    //     auto ret_it = ret.begin();
+
+    //     while (begin != end)
+    //         *(ret_it++) = *begin++;
+
+    // }
+
+    template <class ForwardIt>
+    static string make_name(ForwardIt begin, ForwardIt end)
     {
         std::stringstream name_buf;
 
-        auto b = v.cbegin();
+        if (begin == end)
+            return "INVALID TUPLE";
+
         name_buf << '{';
-        auto t = (*b).lock();
-        if (!t)
-            return "ERROR ERROR ERROR";
 
-        name_buf << t->name();
+        name_buf << type_name(*begin);
 
-        while (++b != v.cend())
+        while (++begin != end)
         {
-            t = b->lock();
-            if (!t)
-                return "ERROR ERROR ERROR";
-
             name_buf << ", "
-                     << t->name();
+                     << type_name(*begin);
         }
 
         return name_buf.str();
@@ -233,10 +280,10 @@ class ClassType : public Type
 
 void __attribute__ ((constructor)) init_basic_types()
 {
-    auto& registry = TypeRegistry::instance();
-    registry.add(make_shared<CharType>());
-    registry.add(make_shared<IntType>());
-    registry.add(make_shared<FloatType>());
+    auto& registry = mmml::TypeRegistry::instance();
+    registry.add(make_shared<mmml::CharType>());
+    registry.add(make_shared<mmml::IntType>());
+    registry.add(make_shared<mmml::FloatType>());
 }
 
 // end namespace mmml /////////////////////////////////////////////////////////

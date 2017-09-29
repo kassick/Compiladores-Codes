@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep  8 20:55:04 2017"
- *         Updated: "2017-09-28 02:17:21 kassick"
+ *         Updated: "2017-09-28 22:07:31 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -51,23 +51,57 @@ struct Type : public enable_shared_from_this<Type>
                 _name;
     }
 
-    virtual bool equals(Type::pointer other) {
-        Type* other_ptr = other.get();
+    virtual bool equals(Type::const_pointer other) const {
+        const Type* other_ptr = other.get();
         if (other_ptr == nullptr)
             return false;
 
-        return typeid(*this) == typeid(other_ptr);
+        return typeid(*this) == typeid(*other_ptr);
+    }
+
+    virtual
+    size_t hash() const {
+        return std::hash<string>()(_name);
     }
 };
+
+// external accessors
+static inline
+const string type_name(const Type& t) {
+    return t.name();
+}
+
+static inline
+const string type_name(const Type::const_pointer & t) {
+    if (!t)
+        return "ERROR NULL TYPE ON TYPE_NAME";
+    return t->name();
+}
+
+static inline
+const string type_name(const Type::const_weak_pointer & t) {
+    auto ptr = t.lock();
+    if (!ptr)
+        return "ERROR NULL TYPE ON TYPE_NAME";
+    return ptr->name();
+}
 
 // end namespace mmml /////////////////////////////////////////////////////////
 }
 
 namespace std {
-static
+static inline
 string to_string(const mmml::Type &t) {
     return t.to_string();
 }
+
+// template <>
+// struct hash<mmml::Type>
+// {
+//     size_t operator()(const mmml::Type & t) const {
+//         return t.hash();
+//     }
+// };
 
 // end namespace  /////////////////////////////////////////////////////////////
 }
