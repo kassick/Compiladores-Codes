@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-09-30 13:48:27 kassick"
+ *         Updated: "2017-09-30 16:21:58 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -19,6 +19,17 @@ namespace mmml {
 
 using namespace std;
 using stringvector = std::vector<std::string>;
+
+static Symbol::const_pointer mmml_load_symbol(const string name, CodeContext::pointer code_ctx)
+{
+    auto s = code_ctx->symbol_table->find(name);
+    if (s) {
+        *code_ctx << Instruction("load", {s->pos}).with_annot("type(" + type_name(s->type()) + ")");
+        return s;
+    }
+
+    return nullptr;
+}
 
 antlrcpp::Any CodeVisitor::visitLiteral_float_rule(MMMLParser::Literal_float_ruleContext *ctx)
 {
@@ -85,21 +96,205 @@ CodeVisitor::visitLiteralnil_rule(MMMLParser::Literalnil_ruleContext *ctx) {
 }
 
 antlrcpp::Any CodeVisitor::visitMe_exprsymbol_rule(MMMLParser::Me_exprsymbol_ruleContext *ctx)  {
-    auto s = this->code_ctx->symbol_table->find(ctx->getText());
+    auto s = mmml_load_symbol(ctx->symbol()->getText(), code_ctx);
     if (!s) {
-        report_error(ctx) << " : Unknown symbol " << ctx->getText()
+        report_error(ctx) << " : Unknown symbol " << ctx->symbol()->getText()
                           << endl;
 
         *code_ctx << Instruction("push", {0}).with_annot("type(int)");
         return int_type;
     }
 
-    *code_ctx <<
-            Instruction("load", {s->pos})
-            .with_annot("type(" + type_name(s->type()) + ")");
-
+    // mmml_load_symbol inserts load n in the ctx parameter
     return s->type();
 }
+
+antlrcpp::Any CodeVisitor::visitMe_boolneg_rule(MMMLParser::Me_boolneg_ruleContext *ctx) {
+    // ! sym
+
+    auto s = mmml_load_symbol(ctx->symbol()->getText(), code_ctx);
+    if (!s) {
+        report_error(ctx) << " : Unknown symbol " << ctx->getText()
+                          << endl;
+
+        *code_ctx << Instruction("push", {0}).with_annot("type(bool)");
+        return bool_type;
+    }
+
+    // coerce it to bool
+    auto coerced_bool_type = gen_cast_code(ctx,
+                                           s->type(), bool_type,
+                                           code_ctx);
+
+    if (!coerced_bool_type || !coerced_bool_type->equals(bool_type))
+    {
+        report_error(ctx) << "Can not coerce type " << s->type()->name()
+                          << " to bool";
+
+        *code_ctx << Instruction("pop").with_annot("drop invalid bool cast");
+    }
+
+    return bool_type;
+}
+
+antlrcpp::Any CodeVisitor::visitMe_boolnegparens_rule(MMMLParser::Me_boolnegparens_ruleContext *ctx)
+{
+    Type::const_pointer ftype = visit(ctx->funcbody());
+
+    if (!ftype) {
+        report_error(ctx, "IMPL ERROR ON BOOLNEGPARENS");
+        *code_ctx << Instruction("pop").with_annot("drop invalid bool cast");
+        return bool_type;
+    }
+
+    // coerce it to bool
+    auto coerced_bool_type = gen_cast_code(ctx,
+                                           ftype, bool_type,
+                                           code_ctx);
+
+    if (!coerced_bool_type || !coerced_bool_type->equals(bool_type))
+    {
+        report_error(ctx) << "Can not coerce type " << ftype->name()
+                          << " to bool";
+
+        *code_ctx << Instruction("pop").with_annot("drop invalid bool cast");
+    }
+
+    return bool_type;
+}
+
+template <class ValidTypePred>
+Type::const_pointer generic_bin_op(CodeVisitor* visitor,
+                                   antlr4::ParserRuleContext* left,
+                                   antlr4::ParserRuleContext* right,
+                                   CodeContext::pointer code_ctx,
+                                   ValidTypePred pred)
+{
+    CodeVisitor leftvisitor, rightvisitor;
+
+    auto rcode = code_ctx->create_block();
+    auto lcode = code_ctx->create_block();
+
+    leftvisitor.code_ctx = lcode;
+    rightvisitor.code_ctx = rcode;
+
+    Type::const_pointer ltype = leftvisitor.visit(left);
+    if (!ltype)
+    {
+        CodeVisitor::report_error(left) << "IMPL ERROR GOT NULL FROM LEFT ON BIN OP" << endl;
+        *code_ctx << Instruction("pop").with_annot("pop left");
+        return CodeVisitor::int_type;
+    }
+
+    Type::const_pointer rtype = rightvisitor.visit(right);
+    if (!rtype)
+    {
+        CodeVisitor::report_error(right) << "IMPL ERROR GOT NULL FROM RIGHT ON BIN OP" << endl;
+        *code_ctx << Instruction("pop").with_annot("pop right");
+        return CodeVisitor::int_type;
+    }
+
+    visitor->nerrors += leftvisitor.nerrors + rightvisitor.nerrors;
+    visitor->nwarns += leftvisitor.nwarns + rightvisitor.nwarns;
+
+    // Try to get both to be the same type
+    auto coalesced_type = CodeVisitor::gen_coalesce_code(ltype, lcode, rtype, rcode);
+
+    if (!coalesced_type || !pred(coalesced_type))
+    {
+        // Required upcasting did not result in expected type
+
+        CodeVisitor::report_error(left) << "Could not coerce types "
+                                        << ltype->name() << " and " << rtype->name();
+
+        *code_ctx << Instruction("pop").with_annot("pop right");
+        *code_ctx << Instruction("pop").with_annot("pop left");
+
+        return nullptr;
+    }
+
+    *code_ctx << *lcode << *rcode;
+
+    return coalesced_type;
+}
+
+antlrcpp::Any CodeVisitor::visitMe_listconcat_rule(MMMLParser::Me_listconcat_ruleContext *ctx)
+{
+    auto rtype = generic_bin_op(this,
+                                ctx->l, ctx->r,
+                                code_ctx,
+                                [](Type::const_pointer c) {
+                                    return c->as<SequenceType>();
+                                });
+
+    if (!rtype)
+        return type_registry.add(make_shared<SequenceType>(int_type));
+
+    *code_ctx
+            << Instruction("mark", {2})
+            .with_annot("stack: {2: c, d} {2: a, b} |  # right left")
+            << Instruction("push", {0})
+            .with_annot("stack: 0 {2: c, d} {2: a, b} |  #int right left")
+            << Instruction("swap", {0})
+            .with_annot("stack: {2: a, b} {2: c, d} 0 | left right @len")
+            << Instruction("aload", {})
+            .with_annot("stack: 2 b a {2: c, d} 0 | llen l9 l8 ... r0 right len ")
+            << Instruction("store", {0})
+            .with_annot("stack: b a {2: c, d} 2 | l9 l8 ... l0 right len")
+            << Instruction("load", {1})
+            .with_annot("stack: {2: c, d} b a {2: c, d} 2 | right l9 ... l0 right len")
+            << Instruction("aload", {})
+            .with_annot("stack: 2 d c b a {2: c, d} 2 | rlen r9 .. r0 l9 .. l0 right len")
+            << Instruction("load", {0})
+            .with_annot("stack: 2 2 d c b a {2: c, d} 2  |")
+            << Instruction("add", {})
+            .with_annot("stack: 4 d c b a {2: c, d} 2  |")
+            << Instruction("acreate", {})
+            .with_annot("stack : {4 a b c d} {2: c d} 2 |")
+            << Instruction("crunch", {0, 2})
+            .with_annot("stack : {4 a b c d} |")
+            << Instruction("drop_mark", {})
+            .with_annot("type(" + rtype->name() + ")");
+
+    return rtype;
+}
+
+antlrcpp::Any CodeVisitor::visitMe_exprmuldiv_rule(MMMLParser::Me_exprmuldiv_ruleContext *ctx)
+{
+    auto rtype = generic_bin_op(this,
+                                ctx->l, ctx->r,
+                                code_ctx,
+                                [](Type::const_pointer c) {
+                                    return c->is_basic();
+                                });
+
+    if (!rtype)
+        return int_type;
+
+    *code_ctx
+            << Instruction(ctx->op->getText() == "/" ? "div" : "mul").with_annot("type(" + rtype->name() + ")");
+
+    return rtype;
+}
+
+antlrcpp::Any CodeVisitor::visitMe_exprplusminus_rule(MMMLParser::Me_exprplusminus_ruleContext *ctx)
+{
+    auto rtype = generic_bin_op(this,
+                                ctx->l, ctx->r,
+                                code_ctx,
+                                [](Type::const_pointer c) {
+                                    return c->is_basic();
+                                });
+
+    if (!rtype)
+        return int_type;
+
+    *code_ctx
+            << Instruction(ctx->op->getText() == "+" ? "add" : "sub").with_annot("type(" + rtype->name() + ")");
+
+    return rtype;
+}
+
 
 // Cast rules
 antlrcpp::Any CodeVisitor::visitCast_rule(MMMLParser::Cast_ruleContext *ctx)

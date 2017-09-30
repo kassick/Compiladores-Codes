@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:45:16 2017"
- *         Updated: "2017-09-30 13:48:22 kassick"
+ *         Updated: "2017-09-30 16:21:00 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -158,6 +158,17 @@ class  CodeVisitor : public MMMLBaseVisitor {
     virtual antlrcpp::Any visitLetvarresult_ignore_rule(MMMLParser::Letvarresult_ignore_ruleContext *ctx) override ;
 
     virtual antlrcpp::Any visitLetunpack_rule(MMMLParser::Letunpack_ruleContext *ctx) override ;
+
+    virtual antlrcpp::Any visitMe_boolneg_rule(MMMLParser::Me_boolneg_ruleContext *ctx) override ;
+
+    virtual antlrcpp::Any visitMe_boolnegparens_rule(MMMLParser::Me_boolnegparens_ruleContext *ctx) override ;
+
+    // binary ops
+    virtual antlrcpp::Any visitMe_listconcat_rule(MMMLParser::Me_listconcat_ruleContext *ctx) override ;
+
+    virtual antlrcpp::Any visitMe_exprmuldiv_rule(MMMLParser::Me_exprmuldiv_ruleContext *ctx) override ;
+
+    virtual antlrcpp::Any visitMe_exprplusminus_rule(MMMLParser::Me_exprplusminus_ruleContext *ctx) override ;
 };
 
 /*
@@ -250,25 +261,12 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitMe_exprplusminus_rule(MMMLParser::Me_exprplusminus_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
 
   virtual antlrcpp::Any visitMe_boolneg_rule(MMMLParser::Me_boolneg_ruleContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitMe_listconcat_rule(MMMLParser::Me_listconcat_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
 
-  virtual antlrcpp::Any visitMe_exprmuldiv_rule(MMMLParser::Me_exprmuldiv_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitMe_exprparens_rule(MMMLParser::Me_exprparens_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
 
   virtual antlrcpp::Any visitMe_boolandor_rule(MMMLParser::Me_boolandor_ruleContext *ctx) override {
     return visitChildren(ctx);
@@ -290,9 +288,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitMe_boolnegparens_rule(MMMLParser::Me_boolnegparens_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
 
   virtual antlrcpp::Any visitMe_booleqdiff_rule(MMMLParser::Me_booleqdiff_ruleContext *ctx) override {
     return visitChildren(ctx);
