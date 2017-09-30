@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-09-30 04:49:16 kassick"
+ *         Updated: "2017-09-30 13:48:27 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -84,7 +84,7 @@ CodeVisitor::visitLiteralnil_rule(MMMLParser::Literalnil_ruleContext *ctx) {
   return nil_type;
 }
 
-antlrcpp::Any CodeVisitor::visitSymbol_rule(MMMLParser::Symbol_ruleContext *ctx)  {
+antlrcpp::Any CodeVisitor::visitMe_exprsymbol_rule(MMMLParser::Me_exprsymbol_ruleContext *ctx)  {
     auto s = this->code_ctx->symbol_table->find(ctx->getText());
     if (!s) {
         report_error(ctx) << " : Unknown symbol " << ctx->getText()
@@ -483,7 +483,6 @@ default_return_int:
     *code_ctx << Instruction("pop").with_annot("Panic!")
               << Instruction("push", {0}).with_annot("type(int)");
     return int_type;
-
 }
 
 antlrcpp::Any CodeVisitor::visitTuple_ctor(MMMLParser::Tuple_ctorContext *ctx)
@@ -564,12 +563,12 @@ antlrcpp::Any CodeVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleContext *
 
     // visit true
     CodeVisitor truevisitor;
-    truevisitor.code_ctx = this->code_ctx->create_context();
+    truevisitor.code_ctx = this->code_ctx->create_block();
     bodytrue_type =  truevisitor.visit(ctx->bodytrue);
 
     // visit false
     CodeVisitor falsevisitor;
-    falsevisitor.code_ctx = this->code_ctx->create_context();
+    falsevisitor.code_ctx = this->code_ctx->create_block();
     bodyfalse_type = falsevisitor.visit(ctx->bodyfalse);
 
     // merge nerrors / nwards
@@ -608,6 +607,154 @@ antlrcpp::Any CodeVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleContext *
 
 
     return rtype;
+}
+
+antlrcpp::Any CodeVisitor::visitFbody_let_rule(MMMLParser::Fbody_let_ruleContext *ctx)
+{
+    /*  let x = 1 + 1,
+            y = { 1, 2, "lala" }
+        in
+            x + (get 1 y)
+    */
+
+    // New visitor with a nested name table
+    CodeVisitor letvisitor;
+    letvisitor.code_ctx = this->code_ctx->create_subcontext();
+
+    // visit letlist, populate the new symbol table
+    letvisitor.visit(ctx->letlist());
+
+    Type::const_pointer ltype = letvisitor.visit(ctx->fnested);
+
+    if (!ltype)
+    {
+        report_error(ctx) << "IMPL ERROR LET EXPR HAS NIL TYPE" << endl;
+        ltype = int_type;
+    }
+
+    this->nerrors += letvisitor.nerrors;
+    this->nwarns += letvisitor.nwarns;
+
+    *this->code_ctx << std::move(*letvisitor.code_ctx);
+
+    return ltype;
+}
+
+antlrcpp::Any CodeVisitor::visitLetvarattr_rule(MMMLParser::Letvarattr_ruleContext *ctx)
+{
+    // let x = funcbody
+    Type::const_pointer symbol_type = visit(ctx->funcbody());
+
+    if (!symbol_type) {
+        report_error(ctx) << "IMPL ERROR GOT NULL FROM FUNCBODY IN letvarattr"
+                          << endl;
+        symbol_type = int_type;
+    }
+
+    if (code_ctx->symbol_table->find_local(ctx->sym->getText())) {
+        // name clash on same table
+        report_error(ctx) << "Re-defining symbol ``" << ctx->sym->getText() << "''"
+                          << " on same context in an error"
+                          << endl;
+        *code_ctx << Instruction("pop",{}).with_annot("drop " + ctx->sym->getText());
+    } else {
+        auto sym = make_shared<Symbol>(ctx->sym->getText(),
+                                       symbol_type,
+                                       ctx->sym->getStart()->getLine(), ctx->sym->getStart()->getCharPositionInLine());
+
+        code_ctx->symbol_table->add(sym);
+
+        *code_ctx << Instruction("store", {sym->pos}).with_annot("type(" + symbol_type->name() + ")");
+    }
+
+    return code_ctx->symbol_table->offset;
+}
+
+antlrcpp::Any CodeVisitor::visitLetvarresult_ignore_rule(MMMLParser::Letvarresult_ignore_ruleContext *ctx)
+{
+    // let _  = funcbody
+    Type::const_pointer symbol_type = visit(ctx->funcbody());
+
+    if (!symbol_type) {
+        report_error(ctx) << "IMPL ERROR GOT NULL FROM FUNCBODY IN letvarattr"
+                          << endl;
+        symbol_type = int_type;
+    }
+
+    *code_ctx << Instruction("pop",{}).with_annot("drop _");
+
+    return code_ctx->symbol_table->offset;
+}
+
+antlrcpp::Any CodeVisitor::visitLetunpack_rule(MMMLParser::Letunpack_ruleContext *ctx)
+{
+    // let h :: t = funcbody
+    /*
+      aload "abc"
+      # stack is 3 c b a
+      push -1
+      # stack is -1 3 c b a
+      add
+      # stack is 2 c b a
+      acreate
+      # stack is {b c} a
+     */
+
+    Type::const_pointer list_type = visit(ctx->funcbody());
+    if (!list_type) {
+        report_error(ctx) << "IMPL ERROR GOT NULL TYPE FROM UNPACK FUNCBODY" << endl;
+        *code_ctx << Instruction("pop").with_annot("drop unpack");
+        return code_ctx->symbol_table->offset;
+    }
+
+    if (!list_type->as<SequenceType>()) {
+        // recover
+        report_error(ctx) << "Unpack rule expects a list on it's right side" << endl;
+        list_type = type_registry.add(make_shared<SequenceType>(list_type));
+    }
+
+    auto previous_tail = code_ctx->symbol_table->find_local(ctx->tail->getText());
+    if (previous_tail) {
+        report_error(ctx) << "Re-definition of symbol ``" << previous_tail->name
+                          << " shadows previously defined in line "
+                          << previous_tail->line << ", column" << previous_tail->col
+                          << endl;
+        *code_ctx << Instruction("pop").with_annot("drop tail");
+    } else {
+        auto sym = make_shared<Symbol>(ctx->tail->getText(), list_type,
+                                       ctx->tail->getStart()->getLine(),
+                                       ctx->tail->getStart()->getCharPositionInLine());
+
+        code_ctx->symbol_table->add(sym);
+
+        *code_ctx << Instruction("store", {sym->pos}).with_annot("type(" + list_type->name() + ")");
+    }
+
+    auto previous_head = code_ctx->symbol_table->find_local(ctx->head->getText());
+    if (previous_head) {
+        report_error(ctx) << "Re-definition of symbol ``" << previous_head->name
+                          << " shadows previously defined in line "
+                          << previous_head->line << ", column" << previous_head->col
+                          << endl;
+        *code_ctx << Instruction("pop").with_annot("drop head");
+    } else {
+        auto decayed_type = list_type->as<SequenceType>()->decayed_type.lock();
+        if (!decayed_type)
+        {
+            report_error(ctx) << "IMPL ERROR DECAYED LIST TYPE IS NULL" << endl;
+            decayed_type = int_type;
+        }
+
+        auto sym = make_shared<Symbol>(ctx->tail->getText(), decayed_type,
+                                       ctx->head->getStart()->getLine(),
+                                       ctx->head->getStart()->getCharPositionInLine());
+
+        code_ctx->symbol_table->add(sym);
+
+        *code_ctx << Instruction("store", {sym->pos}).with_annot("type(" + decayed_type->name() + ")");
+    }
+
+    return code_ctx->symbol_table->offset;
 }
 
 // Static storage for out_stream and err_stream

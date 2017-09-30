@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:45:16 2017"
- *         Updated: "2017-09-30 04:46:37 kassick"
+ *         Updated: "2017-09-30 13:48:22 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -27,6 +27,15 @@ struct LabelFactory {
         static int next = 0;
 
         return "l" + to_string(next++);
+    }
+};
+
+struct SymbolFactory {
+
+    static string make() {
+        static int next = 0;
+
+        return "@s" + to_string(next++);
     }
 };
 
@@ -122,7 +131,8 @@ class  CodeVisitor : public MMMLBaseVisitor {
 
     virtual antlrcpp::Any visitLiteraltrueorfalse_rule(MMMLParser::Literaltrueorfalse_ruleContext *ctx) override ;
 
-    virtual antlrcpp::Any visitSymbol_rule(MMMLParser::Symbol_ruleContext *ctx) override ;
+    virtual antlrcpp::Any
+    visitMe_exprsymbol_rule(MMMLParser::Me_exprsymbol_ruleContext *ctx) override ;
 
     virtual antlrcpp::Any visitCast_rule(MMMLParser::Cast_ruleContext *ctx) override ;
 
@@ -140,6 +150,14 @@ class  CodeVisitor : public MMMLBaseVisitor {
 
 
     virtual antlrcpp::Any visitFbody_if_rule(MMMLParser::Fbody_if_ruleContext *ctx) override ;
+
+    virtual antlrcpp::Any visitFbody_let_rule(MMMLParser::Fbody_let_ruleContext *ctx) override;
+
+    virtual antlrcpp::Any visitLetvarattr_rule(MMMLParser::Letvarattr_ruleContext *ctx) override ;
+
+    virtual antlrcpp::Any visitLetvarresult_ignore_rule(MMMLParser::Letvarresult_ignore_ruleContext *ctx) override ;
+
+    virtual antlrcpp::Any visitLetunpack_rule(MMMLParser::Letunpack_ruleContext *ctx) override ;
 };
 
 /*
@@ -222,37 +240,10 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitFbody_let_rule(MMMLParser::Fbody_let_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitFbody_expr_rule(MMMLParser::Fbody_expr_ruleContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitLetlist_rule(MMMLParser::Letlist_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitLetlist_cont_rule(MMMLParser::Letlist_cont_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitLetlist_cont_end(MMMLParser::Letlist_cont_endContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitLetvarattr_rule(MMMLParser::Letvarattr_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitLetvarresult_ignore_rule(MMMLParser::Letvarresult_ignore_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitLetunpack_rule(MMMLParser::Letunpack_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
 
 
   virtual antlrcpp::Any visitClass_ctor(MMMLParser::Class_ctorContext *ctx) override {

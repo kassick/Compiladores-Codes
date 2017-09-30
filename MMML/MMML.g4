@@ -1,5 +1,6 @@
 grammar MMML;
 
+
 /*
 Programa: Declarações de funções e uma função main SEMPRE
 
@@ -133,9 +134,9 @@ letlist_cont
 // ou
 // x::rest = l
 letvarexpr
-  :   sym=symbol '=' funcbody          #letvarattr_rule
-  |    '_'    '=' funcbody             #letvarresult_ignore_rule
-  |    symbol '::' symbol '=' funcbody #letunpack_rule
+  :   sym=symbol '=' funcbody                    #letvarattr_rule
+  |    '_'       '=' funcbody                    #letvarresult_ignore_rule
+  |    head=symbol '::' tail=symbol '=' funcbody #letunpack_rule
   ;
 
 // Meta Expressão:

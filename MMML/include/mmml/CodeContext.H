@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:33:27 2017"
- *         Updated: "2017-09-30 04:42:04 kassick"
+ *         Updated: "2017-09-30 11:40:04 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -47,7 +47,11 @@ struct CodeContext
 
 
 
-    CodeContext::pointer create_context() {
+    CodeContext::pointer create_block() {
+        return make_shared<CodeContext>(this->symbol_table);
+    }
+
+    CodeContext::pointer create_subcontext() {
         return make_shared<CodeContext>(this->symbol_table);
     }
 };

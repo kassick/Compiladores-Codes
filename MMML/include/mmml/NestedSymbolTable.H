@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep  8 20:55:04 2017"
- *         Updated: "2017-09-27 23:48:14 kassick"
+ *         Updated: "2017-09-30 12:43:53 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -82,8 +82,9 @@ class NestedSymbolTable : public enable_shared_from_this<NestedSymbolTable>
     string to_string() const ;
 
 
-  private:
     Symbol::const_pointer find_local(const Symbol::name_type name) const ;
+
+  private:
 
     Symbol::const_pointer findSymbolRecursive(const Symbol::name_type name) const;
 
