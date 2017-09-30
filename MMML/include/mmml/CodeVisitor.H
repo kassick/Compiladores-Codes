@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:45:16 2017"
- *         Updated: "2017-09-29 20:42:27 kassick"
+ *         Updated: "2017-09-29 21:36:33 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -31,7 +31,6 @@ class  CodeVisitor : public MMMLBaseVisitor {
 
     CodeContext::pointer code_ctx;
 
-
     virtual antlrcpp::Any visitLiteral_float_rule(MMMLParser::Literal_float_ruleContext *ctx) override ;
 
     virtual antlrcpp::Any visitLiteral_decimal_rule(MMMLParser::Literal_decimal_ruleContext *ctx) override ;
@@ -42,6 +41,11 @@ class  CodeVisitor : public MMMLBaseVisitor {
 
     virtual antlrcpp::Any visitLiteralstring_rule(MMMLParser::Literalstring_ruleContext *ctx) override ;
     virtual antlrcpp::Any visitLiteral_char_rule(MMMLParser::Literal_char_ruleContext *ctx) override ;
+
+    virtual antlrcpp::Any visitLiteralnil_rule(MMMLParser::Literalnil_ruleContext *ctx) override ;
+
+    virtual antlrcpp::Any visitLiteraltrueorfalse_rule(MMMLParser::Literaltrueorfalse_ruleContext *ctx) override ;
+
     virtual antlrcpp::Any visitSymbol_rule(MMMLParser::Symbol_ruleContext *ctx) override ;
 
 
@@ -63,6 +67,7 @@ class  CodeVisitor : public MMMLBaseVisitor {
     }
 };
 
+/*
 class  __CodeVisitor : public MMMLBaseVisitor {
 public:
 
@@ -286,44 +291,9 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitLiteralnil_rule(MMMLParser::Literalnil_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitLiteraltrueorfalse_rule(MMMLParser::Literaltrueorfalse_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitLiteral_float_rule(MMMLParser::Literal_float_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitLiteral_decimal_rule(MMMLParser::Literal_decimal_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitLiteral_hexadecimal_rule(MMMLParser::Literal_hexadecimal_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitLiteral_binary_rule(MMMLParser::Literal_binary_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitLiteralstring_rule(MMMLParser::Literalstring_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitLiteral_char_rule(MMMLParser::Literal_char_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitSymbol_rule(MMMLParser::Symbol_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-
 };
+
+*/
 
 
 } // end namespace mmml ///////////////////////////////////////////////////////

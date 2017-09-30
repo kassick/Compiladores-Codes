@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-09-29 21:20:51 kassick"
+ *         Updated: "2017-09-29 21:35:24 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -65,8 +65,23 @@ antlrcpp::Any CodeVisitor::visitLiteral_char_rule(MMMLParser::Literal_char_ruleC
     return char_type;
 }
 
-antlrcpp::Any CodeVisitor::visitSymbol_rule(MMMLParser::Symbol_ruleContext *ctx)  {
+antlrcpp::Any CodeVisitor::visitLiteraltrueorfalse_rule(MMMLParser::Literaltrueorfalse_ruleContext *ctx)  {
 
+    *code_ctx <<
+            Instruction("push", {( ctx->getText() == "true" ? 1 : 0 ) })
+            .with_annot("type(int)");
+    return int_type;
+}
+
+antlrcpp::Any
+CodeVisitor::visitLiteralnil_rule(MMMLParser::Literalnil_ruleContext *ctx) {
+
+  *code_ctx << Instruction("push", {"null"}).with_annot("type(nil)");
+
+  return Type::const_pointer(nullptr);
+}
+
+antlrcpp::Any CodeVisitor::visitSymbol_rule(MMMLParser::Symbol_ruleContext *ctx)  {
     auto s = this->code_ctx->symbol_table->find(ctx->getText());
     if (!s) {
         err() << "Unknown symbol " << ctx->getText()
@@ -84,6 +99,7 @@ antlrcpp::Any CodeVisitor::visitSymbol_rule(MMMLParser::Symbol_ruleContext *ctx)
 
     return s->type();
 }
+
 
 // Static storage for out_stream and err_stream
 ostream* CodeVisitor::out_stream = nullptr ;
