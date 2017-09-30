@@ -980,6 +980,27 @@ acreate
 
   #+END_SRC
 
+- Concatenação de Vetores
+
+  #+BEGIN_SRC sh :eval never
+  push "abc"
+  acreate
+  push "def"
+  acreate
+  mark 2
+  push 0
+  swap 0
+  aload
+  store 0
+  load 1
+  aload
+  load 0
+  add
+  acreate
+  crunch 0 2
+  drop_mark
+  #+END_SRC
+
 ** Funções
 
 - Exemplo 1 : Retorno abaixo da marca. Chamador limpa.
