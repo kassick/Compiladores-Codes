@@ -740,9 +740,9 @@ Quando um tipo inteiro for passado como parâmetro para uma função que espera 
 
 As seguintes coerções de tipos são válidas:
 
-| Integer  | \to | Float    |
 | Char     | \to | Integer  |
 | Char     | \to | Float    |
+| Integer  | \to | Float    |
 | Qualquer | \to | Booleano |
 
 No caso da coerção para /booleano/, o /valor/ obtido será equivalente a /false/ caso o valor coagido for:
@@ -762,7 +762,7 @@ def funct =
       media x y // x eh coagido para float , y eh coagido para float
 #+END_SRC
 
-Uma coerção especial é a da constante nula ~nil~ para algum tipo lista. A constante ~nil~ pode ser coagida para qualquer tipo sequência durante chamadas de função ou concatenação de sequências:
+Uma coerção especial é a da constante nula ~nil~ para algum tipo sequência. A constante ~nil~ pode ser coagida para qualquer tipo sequência durante chamadas de função ou concatenação de sequências:
 #+BEGIN_SRC fsharp
 def concat a : int[] , b : int[] = a :: b
 
@@ -771,6 +771,21 @@ def main =
                                  // [1] :: [1] é int
     in concat tmp nil            // Coage para int[] por que eh o
                                  // que o parametro 2 de concat espera
+#+END_SRC
+
+A coerção de tipos também deve acontecer durante o "retorno" de if's, para que o retorno seja de algum tipo abrangente o sufuciente para armazenar tanto o retorno do lado /verdadeiro/ quando o do lado /falso/:
+#+BEGIN_SRC fsharp
+let x = if a
+        then 5.2   // float
+        else 7     // int
+in x          // <-- x é do tipo float
+#+END_SRC
+
+#+BEGIN_SRC fsharp
+let l = if a
+        then [1]   // tipo int[]
+        else nil   // tipo QUALQUER[]
+in l       // <-- x é do tipo int[]
 #+END_SRC
 
 ** Um Programa em {{{mml}}}

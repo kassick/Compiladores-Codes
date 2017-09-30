@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-09-30 01:49:27 kassick"
+ *         Updated: "2017-09-30 04:49:16 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -79,7 +79,7 @@ antlrcpp::Any CodeVisitor::visitLiteraltrueorfalse_rule(MMMLParser::Literaltrueo
 antlrcpp::Any
 CodeVisitor::visitLiteralnil_rule(MMMLParser::Literalnil_ruleContext *ctx) {
 
-  *code_ctx << Instruction("push", {"null"}).with_annot("type(nil)");
+  // *code_ctx << Instruction("push", {"null"}).with_annot("type(nil)");
 
   return nil_type;
 }
@@ -121,7 +121,7 @@ antlrcpp::Any CodeVisitor::visitCast_rule(MMMLParser::Cast_ruleContext *ctx)
         goto default_cast_to_int;
     }
 
-    return gen_cast_code(ctx, source_type, dest_type);
+    return gen_cast_code(ctx, source_type, dest_type, code_ctx);
 
 default_cast_to_int:
     *code_ctx << Instruction("pop")
@@ -132,7 +132,8 @@ default_cast_to_int:
 
 Type::const_pointer CodeVisitor::gen_cast_code(antlr4::ParserRuleContext * ctx,
                                                Type::const_pointer source_type,
-                                               Type::const_pointer dest_type)
+                                               Type::const_pointer dest_type,
+                                               CodeContext::pointer code_ctx)
 {
     // cast to same type?
     if (source_type->equals(dest_type)) {
@@ -220,6 +221,59 @@ Type::const_pointer CodeVisitor::gen_cast_code(antlr4::ParserRuleContext * ctx,
 
     err() << "SHOULD NEVER REATH THIS POINT IN GEN_CAST_CODE" << endl;
     return int_type;
+}
+
+Type::const_pointer CodeVisitor::gen_coalesce_code(
+    Type::const_pointer ltype, CodeContext::pointer lcode,
+    Type::const_pointer rtype, CodeContext::pointer rcode)
+{
+    if (ltype->equals(rtype))
+        return ltype;
+
+    // Basic Types:
+    // char -> int
+    // char -> float
+    // char -> bool
+    // int -> float
+    // int -> bool
+    // float -> bool
+    // Special cases:
+    // nil -> any[]
+
+    // Dirty Trick: basic_types.cpp register the basic types in the following order:
+    // - char          id 0
+    // - int           id 1
+    // - float         id 2
+    // - bool          id 3
+    // - nil           id 4
+    // ANY SEQUENCE OR TUPLE OR USED DEFINED TYPE HAS HIGHER ID
+    // By taking the type with the bigger id, we can upcast without a lot of ifs
+
+    Type::const_pointer coalesced = ltype->id() > rtype->id() ? ltype : rtype ;
+    Type::const_pointer from;
+    CodeContext::pointer code_ctx;
+
+    if (coalesced == ltype) {
+        from = rtype;
+        code_ctx = rcode;
+    } else {
+        from = ltype;
+        code_ctx = lcode;
+    }
+
+    // Basic -> Nil :: ERROR
+    if (coalesced->as<NilType>())
+        return nullptr;
+
+    // Sequence / nil ?
+    if (coalesced->as<SequenceType>() && from->as<NilType>()) {
+
+        *code_ctx << Instruction("acreate", {0}).with_annot("type (" + coalesced->name() + ")");
+
+    } else if (coalesced->is_basic() && from->is_basic())
+        return gen_cast_code(nullptr, from, coalesced, code_ctx);
+
+    return nullptr;
 }
 
 antlrcpp::Any CodeVisitor::visitSeq_create_seq(MMMLParser::Seq_create_seqContext *ctx)
@@ -340,8 +394,232 @@ antlrcpp::Any CodeVisitor::visitMe_class_set_rule(MMMLParser::Me_class_set_ruleC
     return class_type;
 }
 
+antlrcpp::Any CodeVisitor::visitMe_tuple_set_rule(MMMLParser::Me_tuple_set_ruleContext *ctx)
+{
+    Type::const_pointer field_type, tup_funcbody_type, val_funcbody_type;
+    TupleType::const_pointer tuple_type;
+    int pos;
+
+    tup_funcbody_type = visit(ctx->tup).as<Type::const_pointer>();
+    // top is tuple, get specific position
+
+    if (!tup_funcbody_type) {
+        report_error(ctx) << "IMPL ERROR got null from tup funcbody" << endl;
+        *code_ctx << Instruction("pop").with_annot("drop tup")
+                  << Instruction("push", {0}).with_annot("type(int)");
+        return int_type;
+    }
+
+    tuple_type = tup_funcbody_type->as<TupleType>();
+    if (!tuple_type) {
+        report_error(ctx) << "Using tuple accessor method get on type ``"
+                          << tup_funcbody_type->name() << "''"
+                          << endl;
+        return tup_funcbody_type;
+    }
+
+    val_funcbody_type = visit(ctx->val).as<Type::const_pointer>();
+    if (!val_funcbody_type) {
+        report_error(ctx) << "IMPL ERROR got null from val funcbody" << endl;
+        *code_ctx << Instruction("pop").with_annot("drop val");
+        return tup_funcbody_type;
+    }
+
+    pos = stoi(ctx->pos->getText());
+    field_type = tuple_type->get_nth_type(pos);
+
+    if (!field_type) {
+        report_error(ctx) << "Access to invalid position " << pos
+                          << " on tuple of type"
+                          << tuple_type->name()
+                          << endl;
+        *code_ctx << Instruction("pop").with_annot("drop val");
+        return tup_funcbody_type;
+    }
+
+    *code_ctx << Instruction("aset", {pos}).with_annot("type(" + tuple_type->name() + ")");
+
+    return field_type;
+}
+
+antlrcpp::Any CodeVisitor::visitMe_tuple_get_rule(MMMLParser::Me_tuple_get_ruleContext *ctx)
+{
+    Type::const_pointer field_type;
+    TupleType::const_pointer tuple_type;
+    int pos;
+
+    auto funcbody_type = visit(ctx->funcbody()).as<Type::const_pointer>();
+    // top is tuple, get specific position
+
+    if (!funcbody_type) {
+        report_error(ctx) << "IMPL ERROR god null from funcbody" << endl;
+        goto default_return_int;
+    }
+
+    tuple_type = funcbody_type->as<TupleType>();
+    if (!tuple_type) {
+        report_error(ctx) << "Using tuple accessor method get on type ``"
+                          << funcbody_type->name() << "''"
+                          << endl;
+        goto default_return_int;
+    }
+
+    pos = stoi(ctx->pos->getText());
+    field_type = tuple_type->get_nth_type(pos);
+
+    if (!field_type) {
+        report_error(ctx) << "Access to invalid position " << pos
+                          << " on tuple of type"
+                          << tuple_type->name()
+                          << endl;
+        goto default_return_int;
+    }
+
+    *code_ctx << Instruction("aget", {pos}).with_annot("type(" + field_type->name() + ")");
+
+    return field_type;
+
+default_return_int:
+    *code_ctx << Instruction("pop").with_annot("Panic!")
+              << Instruction("push", {0}).with_annot("type(int)");
+    return int_type;
+
+}
+
+antlrcpp::Any CodeVisitor::visitTuple_ctor(MMMLParser::Tuple_ctorContext *ctx)
+{
+    TupleType::base_types_vector_t types;
+    Type::pointer _tup;
+    TupleType::const_pointer tuple;
+
+    int i = 0;
+
+    for(auto funcbody: ctx->funcbody())
+    {
+        auto type = visit(funcbody);
+        if (!type) {
+            report_error(funcbody) << "IMPL ERROR: GOT NULL FROM TUPLE CTOR FUNCBODY #" << i;
+            goto default_return_int;
+        }
+
+        types.push_back(type);
+    }
+
+    _tup = make_shared<TupleType>(types);
+    tuple = type_registry.add(_tup)->as<TupleType>();
+
+    if (!tuple) {
+        report_error(ctx) << "Could not create tuple type";
+        goto default_return_int;
+    }
+
+    return tuple;
+
+default_return_int:
+    while (i-- > 0)
+        *code_ctx << Instruction("drop").with_annot("drop " + to_string(i));
+    *code_ctx << Instruction("push", {0}).with_annot("type(int)");
+
+    return int_type;
+
+}
+
+
+antlrcpp::Any CodeVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleContext *ctx)
+{
+    /*
+                   load 0      # a
+                   load 1      # b
+                   sub         # type(int)
+                   bz lfalse
+      ltrue      : nop
+                   push "igual"
+                   jump lcont
+      lfalse     : nop
+                   push "diferente"
+      lcont      : prints
+
+    */
+
+    Type::const_pointer cond_type, bodytrue_type, bodyfalse_type;
+
+    cond_type = visit(ctx->cond).as<Type::const_pointer>();
+    if (!cond_type) {
+        report_error(ctx) << "IMPL ERROR: COND FUNCBODY RETURNED NULL TYPE"
+                          << endl;
+        *code_ctx << Instruction("pop").with_annot("drop cond")
+                  << Instruction("push", {0}).with_annot("type(bool)");
+
+    } else if (!cond_type->equals(bool_type)) {
+
+        // Must cast
+        auto new_cond_type = gen_cast_code(ctx, cond_type, bool_type, this->code_ctx);
+    }
+
+    string ltrue  = LabelFactory::make();
+    string lfalse = LabelFactory::make();
+    string lcont  = LabelFactory::make();
+
+    // Visit each side with a different code context
+
+    // visit true
+    CodeVisitor truevisitor;
+    truevisitor.code_ctx = this->code_ctx->create_context();
+    bodytrue_type =  truevisitor.visit(ctx->bodytrue);
+
+    // visit false
+    CodeVisitor falsevisitor;
+    falsevisitor.code_ctx = this->code_ctx->create_context();
+    bodyfalse_type = falsevisitor.visit(ctx->bodyfalse);
+
+    // merge nerrors / nwards
+    this->nerrors += truevisitor.nerrors + falsevisitor.nerrors;
+    this->nwarns += truevisitor.nwarns + falsevisitor.nwarns;
+
+    if (!bodytrue_type || !bodyfalse_type) {
+        report_error(ctx) << "IMPL ERROR: BODYTRUE FUNCBODY RETURNED NULL TYPE"
+                          << endl;
+        *code_ctx << Instruction("pop").with_annot("drop true or false")
+                  << Instruction("push", {0}).with_annot("type(int)");
+
+        return int_type;
+    }
+
+    Type::const_pointer rtype = gen_coalesce_code(bodytrue_type, truevisitor.code_ctx,
+                                                  bodyfalse_type, falsevisitor.code_ctx);
+
+    if (!rtype) {
+        report_error(ctx) << "Could not coalesce types " << bodytrue_type
+                          << " and " << bodyfalse_type
+                          << " . Maybe a cast?"
+                          << endl;
+        *code_ctx << Instruction("pop").with_annot("drop true or false")
+                  << Instruction("push", {0}).with_annot("type(int)");
+
+        return int_type;
+    }
+
+    *code_ctx << Instruction("bz", {lfalse})
+              << Instruction("nop").with_label(ltrue)
+              << *truevisitor.code_ctx
+              << Instruction("jump", {lcont})
+              << Instruction("nop").with_label(lfalse)
+              << Instruction("nop").with_label(lcont);
+
+
+    return rtype;
+}
+
 // Static storage for out_stream and err_stream
 ostream* CodeVisitor::out_stream = nullptr ;
 ostream* CodeVisitor::err_stream = nullptr ;
+int CodeVisitor::nerrors = 0;
+int CodeVisitor::nwarns = 0;
+
+Type::const_pointer CodeVisitor::bool_type = TypeRegistry::instance().find_by_name("bool");
+Type::const_pointer CodeVisitor::char_type = TypeRegistry::instance().find_by_name("char");
+Type::const_pointer CodeVisitor::int_type = TypeRegistry::instance().find_by_name("int");
+Type::const_pointer CodeVisitor::float_type = TypeRegistry::instance().find_by_name("float");
+Type::const_pointer CodeVisitor::nil_type = TypeRegistry::instance().find_by_name("nil");
 
 } // end namespace mmml ///////////////////////////////////////////////////////

@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Thu Sep 28 00:18:58 2017"
- *         Updated: "2017-09-30 01:24:07 kassick"
+ *         Updated: "2017-09-30 03:45:19 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -56,10 +56,11 @@ class FloatType : public BasicType
     FloatType() : BasicType("float", 1) {}
 };
 
-class NilType : public BasicType
+class NilType : public Type
 {
   public:
-    NilType() : BasicType("nil", 1) {}
+    NilType() : Type("nil", 1) {}
+
 };
 
 class BoolType : public BasicType
@@ -169,6 +170,8 @@ class TupleType : public Type
     // {}
 
     Type::const_pointer get_nth_type(int n) const {
+        if (n < 0 || n >= base_types.size())
+            return nullptr;
         auto wp = this->base_types[n];
         return wp.lock();
     }

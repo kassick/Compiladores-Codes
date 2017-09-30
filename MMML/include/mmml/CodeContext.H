@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:33:27 2017"
- *         Updated: "2017-09-29 22:53:14 kassick"
+ *         Updated: "2017-09-30 04:42:04 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -30,19 +30,22 @@ struct CodeContext
 
     NestedSymbolTable::pointer symbol_table;
     InstructionBlock::pointer code;
-    Type::const_pointer rtype;
 
-    CodeContext() {
-        symbol_table = make_shared<NestedSymbolTable>();
-        code = nullptr;
-        rtype = nullptr;
-    }
+    CodeContext(NestedSymbolTable::pointer symbols, InstructionBlock::pointer code)
+            : symbol_table(symbols),
+              code(code)
+    {}
 
-    CodeContext(NestedSymbolTable::pointer symbols) {
-        symbol_table = symbols;
-        code = nullptr;
-        rtype = nullptr;
-    }
+    CodeContext(NestedSymbolTable::pointer symbols)
+            : CodeContext(symbols, make_shared<InstructionBlock>())
+    {}
+
+    CodeContext()
+            : CodeContext(make_shared<NestedSymbolTable>(),
+                          make_shared<InstructionBlock>())
+    {}
+
+
 
     CodeContext::pointer create_context() {
         return make_shared<CodeContext>(this->symbol_table);
@@ -54,5 +57,17 @@ struct CodeContext
 static inline
 mmml::CodeContext& operator<<(mmml::CodeContext& ctx, const mmml::Instruction& i) {
     *(ctx.code) << i;
+    return ctx;
+}
+
+static inline
+mmml::CodeContext& operator<<(mmml::CodeContext& ctx, const mmml::CodeContext& other) {
+    *(ctx.code) << *(other.code);
+    return ctx;
+}
+
+static inline
+mmml::CodeContext& operator<<(mmml::CodeContext& ctx, const mmml::CodeContext&& other) {
+    *(ctx.code) << std::move(*(other.code));
     return ctx;
 }

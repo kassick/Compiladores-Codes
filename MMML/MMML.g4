@@ -165,7 +165,7 @@ letvarexpr
 // Cast
 // int a
 tuple_ctor
-    :   '{' funcbody (',' funcbody)* '}'
+    :   '{' first=funcbody (',' funcbody)* '}'
     ;
 
 class_ctor
@@ -186,8 +186,8 @@ metaexpr
     | metaexpr TOK_CMP_GT_LT metaexpr            #me_boolgtlt_rule       // < <= >= > are equal
     | metaexpr TOK_CMP_EQ_DIFF metaexpr          #me_booleqdiff_rule     // == and != are egual
     | metaexpr TOK_BOOL_AND_OR metaexpr          #me_boolandor_rule      // &&   and  ||  are equal
-    | 'get' pos=DECIMAL funcbody                 #me_tuple_access_rule   // get 0 funcTup
-    | 'set' pos=DECIMAL funcbody                 #me_tuple_access_rule   // get 0 funcTup
+    | 'get' pos=DECIMAL funcbody                 #me_tuple_get_rule      // get 0 funcTup
+    | 'set' pos=DECIMAL tup=funcbody val=funcbody #me_tuple_set_rule      // get 0 funcTup
     | 'get' name=symbol funcbody                 #me_class_get_rule      // get campo
     | 'set' name=symbol cl=funcbody val=funcbody #me_class_set_rule      // get campo
     | symbol                                     #me_exprsymbol_rule     // a single symbol
