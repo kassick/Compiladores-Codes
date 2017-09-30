@@ -6,8 +6,7 @@ start
     ;
 
 instruction_line
-    :
-        (label ':' )?
+    :   (label ':' )?
         instruction
         NEWLINE
         #instructionLine
@@ -16,7 +15,9 @@ instruction_line
     ;
 
 instruction
-    :   'mark'
+    :   'nop'
+        #nop
+    |   'mark'
         #mark
     |   'mark' keep=non_negative_int_arg
         #markArg
@@ -188,7 +189,7 @@ WS : [ \t] -> skip;
 
 NEWLINE : '\r'? '\n'; // dos or windows newlines
 
-COMMENT : '#' ~[\r\n]* '\r'? '\n' -> skip ;
+COMMENT : '#' ~[\r\n]* -> skip ;
 
 LITERAL_STRING
     :   '"'

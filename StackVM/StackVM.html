@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="pt" xml:lang="pt">
 <head>
-<!-- 2017-09-19 ter 22:31 -->
+<!-- 2017-09-29 sex 23:38 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>StackVM &#x2013; Documentação</title>
@@ -256,36 +256,36 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org0086879">1. Introdução</a></li>
-<li><a href="#orgb64f09a">2. Compilação</a>
+<li><a href="#org1c5f822">1. Introdução</a></li>
+<li><a href="#org828cd49">2. Compilação</a>
 <ul>
-<li><a href="#org99e6d47">2.1. Geração do Código ASM.js</a></li>
+<li><a href="#org1fadde2">2.1. Geração do Código ASM.js</a></li>
 </ul>
 </li>
-<li><a href="#orgeb865fb">3. Execução</a></li>
-<li><a href="#org91eaa4e">4. Estrutura da Linguagem Assembly para a Máquina Virtual</a></li>
-<li><a href="#org5919e0e">5. A Pilha de Dados</a></li>
-<li><a href="#orgdae4222">6. Instruções</a>
+<li><a href="#orgb0849d4">3. Execução</a></li>
+<li><a href="#org34edf8a">4. Estrutura da Linguagem Assembly para a Máquina Virtual</a></li>
+<li><a href="#org64e7a25">5. A Pilha de Dados</a></li>
+<li><a href="#org65b6e26">6. Instruções</a>
 <ul>
-<li><a href="#org07432fb">6.1. Instruções Básicas</a></li>
-<li><a href="#orgb1b85b1">6.2. Operações Binárias e Lógicas</a></li>
-<li><a href="#org33dbed5">6.3. Conversões (cast)</a></li>
-<li><a href="#orgc0cba6f">6.4. Entrada e Saída</a></li>
-<li><a href="#org4c47149">6.5. Vetores</a></li>
-<li><a href="#orgf261f71">6.6. Manipulação da Pilha</a></li>
-<li><a href="#org4058311">6.7. Operações <code>push</code> especiais</a></li>
-<li><a href="#org1d9fe62">6.8. Gerenciamento de Pilhas Aninhadas</a></li>
-<li><a href="#orgf030ed7">6.9. Controle de Fluxo</a></li>
+<li><a href="#orgbadc962">6.1. Instruções Básicas</a></li>
+<li><a href="#orge608326">6.2. Operações Binárias e Lógicas</a></li>
+<li><a href="#org8c878c3">6.3. Conversões (cast)</a></li>
+<li><a href="#org087dd28">6.4. Entrada e Saída</a></li>
+<li><a href="#org26d2fb7">6.5. Vetores</a></li>
+<li><a href="#orgeaa2fa5">6.6. Manipulação da Pilha</a></li>
+<li><a href="#orgd4bd98c">6.7. Operações <code>push</code> especiais</a></li>
+<li><a href="#orgf8378cf">6.8. Gerenciamento de Pilhas Aninhadas</a></li>
+<li><a href="#org65e0029">6.9. Controle de Fluxo</a></li>
 </ul>
 </li>
-<li><a href="#orga1f4c3a">7. Exemplos de Código</a>
+<li><a href="#org68a2ff4">7. Exemplos de Código</a>
 <ul>
-<li><a href="#orgb411fc1">7.1. Aritmética Básica</a></li>
-<li><a href="#orgcf2215b">7.2. Controle de Fluxo</a></li>
-<li><a href="#orgbcd77f3">7.3. Operações Lógicas</a></li>
-<li><a href="#org95a9aaf">7.4. I/O</a></li>
-<li><a href="#org2207d0b">7.5. Vetores</a></li>
-<li><a href="#org6d07337">7.6. Funções</a></li>
+<li><a href="#org7936d43">7.1. Aritmética Básica</a></li>
+<li><a href="#org9a02398">7.2. Controle de Fluxo</a></li>
+<li><a href="#org4b92138">7.3. Operações Lógicas</a></li>
+<li><a href="#orga4c1b7c">7.4. I/O</a></li>
+<li><a href="#org9ee089a">7.5. Vetores</a></li>
+<li><a href="#orgeb16008">7.6. Funções</a></li>
 </ul>
 </li>
 </ul>
@@ -319,7 +319,7 @@ for the JavaScript code in this tag.
 </p>
 
 <p>
-Ver mais exemplos de código em <a href="#orga1f4c3a">Exemplos de Código</a>.
+Ver mais exemplos de código em <a href="#org68a2ff4">Exemplos de Código</a>.
 </p>
 
 <textarea name="source" id="esource" rows="10" cols="70">
@@ -354,8 +354,8 @@ print
 
 <textarea id="result" rows="10" cols="70"></textarea>
 
-<div id="outline-container-org0086879" class="outline-2">
-<h2 id="org0086879"><span class="section-number-2">1</span> Introdução</h2>
+<div id="outline-container-org1c5f822" class="outline-2">
+<h2 id="org1c5f822"><span class="section-number-2">1</span> Introdução</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Máquina de pilha simples com suporte a vetores de tipos mistos.
@@ -363,8 +363,8 @@ Máquina de pilha simples com suporte a vetores de tipos mistos.
 </div>
 </div>
 
-<div id="outline-container-orgb64f09a" class="outline-2">
-<h2 id="orgb64f09a"><span class="section-number-2">2</span> Compilação</h2>
+<div id="outline-container-org828cd49" class="outline-2">
+<h2 id="org828cd49"><span class="section-number-2">2</span> Compilação</h2>
 <div class="outline-text-2" id="text-2">
 <ol class="org-ol">
 <li>Obtenha o ZIP com o código.</li>
@@ -374,7 +374,7 @@ Em uma máquina <i>Linux</i><sup><a id="fnr.1" class="footref" href="#fn.1">1</a
 </p>
 <div class="org-src-container">
 <pre class="src src-sh">unzip StackVM.zip
-<span style="color: #528fd1;">cd</span> Compiladores
+<span style="color: #3a81c3;">cd</span> Compiladores
 </pre>
 </div></li>
 
@@ -383,9 +383,9 @@ Em um diretório de Build, execute o CMake
 </p>
 <div class="org-src-container">
 <pre class="src src-sh">mkdir Build
-<span style="color: #528fd1;">cd</span> Build
+<span style="color: #3a81c3;">cd</span> Build
 cmake ..
-<span style="color: #528fd1;">cd</span> ..
+<span style="color: #3a81c3;">cd</span> ..
 </pre>
 </div></li>
 
@@ -399,16 +399,16 @@ Ainda no diretório de build, construa o projeto
 </ol>
 </div>
 
-<div id="outline-container-org99e6d47" class="outline-3">
-<h3 id="org99e6d47"><span class="section-number-3">2.1</span> Geração do Código ASM.js</h3>
+<div id="outline-container-org1fadde2" class="outline-3">
+<h3 id="org1fadde2"><span class="section-number-3">2.1</span> Geração do Código ASM.js</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 O arquivo <a href="file:///home/kassick/Sources/Compiladores/StackVM/stackvm.js">stackvm.js</a> é compilado para ASM.js via emscripten. Ele foi gerado com a versão 1.37.18-64bit.
 </p>
 <div class="org-src-container">
 <pre class="src src-sh">mkdir JS
-<span style="color: #528fd1;">pushd</span> JS
-<span style="color: #528fd1;">source</span> PATH/TO/emsdk-portable/emsdk_env.sh
+<span style="color: #3a81c3;">pushd</span> JS
+<span style="color: #3a81c3;">source</span> PATH/TO/emsdk-portable/emsdk_env.sh
 emconfigure cmake ..
 emmake make
 </pre>
@@ -417,8 +417,8 @@ emmake make
 </div>
 </div>
 
-<div id="outline-container-orgeb865fb" class="outline-2">
-<h2 id="orgeb865fb"><span class="section-number-2">3</span> Execução</h2>
+<div id="outline-container-orgb0849d4" class="outline-2">
+<h2 id="orgb0849d4"><span class="section-number-2">3</span> Execução</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 Para executar a StackVM, entre no diretório <code>Build/StackVM</code> e execute (em um terminal) o programa <code>stackvm</code>
@@ -433,10 +433,10 @@ Para digitar as instruções diretamente para a máquina, use o redirecionamento
 </p>
 <div class="org-src-container">
 <pre class="src src-sh">./stackvm &lt;&lt;EOF
-<span style="color: #ffff00; font-weight: bold;">push 1</span>
-<span style="color: #ffff00; font-weight: bold;">push 2</span>
-<span style="color: #ffff00; font-weight: bold;">add</span>
-<span style="color: #ffff00; font-weight: bold;">EOF</span>
+<span style="color: #ffa54f;">push 1</span>
+<span style="color: #ffa54f;">push 2</span>
+<span style="color: #ffa54f;">add</span>
+<span style="color: #ffa54f;">EOF</span>
 </pre>
 </div>
 
@@ -451,8 +451,8 @@ Pode-se também passar um nome de arquivo como parâmetro. O arquivo deve ser um
 </div>
 </div>
 
-<div id="outline-container-org91eaa4e" class="outline-2">
-<h2 id="org91eaa4e"><span class="section-number-2">4</span> Estrutura da Linguagem Assembly para a Máquina Virtual</h2>
+<div id="outline-container-org34edf8a" class="outline-2">
+<h2 id="org34edf8a"><span class="section-number-2">4</span> Estrutura da Linguagem Assembly para a Máquina Virtual</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 O arquivo <a href="file:///home/kassick/Sources/Compiladores/StackVM/StackVM.g4">StackVM.g4</a> possui a gramática LL( * ) utilizada para definir a entrada.
@@ -462,8 +462,8 @@ O arquivo <a href="file:///home/kassick/Sources/Compiladores/StackVM/StackVM.g4"
 <b>Comentários</b> são linhas iniciadas por # :
 </p>
 <div class="org-src-container">
-<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">esta linha eh um comentario</span>
-push <span style="color: #ab75c3;">1</span>
+<pre class="src src-sh"><span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">esta linha eh um comentario</span>
+push <span style="color: #4e3163;">1</span>
 </pre>
 </div>
 
@@ -475,9 +475,9 @@ Não são permitidos comentários ao lado das instruções
 O arquivo deve conter uma ou mais <b>Linhas de Instrução</b>
 </p>
 <div class="org-src-container">
-<pre class="src src-sh">push <span style="color: #ab75c3;">1</span>
-push <span style="color: #ab75c3;">2</span>
-push <span style="color: #ab75c3;">3</span>
+<pre class="src src-sh">push <span style="color: #4e3163;">1</span>
+push <span style="color: #4e3163;">2</span>
+push <span style="color: #4e3163;">3</span>
 add
 div
 </pre>
@@ -487,8 +487,8 @@ div
 Linhas de instrução <b>podem</b> possuir <i>labels</i> que são utilizados para controle de fluxo:
 </p>
 <div class="org-src-container">
-<pre class="src src-sh">um_label :  push <span style="color: #ab75c3;">1</span>
-            push <span style="color: #ab75c3;">2.0</span>
+<pre class="src src-sh">um_label :  push <span style="color: #4e3163;">1</span>
+            push <span style="color: #4e3163;">2.0</span>
             div
             bnz um_label
 </pre>
@@ -496,8 +496,8 @@ Linhas de instrução <b>podem</b> possuir <i>labels</i> que são utilizados par
 </div>
 </div>
 
-<div id="outline-container-org5919e0e" class="outline-2">
-<h2 id="org5919e0e"><span class="section-number-2">5</span> A Pilha de Dados</h2>
+<div id="outline-container-org64e7a25" class="outline-2">
+<h2 id="org64e7a25"><span class="section-number-2">5</span> A Pilha de Dados</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 A pilha de dados pode crescer arbitrariamente.
@@ -509,13 +509,21 @@ Cada posição da pilha possui um <i>item de dados</i>. Este item pode ser um do
 </div>
 </div>
 
-<div id="outline-container-orgdae4222" class="outline-2">
-<h2 id="orgdae4222"><span class="section-number-2">6</span> Instruções</h2>
+<div id="outline-container-org65b6e26" class="outline-2">
+<h2 id="org65b6e26"><span class="section-number-2">6</span> Instruções</h2>
 <div class="outline-text-2" id="text-6">
-</div><div id="outline-container-org07432fb" class="outline-3">
-<h3 id="org07432fb"><span class="section-number-3">6.1</span> Instruções Básicas</h3>
+</div><div id="outline-container-orgbadc962" class="outline-3">
+<h3 id="orgbadc962"><span class="section-number-3">6.1</span> Instruções Básicas</h3>
 <div class="outline-text-3" id="text-6-1">
 <ol class="org-ol">
+<li><p>
+<b>nop</b>
+</p>
+
+<p>
+Não toma nenhuma ação
+</p></li>
+
 <li><p>
 <b>exit</b>
 </p>
@@ -1000,8 +1008,8 @@ Uma vez que a pilha apenas suporta tipos básicos, push de strings literais irã
 </div>
 </div>
 
-<div id="outline-container-orgb1b85b1" class="outline-3">
-<h3 id="orgb1b85b1"><span class="section-number-3">6.2</span> Operações Binárias e Lógicas</h3>
+<div id="outline-container-orge608326" class="outline-3">
+<h3 id="orge608326"><span class="section-number-3">6.2</span> Operações Binárias e Lógicas</h3>
 <div class="outline-text-3" id="text-6-2">
 <p>
 Operações <i>binárias</i> sempre consomem os dois elementos no topo da pilha e devolvem o resultado da operação
@@ -1108,10 +1116,10 @@ Nas operações aritméticas, o tipo resultante será aquele que conseguiria gua
 </table>
 
 <div class="org-src-container">
-<pre class="src src-sh">push <span style="color: #ab75c3;">1</span>
-push <span style="color: #ab75c3;">2.0</span>
+<pre class="src src-sh">push <span style="color: #4e3163;">1</span>
+push <span style="color: #4e3163;">2.0</span>
 div
-<span style="color: #656565;"># </span><span style="color: #757575;">resultado: 0.5</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">resultado: 0.5</span>
 </pre>
 </div>
 
@@ -1140,8 +1148,8 @@ As seguintes operações bit-a-bit são suportadas:
 </div>
 </div>
 
-<div id="outline-container-org33dbed5" class="outline-3">
-<h3 id="org33dbed5"><span class="section-number-3">6.3</span> Conversões (cast)</h3>
+<div id="outline-container-org8c878c3" class="outline-3">
+<h3 id="org8c878c3"><span class="section-number-3">6.3</span> Conversões (cast)</h3>
 <div class="outline-text-3" id="text-6-3">
 <p>
 As operações de cast convertem o elemento do topo da pilha para um elemento do tipo alvo:
@@ -1155,8 +1163,8 @@ As operações de cast convertem o elemento do topo da pilha para um elemento do
 </div>
 </div>
 
-<div id="outline-container-orgc0cba6f" class="outline-3">
-<h3 id="orgc0cba6f"><span class="section-number-3">6.4</span> Entrada e Saída</h3>
+<div id="outline-container-org087dd28" class="outline-3">
+<h3 id="org087dd28"><span class="section-number-3">6.4</span> Entrada e Saída</h3>
 <div class="outline-text-3" id="text-6-4">
 <p>
 As seguintes instruções lêem da entrada padrão e colocam o resultado no topo da pilha:
@@ -1179,9 +1187,9 @@ As seguintes instruções imprimem o conteúdo da pilha na saída padrão:
 <div class="org-src-container">
 <pre class="src src-sh">readc
 readc
-push <span style="color: #ab75c3;">2</span>
+push <span style="color: #4e3163;">2</span>
 prints
-<span style="color: #656565;"># </span><span style="color: #757575;">"concatena" dois chars como uma string</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">"concatena" dois chars como uma string</span>
 </pre>
 </div>
 
@@ -1191,21 +1199,21 @@ prints
 </div>
 </div>
 
-<div id="outline-container-org4c47149" class="outline-3">
-<h3 id="org4c47149"><span class="section-number-3">6.5</span> Vetores</h3>
+<div id="outline-container-org26d2fb7" class="outline-3">
+<h3 id="org26d2fb7"><span class="section-number-3">6.5</span> Vetores</h3>
 <div class="outline-text-3" id="text-6-5">
 <p>
 Um vetor é um <i>item de dados</i> que possui outros itens de dados. A sua criação é feita com os elementos no topo da pilha de trabalho:
 </p>
 <div class="org-src-container">
-<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">elementos: 1 2 3</span>
-push <span style="color: #ab75c3;">1</span>
-push <span style="color: #ab75c3;">2</span>
-push <span style="color: #ab75c3;">3</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">tamanho: 3</span>
-push <span style="color: #ab75c3;">3</span>
+<pre class="src src-sh"><span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">elementos: 1 2 3</span>
+push <span style="color: #4e3163;">1</span>
+push <span style="color: #4e3163;">2</span>
+push <span style="color: #4e3163;">3</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">tamanho: 3</span>
+push <span style="color: #4e3163;">3</span>
 acreate
-<span style="color: #656565;"># </span><span style="color: #757575;">[ 1 2 3 ]</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">[ 1 2 3 ]</span>
 </pre>
 </div>
 
@@ -1213,19 +1221,19 @@ acreate
 Vetores podem conter itens de vetores:
 </p>
 <div class="org-src-container">
-<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">elementos: 1 2 3</span>
-push <span style="color: #ab75c3;">1</span>
-push <span style="color: #ab75c3;">2</span>
-push <span style="color: #ab75c3;">3</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">tamanho: 3</span>
-push <span style="color: #ab75c3;">3</span>
+<pre class="src src-sh"><span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">elementos: 1 2 3</span>
+push <span style="color: #4e3163;">1</span>
+push <span style="color: #4e3163;">2</span>
+push <span style="color: #4e3163;">3</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">tamanho: 3</span>
+push <span style="color: #4e3163;">3</span>
 acreate
-<span style="color: #656565;"># </span><span style="color: #757575;">[ 1 2 3 ]</span>
-push <span style="color: #bdbc61;">"abc"</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">[ 1 2 3 ]</span>
+push <span style="color: #2d9574;">"abc"</span>
 acreate
-<span style="color: #656565;"># </span><span style="color: #757575;">[ a b c ]</span>
-acreate <span style="color: #ab75c3;">2</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">[ [ 1 2 3 ] [ a b c ] ]</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">[ a b c ]</span>
+acreate <span style="color: #4e3163;">2</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">[ [ 1 2 3 ] [ a b c ] ]</span>
 </pre>
 </div>
 
@@ -1684,8 +1692,8 @@ As seguintes operações estão disponíveis para manipulação de vetores:
 </div>
 </div>
 
-<div id="outline-container-orgf261f71" class="outline-3">
-<h3 id="orgf261f71"><span class="section-number-3">6.6</span> Manipulação da Pilha</h3>
+<div id="outline-container-orgeaa2fa5" class="outline-3">
+<h3 id="orgeaa2fa5"><span class="section-number-3">6.6</span> Manipulação da Pilha</h3>
 <div class="outline-text-3" id="text-6-6">
 <ol class="org-ol">
 <li><p>
@@ -2232,8 +2240,8 @@ O seguinte exemplo executa <code>trim 1</code>
 </div>
 </div>
 
-<div id="outline-container-org4058311" class="outline-3">
-<h3 id="org4058311"><span class="section-number-3">6.7</span> Operações <code>push</code> especiais</h3>
+<div id="outline-container-orgd4bd98c" class="outline-3">
+<h3 id="orgd4bd98c"><span class="section-number-3">6.7</span> Operações <code>push</code> especiais</h3>
 <div class="outline-text-3" id="text-6-7">
 <ol class="org-ol">
 <li><p>
@@ -2245,8 +2253,8 @@ No código abaixo, o label l2 é a segunda instrução, portanto posição <code
 </p>
 
 <div class="org-src-container">
-<pre class="src src-sh">    push <span style="color: #ab75c3;">1</span>
-l2: push <span style="color: #ab75c3;">2</span>
+<pre class="src src-sh">    push <span style="color: #4e3163;">1</span>
+l2: push <span style="color: #4e3163;">2</span>
     push l2
 </pre>
 </div>
@@ -2301,12 +2309,12 @@ l2: push <span style="color: #ab75c3;">2</span>
 </p>
 
 <div class="org-src-container">
-<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">instrucao 0:</span>
-push <span style="color: #bdbc61;">'a'</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">instrucao 1:</span>
+<pre class="src src-sh"><span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">instrucao 0:</span>
+push <span style="color: #2d9574;">'a'</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">instrucao 1:</span>
 push pc
-<span style="color: #656565;"># </span><span style="color: #757575;">instrucao 2</span>
-push <span style="color: #bdbc61;">'c'</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">instrucao 2</span>
+push <span style="color: #2d9574;">'c'</span>
 </pre>
 </div>
 
@@ -2360,8 +2368,8 @@ push <span style="color: #bdbc61;">'c'</span>
 </p>
 
 <div class="org-src-container">
-<pre class="src src-sh">push <span style="color: #bdbc61;">'a'</span>
-push <span style="color: #bdbc61;">'b'</span>
+<pre class="src src-sh">push <span style="color: #2d9574;">'a'</span>
+push <span style="color: #2d9574;">'b'</span>
 push stack_size
 </pre>
 </div>
@@ -2452,8 +2460,8 @@ push stack_size
 </div>
 </div>
 
-<div id="outline-container-org1d9fe62" class="outline-3">
-<h3 id="org1d9fe62"><span class="section-number-3">6.8</span> Gerenciamento de Pilhas Aninhadas</h3>
+<div id="outline-container-orgf8378cf" class="outline-3">
+<h3 id="orgf8378cf"><span class="section-number-3">6.8</span> Gerenciamento de Pilhas Aninhadas</h3>
 <div class="outline-text-3" id="text-6-8">
 <ol class="org-ol">
 <li><p>
@@ -2461,12 +2469,12 @@ push stack_size
 </p>
 
 <div class="org-src-container">
-<pre class="src src-sh">push <span style="color: #bdbc61;">'a'</span>
-push <span style="color: #bdbc61;">'b'</span>
-push <span style="color: #ab75c3;">1</span>
+<pre class="src src-sh">push <span style="color: #2d9574;">'a'</span>
+push <span style="color: #2d9574;">'b'</span>
+push <span style="color: #4e3163;">1</span>
 mark
-push <span style="color: #bdbc61;">'z'</span>
-load <span style="color: #ab75c3;">0</span>
+push <span style="color: #2d9574;">'z'</span>
+load <span style="color: #4e3163;">0</span>
 </pre>
 </div>
 
@@ -2554,12 +2562,12 @@ load <span style="color: #ab75c3;">0</span>
 </p>
 
 <div class="org-src-container">
-<pre class="src src-sh">push <span style="color: #bdbc61;">'a'</span>
-push <span style="color: #bdbc61;">'b'</span>
-push <span style="color: #ab75c3;">1</span>
-mark <span style="color: #ab75c3;">2</span>
-push <span style="color: #bdbc61;">'z'</span>
-load <span style="color: #ab75c3;">0</span>
+<pre class="src src-sh">push <span style="color: #2d9574;">'a'</span>
+push <span style="color: #2d9574;">'b'</span>
+push <span style="color: #4e3163;">1</span>
+mark <span style="color: #4e3163;">2</span>
+push <span style="color: #2d9574;">'z'</span>
+load <span style="color: #4e3163;">0</span>
 </pre>
 </div>
 
@@ -2651,12 +2659,12 @@ Remove a última marca criada. Coloca a posição da pilha onde essa marca estav
 </p>
 
 <div class="org-src-container">
-<pre class="src src-sh">push <span style="color: #bdbc61;">'a'</span>
-push <span style="color: #bdbc61;">'b'</span>
-push <span style="color: #ab75c3;">1</span>
-mark <span style="color: #ab75c3;">2</span>
-push <span style="color: #bdbc61;">'z'</span>
-load <span style="color: #ab75c3;">0</span>
+<pre class="src src-sh">push <span style="color: #2d9574;">'a'</span>
+push <span style="color: #2d9574;">'b'</span>
+push <span style="color: #4e3163;">1</span>
+mark <span style="color: #4e3163;">2</span>
+push <span style="color: #2d9574;">'z'</span>
+load <span style="color: #4e3163;">0</span>
 pop_mark
 </pre>
 </div>
@@ -2759,12 +2767,12 @@ Remove a última marca criada. Coloca a posição da pilha onde essa marca estav
 </p>
 
 <div class="org-src-container">
-<pre class="src src-sh">push <span style="color: #bdbc61;">'a'</span>
-push <span style="color: #bdbc61;">'b'</span>
-push <span style="color: #ab75c3;">1</span>
-mark <span style="color: #ab75c3;">2</span>
-push <span style="color: #bdbc61;">'z'</span>
-load <span style="color: #ab75c3;">0</span>
+<pre class="src src-sh">push <span style="color: #2d9574;">'a'</span>
+push <span style="color: #2d9574;">'b'</span>
+push <span style="color: #4e3163;">1</span>
+mark <span style="color: #4e3163;">2</span>
+push <span style="color: #2d9574;">'z'</span>
+load <span style="color: #4e3163;">0</span>
 drop_mark
 </pre>
 </div>
@@ -2851,8 +2859,8 @@ drop_mark
 </div>
 </div>
 
-<div id="outline-container-orgf030ed7" class="outline-3">
-<h3 id="orgf030ed7"><span class="section-number-3">6.9</span> Controle de Fluxo</h3>
+<div id="outline-container-org65e0029" class="outline-3">
+<h3 id="org65e0029"><span class="section-number-3">6.9</span> Controle de Fluxo</h3>
 <div class="outline-text-3" id="text-6-9">
 <p>
 As instruções de controle de fluxo modificam o <i>program counter</i> para executar partes diferentes do código. Por padrão, a máquina virtual começa a executar a partir de:
@@ -2872,7 +2880,7 @@ As seguintes instruções de controle de fluxo são suportadas:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-sh">l0  :  push <span style="color: #ab75c3;">1</span>
+<pre class="src src-sh">l0  :  push <span style="color: #4e3163;">1</span>
        jump l0
 </pre>
 </div></li>
@@ -2882,7 +2890,7 @@ As seguintes instruções de controle de fluxo são suportadas:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-sh">l0    : push <span style="color: #bdbc61;">"hello"</span>
+<pre class="src src-sh">l0    : push <span style="color: #2d9574;">"hello"</span>
         prints
 start : push l0
         jump
@@ -2917,19 +2925,19 @@ out        : exit
 </div>
 </div>
 
-<div id="outline-container-orga1f4c3a" class="outline-2">
-<h2 id="orga1f4c3a"><span class="section-number-2">7</span> Exemplos de Código</h2>
+<div id="outline-container-org68a2ff4" class="outline-2">
+<h2 id="org68a2ff4"><span class="section-number-2">7</span> Exemplos de Código</h2>
 <div class="outline-text-2" id="text-7">
-</div><div id="outline-container-orgb411fc1" class="outline-3">
-<h3 id="orgb411fc1"><span class="section-number-3">7.1</span> Aritmética Básica</h3>
+</div><div id="outline-container-org7936d43" class="outline-3">
+<h3 id="org7936d43"><span class="section-number-3">7.1</span> Aritmética Básica</h3>
 <div class="outline-text-3" id="text-7-1">
 <ul class="org-ul">
 <li><p>
 Soma
 </p>
 <div class="org-src-container">
-<pre class="src src-sh">push <span style="color: #ab75c3;">1</span>
-push <span style="color: #ab75c3;">2.0</span>
+<pre class="src src-sh">push <span style="color: #4e3163;">1</span>
+push <span style="color: #4e3163;">2.0</span>
 add
 </pre>
 </div></li>
@@ -2938,11 +2946,11 @@ add
 Soma, Cast, Divisão
 </p>
 <div class="org-src-container">
-<pre class="src src-sh">push <span style="color: #ab75c3;">1</span>
-push <span style="color: #ab75c3;">2</span>
+<pre class="src src-sh">push <span style="color: #4e3163;">1</span>
+push <span style="color: #4e3163;">2</span>
 add
-push <span style="color: #ab75c3;">3</span>
-push <span style="color: #ab75c3;">4</span>
+push <span style="color: #4e3163;">3</span>
+push <span style="color: #4e3163;">4</span>
 add
 cast_d
 div
@@ -2953,10 +2961,10 @@ div
 Multiplicação Simples
 </p>
 <div class="org-src-container">
-<pre class="src src-sh">push <span style="color: #ab75c3;">1</span>
-push <span style="color: #ab75c3;">2</span>
-push <span style="color: #ab75c3;">3</span>
-push <span style="color: #bdbc61;">'a'</span> <span style="color: #656565;"># </span><span style="color: #757575;">97</span>
+<pre class="src src-sh">push <span style="color: #4e3163;">1</span>
+push <span style="color: #4e3163;">2</span>
+push <span style="color: #4e3163;">3</span>
+push <span style="color: #2d9574;">'a'</span> <span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">97</span>
 mul
 mul
 mul
@@ -2966,20 +2974,20 @@ mul
 </div>
 </div>
 
-<div id="outline-container-orgcf2215b" class="outline-3">
-<h3 id="orgcf2215b"><span class="section-number-3">7.2</span> Controle de Fluxo</h3>
+<div id="outline-container-org9a02398" class="outline-3">
+<h3 id="org9a02398"><span class="section-number-3">7.2</span> Controle de Fluxo</h3>
 <div class="outline-text-3" id="text-7-2">
 <ul class="org-ul">
 <li><p>
 Jump Simples
 </p>
 <div class="org-src-container">
-<pre class="src src-sh">target1 : push <span style="color: #bdbc61;">'b'</span>
+<pre class="src src-sh">target1 : push <span style="color: #2d9574;">'b'</span>
 jump target2
-start   : push <span style="color: #bdbc61;">'a'</span>
+start   : push <span style="color: #2d9574;">'a'</span>
 jump target1
-target2 : push <span style="color: #bdbc61;">'c'</span>
-<span style="color: #5180b3;">exit</span>
+target2 : push <span style="color: #2d9574;">'c'</span>
+<span style="color: #3a81c3; font-weight: bold;">exit</span>
 </pre>
 </div></li>
 
@@ -2987,7 +2995,7 @@ target2 : push <span style="color: #bdbc61;">'c'</span>
 Laço simples : <code>while (i ! = 0)</code>
 </p>
 <div class="org-src-container">
-<pre class="src src-sh">start :  push <span style="color: #ab75c3;">5</span>
+<pre class="src src-sh">start :  push <span style="color: #4e3163;">5</span>
 again :  push -1
          add
          dup
@@ -2995,7 +3003,7 @@ again :  push -1
          bz out
          jump again
 out   :  pop
-         <span style="color: #5180b3;">exit</span>
+         <span style="color: #3a81c3; font-weight: bold;">exit</span>
 </pre>
 </div></li>
 
@@ -3003,14 +3011,14 @@ out   :  pop
 Laço simples : <code>while (i &gt; 0)</code>
 </p>
 <div class="org-src-container">
-<pre class="src src-sh">start : push <span style="color: #ab75c3;">5</span>
+<pre class="src src-sh">start : push <span style="color: #4e3163;">5</span>
 again:  push -1
         add
         dup
         dup
         bpos again
         pop
-        <span style="color: #5180b3;">exit</span>
+        <span style="color: #3a81c3; font-weight: bold;">exit</span>
 </pre>
 </div></li>
 
@@ -3018,7 +3026,7 @@ again:  push -1
 Laço simples : <code>if (i &lt; 0) break</code>
 </p>
 <div class="org-src-container">
-<pre class="src src-sh">start : push <span style="color: #ab75c3;">5</span>
+<pre class="src src-sh">start : push <span style="color: #4e3163;">5</span>
 again : push -1
         add
         dup
@@ -3026,28 +3034,28 @@ again : push -1
         dup
         jump again
 out   : pop
-        <span style="color: #5180b3;">exit</span>
+        <span style="color: #3a81c3; font-weight: bold;">exit</span>
 </pre>
 </div></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgbcd77f3" class="outline-3">
-<h3 id="orgbcd77f3"><span class="section-number-3">7.3</span> Operações Lógicas</h3>
+<div id="outline-container-org4b92138" class="outline-3">
+<h3 id="org4b92138"><span class="section-number-3">7.3</span> Operações Lógicas</h3>
 <div class="outline-text-3" id="text-7-3">
 <ul class="org-ul">
 <li><p>
 And
 </p>
 <div class="org-src-container">
-<pre class="src src-sh">push <span style="color: #ab75c3;">1</span>
-push <span style="color: #ab75c3;">2</span>
+<pre class="src src-sh">push <span style="color: #4e3163;">1</span>
+push <span style="color: #4e3163;">2</span>
 and
-push <span style="color: #ab75c3;">0</span>
+push <span style="color: #4e3163;">0</span>
 push -1
 and
-push <span style="color: #ab75c3;">9</span>
+push <span style="color: #4e3163;">9</span>
 push -1
 and
 and
@@ -3059,22 +3067,22 @@ and
 Operações bit-a-bit
 </p>
 <div class="org-src-container">
-<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">print 1 | 2   = 3</span>
-push <span style="color: #bdbc61;">'\n'</span>
-push <span style="color: #ab75c3;">1</span>
-push <span style="color: #ab75c3;">2</span>
+<pre class="src src-sh"><span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">print 1 | 2   = 3</span>
+push <span style="color: #2d9574;">'\n'</span>
+push <span style="color: #4e3163;">1</span>
+push <span style="color: #4e3163;">2</span>
 bor
-<span style="color: #528fd1;">print</span>
-<span style="color: #528fd1;">print</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">print 1 &amp; 3   = 1</span>
-push <span style="color: #ab75c3;">3</span>
-push <span style="color: #ab75c3;">1</span>
+<span style="color: #3a81c3;">print</span>
+<span style="color: #3a81c3;">print</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">print 1 &amp; 3   = 1</span>
+push <span style="color: #4e3163;">3</span>
+push <span style="color: #4e3163;">1</span>
 band
-<span style="color: #528fd1;">print</span>
-push <span style="color: #bdbc61;">'\n'</span>
-<span style="color: #528fd1;">print</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">!(~1)        = 0</span>
-push <span style="color: #ab75c3;">1</span>
+<span style="color: #3a81c3;">print</span>
+push <span style="color: #2d9574;">'\n'</span>
+<span style="color: #3a81c3;">print</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">!(~1)        = 0</span>
+push <span style="color: #4e3163;">1</span>
 bnot
 not
 
@@ -3085,42 +3093,42 @@ not
 Função Booleana test_zero para ver se algo é igual 0 para utilizar o booleano em um and
 </p>
 <div class="org-src-container">
-<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">(1.0 == 0 || 2 ) &amp;&amp; ('a' == 0 || 0.0 == 0) &amp;&amp;  (9 &amp;&amp; -1)</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">funcao test_zero(arg) -&gt; {0, 1}</span>
+<pre class="src src-sh"><span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">(1.0 == 0 || 2 ) &amp;&amp; ('a' == 0 || 0.0 == 0) &amp;&amp;  (9 &amp;&amp; -1)</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">funcao test_zero(arg) -&gt; {0, 1}</span>
 test_zero : bz tz_push_1
-            push <span style="color: #ab75c3;">0</span>
+            push <span style="color: #4e3163;">0</span>
             jump tz_ret
-tz_push_1 : push <span style="color: #ab75c3;">1</span>
+tz_push_1 : push <span style="color: #4e3163;">1</span>
 tz_ret    : pop_mark
             push -1
             add
             load
             jump
-<span style="color: #656565;"># </span><span style="color: #757575;">chama com 1.0</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">chama com 1.0</span>
 start     : push ret1
             mark
-            push <span style="color: #ab75c3;">1.0</span>
+            push <span style="color: #4e3163;">1.0</span>
             jump test_zero
 ret1      : swap
             pop
-            push <span style="color: #ab75c3;">2</span>
+            push <span style="color: #4e3163;">2</span>
             or
-<span style="color: #656565;"># </span><span style="color: #757575;">chama novamente com 'a'</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">chama novamente com 'a'</span>
             push ret2
             mark
-            push <span style="color: #bdbc61;">'a'</span>
+            push <span style="color: #2d9574;">'a'</span>
             jump test_zero
 ret2      : swap
             pop
-<span style="color: #656565;"># </span><span style="color: #757575;">chama com 0.0</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">chama com 0.0</span>
             push ret3
             mark
-            push <span style="color: #ab75c3;">0.0</span>
+            push <span style="color: #4e3163;">0.0</span>
             jump test_zero
 ret3      : swap
             pop
             or
-            push <span style="color: #ab75c3;">9</span>
+            push <span style="color: #4e3163;">9</span>
             push -1
             and
             and
@@ -3132,8 +3140,8 @@ ret3      : swap
 </div>
 </div>
 
-<div id="outline-container-org95a9aaf" class="outline-3">
-<h3 id="org95a9aaf"><span class="section-number-3">7.4</span> I/O</h3>
+<div id="outline-container-orga4c1b7c" class="outline-3">
+<h3 id="orga4c1b7c"><span class="section-number-3">7.4</span> I/O</h3>
 <div class="outline-text-3" id="text-7-4">
 <p>
 Operações de leitura e escrita
@@ -3147,8 +3155,8 @@ reads
 acreate
 aload
 prints
-push <span style="color: #bdbc61;">'\n'</span>
-<span style="color: #528fd1;">print</span>
+push <span style="color: #2d9574;">'\n'</span>
+<span style="color: #3a81c3;">print</span>
 cast_s
 acreate
 aload
@@ -3162,8 +3170,8 @@ acreate
 </div>
 </div>
 
-<div id="outline-container-org2207d0b" class="outline-3">
-<h3 id="org2207d0b"><span class="section-number-3">7.5</span> Vetores</h3>
+<div id="outline-container-org9ee089a" class="outline-3">
+<h3 id="org9ee089a"><span class="section-number-3">7.5</span> Vetores</h3>
 <div class="outline-text-3" id="text-7-5">
 <ul class="org-ul">
 <li><p>
@@ -3171,20 +3179,20 @@ Criação de Vetores
 </p>
 
 <div class="org-src-container">
-<pre class="src src-sh">push <span style="color: #ab75c3;">1</span>
-push <span style="color: #ab75c3;">2</span>
-push <span style="color: #ab75c3;">3</span>
-push <span style="color: #ab75c3;">4</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">tamanho da array &#233; 4</span>
-push <span style="color: #ab75c3;">4</span>
+<pre class="src src-sh">push <span style="color: #4e3163;">1</span>
+push <span style="color: #4e3163;">2</span>
+push <span style="color: #4e3163;">3</span>
+push <span style="color: #4e3163;">4</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">tamanho da array &#233; 4</span>
+push <span style="color: #4e3163;">4</span>
 acreate
 dup
-aget <span style="color: #ab75c3;">1</span>
-push <span style="color: #bdbc61;">"stringue"</span>
+aget <span style="color: #4e3163;">1</span>
+push <span style="color: #2d9574;">"stringue"</span>
 acreate
 aset
-push <span style="color: #ab75c3;">10</span>
-aset <span style="color: #ab75c3;">2</span>
+push <span style="color: #4e3163;">10</span>
+aset <span style="color: #4e3163;">2</span>
 </pre>
 </div></li>
 
@@ -3193,34 +3201,34 @@ Append em Vetores (com função)
 </p>
 
 <div class="org-src-container">
-<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">array_append(0 = array, 1 = val) = new_array</span>
-array_append : load <span style="color: #ab75c3;">0</span>
+<pre class="src src-sh"><span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">array_append(0 = array, 1 = val) = new_array</span>
+array_append : load <span style="color: #4e3163;">0</span>
                aload
-               load <span style="color: #ab75c3;">1</span>
+               load <span style="color: #4e3163;">1</span>
                swap
-               push <span style="color: #ab75c3;">1</span>
+               push <span style="color: #4e3163;">1</span>
                add
                acreate
-               crunch <span style="color: #ab75c3;">0</span> <span style="color: #ab75c3;">2</span>
+               crunch <span style="color: #4e3163;">0</span> <span style="color: #4e3163;">2</span>
                swap
                drop_mark
                jump
-<span style="color: #656565;"># </span><span style="color: #757575;">main() = cria vetor, manda fazer append</span>
-start : push <span style="color: #ab75c3;">1</span>
-        push <span style="color: #ab75c3;">2</span>
-        acreate <span style="color: #ab75c3;">2</span>
-        push <span style="color: #ab75c3;">3</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">main() = cria vetor, manda fazer append</span>
+start : push <span style="color: #4e3163;">1</span>
+        push <span style="color: #4e3163;">2</span>
+        acreate <span style="color: #4e3163;">2</span>
+        push <span style="color: #4e3163;">3</span>
         push ret1
-        mark <span style="color: #ab75c3;">3</span>
+        mark <span style="color: #4e3163;">3</span>
         jump array_append
-ret1  : push <span style="color: #bdbc61;">'a'</span>
-        push <span style="color: #bdbc61;">'b'</span>
-        acreate <span style="color: #ab75c3;">2</span>
-        acreate <span style="color: #ab75c3;">2</span>
-        push <span style="color: #bdbc61;">"ola"</span>
+ret1  : push <span style="color: #2d9574;">'a'</span>
+        push <span style="color: #2d9574;">'b'</span>
+        acreate <span style="color: #4e3163;">2</span>
+        acreate <span style="color: #4e3163;">2</span>
+        push <span style="color: #2d9574;">"ola"</span>
         acreate
         push ret2
-        mark <span style="color: #ab75c3;">3</span>
+        mark <span style="color: #4e3163;">3</span>
         jump array_append
 ret2:   exit
 
@@ -3231,8 +3239,8 @@ ret2:   exit
 </div>
 </div>
 
-<div id="outline-container-org6d07337" class="outline-3">
-<h3 id="org6d07337"><span class="section-number-3">7.6</span> Funções</h3>
+<div id="outline-container-orgeb16008" class="outline-3">
+<h3 id="orgeb16008"><span class="section-number-3">7.6</span> Funções</h3>
 <div class="outline-text-3" id="text-7-6">
 <ul class="org-ul">
 <li><p>
@@ -3240,26 +3248,26 @@ Exemplo 1 : Retorno abaixo da marca. Chamador limpa.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">funcao test_zero(arg) -&gt; {0, 1}</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">retorno fica abaixo da marca.</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">Carrega o ponto de retorno para o topo da pilha com pop_mark.</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">A limpeza &#233; feita por quem chama a fun&#231;&#227;o</span>
+<pre class="src src-sh"><span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">funcao test_zero(arg) -&gt; {0, 1}</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">retorno fica abaixo da marca.</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">Carrega o ponto de retorno para o topo da pilha com pop_mark.</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">A limpeza &#233; feita por quem chama a fun&#231;&#227;o</span>
 test_zero : bz tz_push_1
-            push <span style="color: #ab75c3;">0</span>
+            push <span style="color: #4e3163;">0</span>
             jump tz_ret
-tz_push_1 : push <span style="color: #ab75c3;">1</span>
+tz_push_1 : push <span style="color: #4e3163;">1</span>
 tz_ret    : pop_mark
             push -1
             add
             load
             jump
-<span style="color: #656565;"># </span><span style="color: #757575;">chama com 1.0</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">ao inves de calcular o ponto de retorno, usa um label</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">chama com 1.0</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">ao inves de calcular o ponto de retorno, usa um label</span>
 start     : push ret1
             mark
-            push <span style="color: #ab75c3;">1.0</span>
+            push <span style="color: #4e3163;">1.0</span>
             jump test_zero
-<span style="color: #656565;"># </span><span style="color: #757575;">faz a limpeza</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">faz a limpeza</span>
 ret1      : swap
             pop
 
@@ -3271,26 +3279,26 @@ Exemplo 2 : Retorno abaixo da marca; limpeza pelo chamados
 </p>
 
 <div class="org-src-container">
-<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">funcao test_zero(arg) -&gt; {0, 1}</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">retorno fica abaixo da marca.</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">Carrega o ponto de retorno para o topo da pilha com pop_mark.</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">A limpeza &#233; feita por quem chama a fun&#231;&#227;o</span>
+<pre class="src src-sh"><span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">funcao test_zero(arg) -&gt; {0, 1}</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">retorno fica abaixo da marca.</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">Carrega o ponto de retorno para o topo da pilha com pop_mark.</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">A limpeza &#233; feita por quem chama a fun&#231;&#227;o</span>
 test_zero : bz tz_push_1
-            push <span style="color: #ab75c3;">0</span>
+            push <span style="color: #4e3163;">0</span>
             jump tz_ret
-tz_push_1 : push <span style="color: #ab75c3;">1</span>
+tz_push_1 : push <span style="color: #4e3163;">1</span>
 tz_ret    : pop_mark
             push -1
             add
             load
             jump
-<span style="color: #656565;"># </span><span style="color: #757575;">chama com 1.0</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">ao inves de calcular o ponto de retorno, usa um label</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">chama com 1.0</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">ao inves de calcular o ponto de retorno, usa um label</span>
 start     : push ret1
             mark
-            push <span style="color: #ab75c3;">1.0</span>
+            push <span style="color: #4e3163;">1.0</span>
             jump test_zero
-<span style="color: #656565;"># </span><span style="color: #757575;">faz a limpeza</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">faz a limpeza</span>
 ret1      : swap
             pop
 
@@ -3301,41 +3309,41 @@ ret1      : swap
 Exemplo 3 : Retorno acima dos parâmetros; limpeza pela função chamada
 </p>
 <div class="org-src-container">
-<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">array_append(0 = array, 1 = val) = new_array</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">par&#226;metros guardados no in&#237;cio da pilha, no topo da marca</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">pc de retorno acima dos par&#226;metros</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">ao encerrar a fun&#231;&#227;o, elimina as posi&#231;&#245;es dos par&#226;metros e mant&#233;m apenas o pc</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">como eh um unico retorno, faz swap e depois jump</span>
+<pre class="src src-sh"><span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">array_append(0 = array, 1 = val) = new_array</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">par&#226;metros guardados no in&#237;cio da pilha, no topo da marca</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">pc de retorno acima dos par&#226;metros</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">ao encerrar a fun&#231;&#227;o, elimina as posi&#231;&#245;es dos par&#226;metros e mant&#233;m apenas o pc</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">como eh um unico retorno, faz swap e depois jump</span>
 
-array_append : load <span style="color: #ab75c3;">0</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">desempacota a array no topo da olha</span>
+array_append : load <span style="color: #4e3163;">0</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">desempacota a array no topo da olha</span>
                aload
-<span style="color: #656565;"># </span><span style="color: #757575;">carrega o elemento novo</span>
-               load <span style="color: #ab75c3;">1</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">troca com o tamanho</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">carrega o elemento novo</span>
+               load <span style="color: #4e3163;">1</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">troca com o tamanho</span>
                swap
-<span style="color: #656565;"># </span><span style="color: #757575;">soma 1</span>
-               push <span style="color: #ab75c3;">1</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">soma 1</span>
+               push <span style="color: #4e3163;">1</span>
                add
-<span style="color: #656565;"># </span><span style="color: #757575;">cria novo vetor com n+1 elementos</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">cria novo vetor com n+1 elementos</span>
                acreate
-<span style="color: #656565;"># </span><span style="color: #757575;">elimina os par&#226;metros da pilha e faz a limpeza</span>
-               crunch <span style="color: #ab75c3;">0</span> <span style="color: #ab75c3;">2</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">elimina os par&#226;metros da pilha e faz a limpeza</span>
+               crunch <span style="color: #4e3163;">0</span> <span style="color: #4e3163;">2</span>
                swap
                drop_mark
                jump
-<span style="color: #656565;"># </span><span style="color: #757575;">main()</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">Cria vetor [1 2]</span>
-start : push <span style="color: #ab75c3;">1</span>
-        push <span style="color: #ab75c3;">2</span>
-        acreate <span style="color: #ab75c3;">2</span>
-        push <span style="color: #ab75c3;">3</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">main()</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">Cria vetor [1 2]</span>
+start : push <span style="color: #4e3163;">1</span>
+        push <span style="color: #4e3163;">2</span>
+        acreate <span style="color: #4e3163;">2</span>
+        push <span style="color: #4e3163;">3</span>
         push ret1
-        mark <span style="color: #ab75c3;">3</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">chama array_append [1 2] 3</span>
+        mark <span style="color: #4e3163;">3</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">chama array_append [1 2] 3</span>
         jump array_append
-<span style="color: #656565;"># </span><span style="color: #757575;">pilha: [1 2 3]</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">cria vetor [a b]</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">pilha: [1 2 3]</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">cria vetor [a b]</span>
 ret1  : exit
 
 </pre>
@@ -3345,45 +3353,45 @@ ret1  : exit
 Exemplo 4 : Retorno acima dos parâmetros; limpeza pela função chamada.
 </p>
 <div class="org-src-container">
-<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">array_append(0 = array, 1 = val) = new_array</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">par&#226;metros guardados no in&#237;cio da pilha, no topo da marca</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">pc de retorno acima dos par&#226;metros</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">ao encerrar a fun&#231;&#227;o, carrega o ponto de retorno ao topo</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">elimina os par&#226;metros + retorno</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">faz limpeza, retorna</span>
+<pre class="src src-sh"><span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">array_append(0 = array, 1 = val) = new_array</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">par&#226;metros guardados no in&#237;cio da pilha, no topo da marca</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">pc de retorno acima dos par&#226;metros</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">ao encerrar a fun&#231;&#227;o, carrega o ponto de retorno ao topo</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">elimina os par&#226;metros + retorno</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">faz limpeza, retorna</span>
 
-array_append : load <span style="color: #ab75c3;">0</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">desempacota a array no topo da olha</span>
+array_append : load <span style="color: #4e3163;">0</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">desempacota a array no topo da olha</span>
                aload
-<span style="color: #656565;"># </span><span style="color: #757575;">carrega o elemento novo</span>
-               load <span style="color: #ab75c3;">1</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">troca com o tamanho</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">carrega o elemento novo</span>
+               load <span style="color: #4e3163;">1</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">troca com o tamanho</span>
                swap
-<span style="color: #656565;"># </span><span style="color: #757575;">soma 1</span>
-               push <span style="color: #ab75c3;">1</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">soma 1</span>
+               push <span style="color: #4e3163;">1</span>
                add
-<span style="color: #656565;"># </span><span style="color: #757575;">cria novo vetor com n+1 elementos</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">cria novo vetor com n+1 elementos</span>
                acreate
-<span style="color: #656565;"># </span><span style="color: #757575;">ponto de retorno no top</span>
-               load <span style="color: #ab75c3;">2</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">elimina os par&#226;metros + ponto de retorno</span>
-               crunch <span style="color: #ab75c3;">0</span> <span style="color: #ab75c3;">3</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">ponto de retorno no top</span>
+               load <span style="color: #4e3163;">2</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">elimina os par&#226;metros + ponto de retorno</span>
+               crunch <span style="color: #4e3163;">0</span> <span style="color: #4e3163;">3</span>
                drop_mark
                jump
-<span style="color: #656565;"># </span><span style="color: #757575;">main()</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">Cria vetor [1 2]</span>
-start : push <span style="color: #ab75c3;">1</span>
-        push <span style="color: #ab75c3;">2</span>
-        acreate <span style="color: #ab75c3;">2</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">Adiciona inteiro 3 na pilha</span>
-        push <span style="color: #ab75c3;">3</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">Prepara chamada de array_append</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">main()</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">Cria vetor [1 2]</span>
+start : push <span style="color: #4e3163;">1</span>
+        push <span style="color: #4e3163;">2</span>
+        acreate <span style="color: #4e3163;">2</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">Adiciona inteiro 3 na pilha</span>
+        push <span style="color: #4e3163;">3</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">Prepara chamada de array_append</span>
         push ret1
-        mark <span style="color: #ab75c3;">3</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">chama array_append [1 2] 3</span>
+        mark <span style="color: #4e3163;">3</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">chama array_append [1 2] 3</span>
         jump array_append
-<span style="color: #656565;"># </span><span style="color: #757575;">pilha: [1 2 3]</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">cria vetor [a b]</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">pilha: [1 2 3]</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">cria vetor [a b]</span>
 ret1  : exit
 
 </pre>
@@ -3393,64 +3401,64 @@ ret1  : exit
 Exemplo 5 : Marca-dupla. Retorno dentro de um frame exclusivo.
 </p>
 <div class="org-src-container">
-<pre class="src src-sh"><span style="color: #656565;"># </span><span style="color: #757575;">array_append(0 = array, 1 = val) = new_array</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">marca dupla :</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">+---------------------+</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">|   +--------------+  |</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">|   |   +-------+  |  |</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">| 5 | 3 | 1 arg |  |  |</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">| 4 | 2 | 1 arg |  |  |</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">| 3 | 1 | 0 arg |  |  |</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">| 2 |   +-------+  |  |</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">| 1 | 0 pc retorno |  |</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">|   +--------------+  |</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">| 0  main             |</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">+---------------------+</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">par&#226;metros guardados no in&#237;cio da pilha, no topo da marca</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">pc de retorno abaixo da marca, sozinho.</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">ao encerrar a fun&#231;&#227;o, volta ao escopo anterior e carrega pc da posi&#231;&#227;o 0</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">elimina os par&#226;metros + retorno</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">faz limpeza, retorna</span>
+<pre class="src src-sh"><span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">array_append(0 = array, 1 = val) = new_array</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">marca dupla :</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">+---------------------+</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">|   +--------------+  |</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">|   |   +-------+  |  |</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">| 5 | 3 | 1 arg |  |  |</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">| 4 | 2 | 1 arg |  |  |</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">| 3 | 1 | 0 arg |  |  |</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">| 2 |   +-------+  |  |</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">| 1 | 0 pc retorno |  |</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">|   +--------------+  |</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">| 0  main             |</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">+---------------------+</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">par&#226;metros guardados no in&#237;cio da pilha, no topo da marca</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">pc de retorno abaixo da marca, sozinho.</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">ao encerrar a fun&#231;&#227;o, volta ao escopo anterior e carrega pc da posi&#231;&#227;o 0</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">elimina os par&#226;metros + retorno</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">faz limpeza, retorna</span>
 
-array_append : load <span style="color: #ab75c3;">0</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">desempacota a array no topo da olha</span>
+array_append : load <span style="color: #4e3163;">0</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">desempacota a array no topo da olha</span>
                aload
-<span style="color: #656565;"># </span><span style="color: #757575;">carrega o elemento novo</span>
-               load <span style="color: #ab75c3;">1</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">troca com o tamanho</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">carrega o elemento novo</span>
+               load <span style="color: #4e3163;">1</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">troca com o tamanho</span>
                swap
-<span style="color: #656565;"># </span><span style="color: #757575;">soma 1</span>
-               push <span style="color: #ab75c3;">1</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">soma 1</span>
+               push <span style="color: #4e3163;">1</span>
                add
-<span style="color: #656565;"># </span><span style="color: #757575;">cria novo vetor com n+1 elementos</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">cria novo vetor com n+1 elementos</span>
                acreate
-<span style="color: #656565;"># </span><span style="color: #757575;">ponto de retorno abaixo da marca, sozinho</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">ponto de retorno abaixo da marca, sozinho</span>
                drop_mark
-               load <span style="color: #ab75c3;">0</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">elimina os par&#226;metros + ponto de retorno</span>
-               crunch <span style="color: #ab75c3;">0</span> <span style="color: #ab75c3;">3</span>
+               load <span style="color: #4e3163;">0</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">elimina os par&#226;metros + ponto de retorno</span>
+               crunch <span style="color: #4e3163;">0</span> <span style="color: #4e3163;">3</span>
                drop_mark
                jump
-<span style="color: #656565;"># </span><span style="color: #757575;">main()</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">Cria vetor [1 2]</span>
-start : push <span style="color: #ab75c3;">1</span>
-        push <span style="color: #ab75c3;">2</span>
-        acreate <span style="color: #ab75c3;">2</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">Adiciona inteiro 3 na pilha</span>
-        push <span style="color: #ab75c3;">3</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">Prepara chamada de array_append</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">PRIMEIRO ponto de retorno</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">DEPOIS par&#226;metros</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">main()</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">Cria vetor [1 2]</span>
+start : push <span style="color: #4e3163;">1</span>
+        push <span style="color: #4e3163;">2</span>
+        acreate <span style="color: #4e3163;">2</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">Adiciona inteiro 3 na pilha</span>
+        push <span style="color: #4e3163;">3</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">Prepara chamada de array_append</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">PRIMEIRO ponto de retorno</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">DEPOIS par&#226;metros</span>
         push ret1
-        load <span style="color: #ab75c3;">0</span>
-        load <span style="color: #ab75c3;">1</span>
-        mark <span style="color: #ab75c3;">3</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">segundo contexto, marca mantendo 2</span>
-        mark <span style="color: #ab75c3;">2</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">chama array_append [1 2] 3</span>
+        load <span style="color: #4e3163;">0</span>
+        load <span style="color: #4e3163;">1</span>
+        mark <span style="color: #4e3163;">3</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">segundo contexto, marca mantendo 2</span>
+        mark <span style="color: #4e3163;">2</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">chama array_append [1 2] 3</span>
         jump array_append
-<span style="color: #656565;"># </span><span style="color: #757575;">pilha: [1 2 3]</span>
-<span style="color: #656565;"># </span><span style="color: #757575;">cria vetor [a b]</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">pilha: [1 2 3]</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;"># </span><span style="color: #2aa1ae; background-color: #ecf3ec;">cria vetor [a b]</span>
 ret1  : exit
 
 </pre>
@@ -3472,7 +3480,7 @@ A StackVM foi desenvolvida em C++ com o sistema de build CMake. Enquanto a plata
 </div></div>
 <div id="postamble" class="status">
 <p class="author">Author: Rodrigo Kassick</p>
-<p class="date">Created: 2017-09-19 ter 22:31</p>
+<p class="date">Created: 2017-09-29 sex 23:38</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

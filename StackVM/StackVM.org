@@ -183,11 +183,15 @@ Cada posição da pilha possui um /item de dados/. Este item pode ser um dos tip
 
 ** Instruções Básicas
 
-1. *exit*
+1. *nop*
+
+   Não toma nenhuma ação
+
+2. *exit*
 
    Encerra a execução da máquina virtual.
 
-2. *push* literal
+3. *push* literal
 
    Carrega um literal para a pilha. São aceitos os seguintes literais:
    - /char/: símbolos entre aspas simples, alguns com escape. Exemplo: 'a', 'b', '\n', '\t', etc.
@@ -215,7 +219,7 @@ Cada posição da pilha possui um /item de dados/. Este item pode ser um dos tip
    |   | int 2 |   |           |   | int 2  |
    |---+-------+---+-----------+---+--------|
 
-3. *pop* : Elimina o símbolo no topo da pilha
+4. *pop* : Elimina o símbolo no topo da pilha
 
    |---+-------+---+-----+---+-------|
    | / | <>    |   |     |   | <>    |
@@ -223,7 +227,7 @@ Cada posição da pilha possui um /item de dados/. Este item pode ser um dos tip
    |   | int 2 |   | \rightarrow   |   | int 2 |
    |---+-------+---+-----+---+-------|
 
-4. *popn n* : elimina n símbolos no topo da pilha:
+5. *popn n* : elimina n símbolos no topo da pilha:
 
    |---+--------+---+--------+---+--------|
    | / | <>     |   |        |   | <>     |
@@ -232,7 +236,7 @@ Cada posição da pilha possui um /item de dados/. Este item pode ser um dos tip
    |   | int 2  |   |        |   | char a |
    |---+--------+---+--------+---+--------|
 
-5. *popn* : utiliza o elemento no topo da pilha como parâmetro para popn
+6. *popn* : utiliza o elemento no topo da pilha como parâmetro para popn
 
    |---+--------+---+------+---+--------|
    | / | <>     |   |      |   | <>     |
@@ -242,7 +246,7 @@ Cada posição da pilha possui um /item de dados/. Este item pode ser um dos tip
    |   | int 2  |   |      |   | char a |
    |---+--------+---+------+---+--------|
 
-6. *dup* : duplica o elemento no topo da pilha:
+7. *dup* : duplica o elemento no topo da pilha:
 
    |---+--------+---+-------+---+--------|
    | / | <>     |   |       |   | <>     |
@@ -252,7 +256,7 @@ Cada posição da pilha possui um /item de dados/. Este item pode ser um dos tip
    |   | int 2  |   |       |   | int 2  |
    |---+--------+---+-------+---+--------|
 
-7. *swap* : troca dois elementos do topo da pilha:
+8. *swap* : troca dois elementos do topo da pilha:
    |---+--------+---+------+---+--------|
    | / | <>     |   |      |   | <>     |
    |   | char a |   | =swap= |   | char a |
@@ -260,7 +264,7 @@ Cada posição da pilha possui um /item de dados/. Este item pode ser um dos tip
    |   | int 2  |   |      |   | int 1  |
    |---+--------+---+------+---+--------|
 
-8. *swap i* : troca o elemento do topo da pilha pelo elemento na posição /i/ da pilha
+9. *swap i* : troca o elemento do topo da pilha pelo elemento na posição /i/ da pilha
    |---+--------+---+--------+---+--------|
    | / | <>     |   |        |   | <>     |
    |   | char a |   | =swap 0= |   | int 2  |
@@ -268,13 +272,13 @@ Cada posição da pilha possui um /item de dados/. Este item pode ser um dos tip
    |   | int 2  |   |        |   | char a |
    |---+--------+---+--------+---+--------|
 
-9. *swap i j* : troca dois elementos arbitrários da pilha
-   |---+--------+---+----------+---+--------|
-   | / | <>     |   |          |   | <>     |
-   |   | char a |   | =swap 0 1= |   | int 1  |
-   |   | int 1  |   | \rightarrow        |   | char a |
-   |   | int 2  |   |          |   | int 2  |
-   |---+--------+---+----------+---+--------|
+10. *swap i j* : troca dois elementos arbitrários da pilha
+    |---+--------+---+----------+---+--------|
+    | / | <>     |   |          |   | <>     |
+    |   | char a |   | =swap 0 1= |   | int 1  |
+    |   | int 1  |   | \rightarrow        |   | char a |
+    |   | int 2  |   |          |   | int 2  |
+    |---+--------+---+----------+---+--------|
 
 ** Operações Binárias e Lógicas
 

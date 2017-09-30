@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 14:14:39 2017"
- *         Updated: "2017-09-19 21:41:01 kassick"
+ *         Updated: "2017-09-29 23:50:17 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -18,6 +18,17 @@
 #include "vm.H"
 
 #include <cassert>
+
+struct NopInstr : public Instruction {
+    virtual VM& run(VM& vm) const {
+        // nop
+        return vm;
+    }
+
+    virtual string to_string() const override {
+        return "nop";
+    }
+};
 
 // mark
 // Adds a marker that makes the stack begin anew on top of the current stack

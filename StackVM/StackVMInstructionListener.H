@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 18:08:15 2017"
- *         Updated: "2017-09-20 15:45:36 kassick"
+ *         Updated: "2017-09-29 23:50:50 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -64,6 +64,10 @@ struct InstructionListener : public StackVMBaseListener
         vm.instructions[cur_line] = instr;
         cur_line++;
         instr.reset();
+    }
+
+    virtual void exitNop(StackVMParser::NopContext * ctx) override {
+        instr = make_shared<NopInstr>();
     }
 
     virtual void exitMark(StackVMParser::MarkContext * ctx) override
