@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:45:16 2017"
- *         Updated: "2017-09-29 21:36:33 kassick"
+ *         Updated: "2017-09-30 00:55:32 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -21,15 +21,76 @@
 
 namespace mmml {
 
+struct LabelFactory {
+
+    static string make() {
+        static int next = 0;
+
+        return "l" + to_string(next++);
+    }
+};
+
 class  CodeVisitor : public MMMLBaseVisitor {
 
   public:
     TypeRegistry& type_registry = TypeRegistry::instance();
+    Type::const_pointer bool_type = type_registry.find_by_name("bool");
     Type::const_pointer char_type = type_registry.find_by_name("char");
     Type::const_pointer int_type = type_registry.find_by_name("int");
     Type::const_pointer float_type = type_registry.find_by_name("float");
+    Type::const_pointer nil_type = type_registry.find_by_name("nil");
+
+    // Static: Set this so we don't have to set it every time we construct
+    static ostream *err_stream, *out_stream;
+
+    static ostream& out() {
+        if (out_stream)
+            return *out_stream;
+
+        return cout;
+    }
+
+    static ostream& err() {
+        if (err_stream)
+            return *err_stream;
+
+        return cerr;
+    }
 
     CodeContext::pointer code_ctx;
+    int nerrors = 0;
+    int nwarns = 0;
+
+    ostream& warn(antlr4::ParserRuleContext * ctx, const string message = "")
+    {
+        err() << "Warning at line " << ctx->getStart()->getLine()
+              << ", column " << ctx->getStart()->getCharPositionInLine()
+              << " : ";
+        if (message.length() > 0)
+            err() << message << endl;
+
+        nwarns++;
+
+        return err();
+    }
+
+    ostream& report_error(antlr4::ParserRuleContext * ctx, const string message = "")
+    {
+        err() << "Error at line" << ctx->getStart()->getLine()
+              << ", column " << ctx->getStart()->getCharPositionInLine()
+              << " : ";
+
+        if (message.length() > 0)
+            err() << message << endl;
+
+        this->nerrors++;
+
+        return err();
+    }
+
+    Type::const_pointer gen_cast_code(antlr4::ParserRuleContext*,
+                                      Type::const_pointer source_type,
+                                      Type::const_pointer dest_type);
 
     virtual antlrcpp::Any visitLiteral_float_rule(MMMLParser::Literal_float_ruleContext *ctx) override ;
 
@@ -48,23 +109,10 @@ class  CodeVisitor : public MMMLBaseVisitor {
 
     virtual antlrcpp::Any visitSymbol_rule(MMMLParser::Symbol_ruleContext *ctx) override ;
 
+    virtual antlrcpp::Any visitCast_rule(MMMLParser::Cast_ruleContext *ctx) override ;
 
-    // Static: Set this so we don't have to set it every time we construct
-    static ostream *err_stream, *out_stream;
+    virtual antlrcpp::Any visitSeq_create_seq(MMMLParser::Seq_create_seqContext *ctx) override ;
 
-    static ostream& out() {
-        if (out_stream)
-            return *out_stream;
-
-        return cout;
-    }
-
-    static ostream& err() {
-        if (err_stream)
-            return *err_stream;
-
-        return cerr;
-    }
 };
 
 /*
@@ -263,10 +311,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitSe_create_seq(MMMLParser::Se_create_seqContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitFuncall_rule(MMMLParser::Funcall_ruleContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -287,9 +331,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitCast_rule(MMMLParser::Cast_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
 
 };
 

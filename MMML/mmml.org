@@ -167,9 +167,9 @@ a == (b || c) // parenteses necessario
 
 !(c == a)
 
-c // C é nao nulo?
+c // C, uma lista, é nao vazio?
 
-!c // C é nulo?
+!c // C, uma lista, é vazia?
 
 !(a || b)
 
@@ -568,11 +568,25 @@ As seguintes conversões de tipos são aceitas na linguagem {{{mml}}}:
 | / | <>          | <> | <>           | <> | <>                             |
 |---+-------------+----+--------------+----+--------------------------------|
 |   |             |    |              |    | <30>                           |
-|   | Inteiro     | \to  | Float        | \check  | Número em ponto flutuante com 0s depois da vírgula (1 \to 1.0) |
-|   | Float       | \to  | Inteiro      | \check  | Número inteiro descartando a parte fracionária. Pode perder precisão (1.9 \to 1). Compilador deve alertar (/Warning/) |
+|   | Bool        | \to  | Char         | \check  | 0 se falso, 1 se verdadeiro    |
+|   | Bool        | \to  | Int          | \check  |                                |
+|   | Bool        | \to  | Float        | \check  |                                |
+|---+-------------+----+--------------+----+--------------------------------|
 |   | Char        | \to  | Int          | \check  | Devolve o número da tabela ASCII correspondente ao caractere |
+|   | Char        | \to  | Float        | \check  |                                |
+|---+-------------+----+--------------+----+--------------------------------|
+|   | Inteiro     | \to  | Float        | \check  | Número em ponto flutuante com 0s depois da vírgula (1 \to 1.0) |
+|---+-------------+----+--------------+----+--------------------------------|
+|---+-------------+----+--------------+----+--------------------------------|
+|   | Float       | \to  | Inteiro      | \check  | Número inteiro descartando a parte fracionária. Pode perder precisão (1.9 \to 1). Compilador deve alertar (/Warning/) |
+|   | Float       | \to  | Char         | \check  | Caractere, convertido da tabela ASCII a partir da parte inteira do número |
+|---+-------------+----+--------------+----+--------------------------------|
 |   | Int         | \to  | Char         | \check  | Devolve o caractere associado ao valor da tabela ASCII |
-|   | Qualquer    | \to  | Booleano     | \check  | /false/ se nulo; /true/ caso contrário |
+|---+-------------+----+--------------+----+--------------------------------|
+|---+-------------+----+--------------+----+--------------------------------|
+|   | Sequência   | \to  | Booleano     | \check  | /true/ se não vazia. /false/ caso contrário |
+|   | Qualquer    | \to  | Booleano     | \check  | /false/ se nulo ou zero; /true/ caso contrário |
+|---+-------------+----+--------------+----+--------------------------------|
 
 *Obs.:* Casts não são definidos para tipos sequência, apenas para tipos básicos.
 
@@ -748,7 +762,7 @@ def main =
 Um programa em {{{mml}}} deve possuir uma função chamada /main/ que não recebe nenhum parâmetro. A execução do programa se inicia por esta função:
 #+BEGIN_SRC fsharp
 def fib x : int =
-    if x <= 0 then nil // 0 nao eh valido
+    if x <= 0 then -1 // 0 nao eh valido
     else if x == 1 then 1
     else if x == 2 then 1
     else (fib x - 1) + (fib x - 2)
@@ -862,3 +876,11 @@ def main =
 
   #+RESULTS:
   [[file:inputs/lists.png]]
+
+- Exemplo 13 : Precedência com operadores booleanos e expressões
+  #+INCLUDE "inputs/precedence1.mmml"
+
+  #+CALL: mmml_gen_tree("inputs/precedence1.mmml")
+
+  #+RESULTS:
+  [[file:inputs/precedence1.png]]

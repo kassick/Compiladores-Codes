@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Thu Sep 28 00:18:58 2017"
- *         Updated: "2017-09-29 21:05:48 kassick"
+ *         Updated: "2017-09-29 23:07:33 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -25,22 +25,47 @@
 
 namespace mmml {
 
-class CharType : public Type
+class BasicType : public Type
 {
   public:
-    CharType() : Type("char", 1) {}
+    BasicType(const string name, const int size)
+            : Type(name, size)
+    {}
+
+    virtual bool is_basic() const override
+    {
+        return true;
+    }
 };
 
-class IntType : public Type
+class CharType : public BasicType
 {
   public:
-    IntType() : Type("int", 1) {}
+    CharType() : BasicType("char", 1) {}
 };
 
-class FloatType : public Type
+class IntType : public BasicType
 {
   public:
-    FloatType() : Type("float", 1) {}
+    IntType() : BasicType("int", 1) {}
+};
+
+class FloatType : public BasicType
+{
+  public:
+    FloatType() : BasicType("float", 1) {}
+};
+
+class NilType : public BasicType
+{
+  public:
+    NilType() : BasicType("nil", 1) {}
+};
+
+class BoolType : public BasicType
+{
+  public:
+    BoolType() : BasicType("bool", 1) {}
 };
 
 class SequenceType : public Type

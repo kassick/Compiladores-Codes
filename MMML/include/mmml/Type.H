@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep  8 20:55:04 2017"
- *         Updated: "2017-09-29 11:18:03 kassick"
+ *         Updated: "2017-09-29 22:43:28 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -44,6 +44,7 @@ struct Type : public enable_shared_from_this<Type>
 
     virtual string name() const {return _name;}
     virtual int size() const {return _size;}
+    virtual bool is_basic() const {return false;}
 
     // smart pointer cast:
     // t = registry.find_by_name(...).as<SequenceType>()

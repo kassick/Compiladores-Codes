@@ -188,8 +188,8 @@ metaexpr
     | metaexpr TOK_BOOL_AND_OR metaexpr          #me_boolandor_rule      // &&   and  ||  are equal
     | 'get' pos=DECIMAL funcbody                 #me_tuple_access_rule   // get 0 funcTup
     | 'set' pos=DECIMAL funcbody                 #me_tuple_access_rule   // get 0 funcTup
-    | 'get' name=symbol funcbody                 #me_class_access_rule   // get campo
-    | 'set' name=symbol funcbody                 #me_class_access_rule   // get campo
+    | 'get' name=symbol funcbody                 #me_class_get_rule      // get campo
+    | 'set' name=symbol funcbody                 #me_class_set_rule      // get campo
     | symbol                                     #me_exprsymbol_rule     // a single symbol
     | literal                                    #me_exprliteral_rule    // literal value
     | funcall                                    #me_exprfuncall_rule    // a funcion call
@@ -199,7 +199,7 @@ metaexpr
 // Criação de sequência:
 // [a + b]
 sequence_expr
-  : '[' funcbody ']'                               #se_create_seq
+  : '[' funcbody ']'                               #seq_create_seq
   ;
 
 // Chamada de função

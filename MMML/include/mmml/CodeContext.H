@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:33:27 2017"
- *         Updated: "2017-09-29 21:10:11 kassick"
+ *         Updated: "2017-09-29 22:53:14 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -27,8 +27,6 @@ struct CodeContext
     typedef shared_ptr<const CodeContext> const_pointer;
     typedef weak_ptr<CodeContext> weak_pointer;
     typedef weak_ptr<const CodeContext> const_weak_pointer;
-
-    int nerrors = 0;
 
     NestedSymbolTable::pointer symbol_table;
     InstructionBlock::pointer code;
