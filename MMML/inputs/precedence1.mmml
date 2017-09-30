@@ -1,0 +1,1 @@
+def main = if (len arr) == get 0 tup then 0 else 1
