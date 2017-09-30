@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="pt" xml:lang="pt">
 <head>
-<!-- 2017-09-29 sex 23:38 -->
+<!-- 2017-09-30 sáb 04:53 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>StackVM &#x2013; Documentação</title>
@@ -256,36 +256,36 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org1c5f822">1. Introdução</a></li>
-<li><a href="#org828cd49">2. Compilação</a>
+<li><a href="#org07d8c1d">1. Introdução</a></li>
+<li><a href="#org5942a55">2. Compilação</a>
 <ul>
-<li><a href="#org1fadde2">2.1. Geração do Código ASM.js</a></li>
+<li><a href="#org1ff0c73">2.1. Geração do Código ASM.js</a></li>
 </ul>
 </li>
-<li><a href="#orgb0849d4">3. Execução</a></li>
-<li><a href="#org34edf8a">4. Estrutura da Linguagem Assembly para a Máquina Virtual</a></li>
-<li><a href="#org64e7a25">5. A Pilha de Dados</a></li>
-<li><a href="#org65b6e26">6. Instruções</a>
+<li><a href="#org4c59496">3. Execução</a></li>
+<li><a href="#org7111c35">4. Estrutura da Linguagem Assembly para a Máquina Virtual</a></li>
+<li><a href="#org07c3d42">5. A Pilha de Dados</a></li>
+<li><a href="#orgcf8d9ce">6. Instruções</a>
 <ul>
-<li><a href="#orgbadc962">6.1. Instruções Básicas</a></li>
-<li><a href="#orge608326">6.2. Operações Binárias e Lógicas</a></li>
-<li><a href="#org8c878c3">6.3. Conversões (cast)</a></li>
-<li><a href="#org087dd28">6.4. Entrada e Saída</a></li>
-<li><a href="#org26d2fb7">6.5. Vetores</a></li>
-<li><a href="#orgeaa2fa5">6.6. Manipulação da Pilha</a></li>
-<li><a href="#orgd4bd98c">6.7. Operações <code>push</code> especiais</a></li>
-<li><a href="#orgf8378cf">6.8. Gerenciamento de Pilhas Aninhadas</a></li>
-<li><a href="#org65e0029">6.9. Controle de Fluxo</a></li>
+<li><a href="#orgaa25614">6.1. Instruções Básicas</a></li>
+<li><a href="#org1d052bf">6.2. Operações Binárias e Lógicas</a></li>
+<li><a href="#org0e12e13">6.3. Conversões (cast)</a></li>
+<li><a href="#org346882b">6.4. Entrada e Saída</a></li>
+<li><a href="#orge22edb8">6.5. Vetores</a></li>
+<li><a href="#org93fcf98">6.6. Manipulação da Pilha</a></li>
+<li><a href="#orga6f98a6">6.7. Operações <code>push</code> especiais</a></li>
+<li><a href="#orgaa3011f">6.8. Gerenciamento de Pilhas Aninhadas</a></li>
+<li><a href="#org505142c">6.9. Controle de Fluxo</a></li>
 </ul>
 </li>
-<li><a href="#org68a2ff4">7. Exemplos de Código</a>
+<li><a href="#orgae95f25">7. Exemplos de Código</a>
 <ul>
-<li><a href="#org7936d43">7.1. Aritmética Básica</a></li>
-<li><a href="#org9a02398">7.2. Controle de Fluxo</a></li>
-<li><a href="#org4b92138">7.3. Operações Lógicas</a></li>
-<li><a href="#orga4c1b7c">7.4. I/O</a></li>
-<li><a href="#org9ee089a">7.5. Vetores</a></li>
-<li><a href="#orgeb16008">7.6. Funções</a></li>
+<li><a href="#orgaf29fdc">7.1. Aritmética Básica</a></li>
+<li><a href="#org590d858">7.2. Controle de Fluxo</a></li>
+<li><a href="#org3e29f8c">7.3. Operações Lógicas</a></li>
+<li><a href="#orgb9b65a0">7.4. I/O</a></li>
+<li><a href="#orgfb5696a">7.5. Vetores</a></li>
+<li><a href="#org78fce17">7.6. Funções</a></li>
 </ul>
 </li>
 </ul>
@@ -319,7 +319,7 @@ for the JavaScript code in this tag.
 </p>
 
 <p>
-Ver mais exemplos de código em <a href="#org68a2ff4">Exemplos de Código</a>.
+Ver mais exemplos de código em <a href="#orgae95f25">Exemplos de Código</a>.
 </p>
 
 <textarea name="source" id="esource" rows="10" cols="70">
@@ -354,8 +354,8 @@ print
 
 <textarea id="result" rows="10" cols="70"></textarea>
 
-<div id="outline-container-org1c5f822" class="outline-2">
-<h2 id="org1c5f822"><span class="section-number-2">1</span> Introdução</h2>
+<div id="outline-container-org07d8c1d" class="outline-2">
+<h2 id="org07d8c1d"><span class="section-number-2">1</span> Introdução</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Máquina de pilha simples com suporte a vetores de tipos mistos.
@@ -363,8 +363,8 @@ Máquina de pilha simples com suporte a vetores de tipos mistos.
 </div>
 </div>
 
-<div id="outline-container-org828cd49" class="outline-2">
-<h2 id="org828cd49"><span class="section-number-2">2</span> Compilação</h2>
+<div id="outline-container-org5942a55" class="outline-2">
+<h2 id="org5942a55"><span class="section-number-2">2</span> Compilação</h2>
 <div class="outline-text-2" id="text-2">
 <ol class="org-ol">
 <li>Obtenha o ZIP com o código.</li>
@@ -399,8 +399,8 @@ Ainda no diretório de build, construa o projeto
 </ol>
 </div>
 
-<div id="outline-container-org1fadde2" class="outline-3">
-<h3 id="org1fadde2"><span class="section-number-3">2.1</span> Geração do Código ASM.js</h3>
+<div id="outline-container-org1ff0c73" class="outline-3">
+<h3 id="org1ff0c73"><span class="section-number-3">2.1</span> Geração do Código ASM.js</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 O arquivo <a href="file:///home/kassick/Sources/Compiladores/StackVM/stackvm.js">stackvm.js</a> é compilado para ASM.js via emscripten. Ele foi gerado com a versão 1.37.18-64bit.
@@ -417,8 +417,8 @@ emmake make
 </div>
 </div>
 
-<div id="outline-container-orgb0849d4" class="outline-2">
-<h2 id="orgb0849d4"><span class="section-number-2">3</span> Execução</h2>
+<div id="outline-container-org4c59496" class="outline-2">
+<h2 id="org4c59496"><span class="section-number-2">3</span> Execução</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 Para executar a StackVM, entre no diretório <code>Build/StackVM</code> e execute (em um terminal) o programa <code>stackvm</code>
@@ -451,8 +451,8 @@ Pode-se também passar um nome de arquivo como parâmetro. O arquivo deve ser um
 </div>
 </div>
 
-<div id="outline-container-org34edf8a" class="outline-2">
-<h2 id="org34edf8a"><span class="section-number-2">4</span> Estrutura da Linguagem Assembly para a Máquina Virtual</h2>
+<div id="outline-container-org7111c35" class="outline-2">
+<h2 id="org7111c35"><span class="section-number-2">4</span> Estrutura da Linguagem Assembly para a Máquina Virtual</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 O arquivo <a href="file:///home/kassick/Sources/Compiladores/StackVM/StackVM.g4">StackVM.g4</a> possui a gramática LL( * ) utilizada para definir a entrada.
@@ -496,8 +496,8 @@ Linhas de instrução <b>podem</b> possuir <i>labels</i> que são utilizados par
 </div>
 </div>
 
-<div id="outline-container-org64e7a25" class="outline-2">
-<h2 id="org64e7a25"><span class="section-number-2">5</span> A Pilha de Dados</h2>
+<div id="outline-container-org07c3d42" class="outline-2">
+<h2 id="org07c3d42"><span class="section-number-2">5</span> A Pilha de Dados</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 A pilha de dados pode crescer arbitrariamente.
@@ -509,11 +509,11 @@ Cada posição da pilha possui um <i>item de dados</i>. Este item pode ser um do
 </div>
 </div>
 
-<div id="outline-container-org65b6e26" class="outline-2">
-<h2 id="org65b6e26"><span class="section-number-2">6</span> Instruções</h2>
+<div id="outline-container-orgcf8d9ce" class="outline-2">
+<h2 id="orgcf8d9ce"><span class="section-number-2">6</span> Instruções</h2>
 <div class="outline-text-2" id="text-6">
-</div><div id="outline-container-orgbadc962" class="outline-3">
-<h3 id="orgbadc962"><span class="section-number-3">6.1</span> Instruções Básicas</h3>
+</div><div id="outline-container-orgaa25614" class="outline-3">
+<h3 id="orgaa25614"><span class="section-number-3">6.1</span> Instruções Básicas</h3>
 <div class="outline-text-3" id="text-6-1">
 <ol class="org-ol">
 <li><p>
@@ -1008,8 +1008,8 @@ Uma vez que a pilha apenas suporta tipos básicos, push de strings literais irã
 </div>
 </div>
 
-<div id="outline-container-orge608326" class="outline-3">
-<h3 id="orge608326"><span class="section-number-3">6.2</span> Operações Binárias e Lógicas</h3>
+<div id="outline-container-org1d052bf" class="outline-3">
+<h3 id="org1d052bf"><span class="section-number-3">6.2</span> Operações Binárias e Lógicas</h3>
 <div class="outline-text-3" id="text-6-2">
 <p>
 Operações <i>binárias</i> sempre consomem os dois elementos no topo da pilha e devolvem o resultado da operação
@@ -1148,8 +1148,8 @@ As seguintes operações bit-a-bit são suportadas:
 </div>
 </div>
 
-<div id="outline-container-org8c878c3" class="outline-3">
-<h3 id="org8c878c3"><span class="section-number-3">6.3</span> Conversões (cast)</h3>
+<div id="outline-container-org0e12e13" class="outline-3">
+<h3 id="org0e12e13"><span class="section-number-3">6.3</span> Conversões (cast)</h3>
 <div class="outline-text-3" id="text-6-3">
 <p>
 As operações de cast convertem o elemento do topo da pilha para um elemento do tipo alvo:
@@ -1163,8 +1163,8 @@ As operações de cast convertem o elemento do topo da pilha para um elemento do
 </div>
 </div>
 
-<div id="outline-container-org087dd28" class="outline-3">
-<h3 id="org087dd28"><span class="section-number-3">6.4</span> Entrada e Saída</h3>
+<div id="outline-container-org346882b" class="outline-3">
+<h3 id="org346882b"><span class="section-number-3">6.4</span> Entrada e Saída</h3>
 <div class="outline-text-3" id="text-6-4">
 <p>
 As seguintes instruções lêem da entrada padrão e colocam o resultado no topo da pilha:
@@ -1199,8 +1199,8 @@ prints
 </div>
 </div>
 
-<div id="outline-container-org26d2fb7" class="outline-3">
-<h3 id="org26d2fb7"><span class="section-number-3">6.5</span> Vetores</h3>
+<div id="outline-container-orge22edb8" class="outline-3">
+<h3 id="orge22edb8"><span class="section-number-3">6.5</span> Vetores</h3>
 <div class="outline-text-3" id="text-6-5">
 <p>
 Um vetor é um <i>item de dados</i> que possui outros itens de dados. A sua criação é feita com os elementos no topo da pilha de trabalho:
@@ -1692,8 +1692,8 @@ As seguintes operações estão disponíveis para manipulação de vetores:
 </div>
 </div>
 
-<div id="outline-container-orgeaa2fa5" class="outline-3">
-<h3 id="orgeaa2fa5"><span class="section-number-3">6.6</span> Manipulação da Pilha</h3>
+<div id="outline-container-org93fcf98" class="outline-3">
+<h3 id="org93fcf98"><span class="section-number-3">6.6</span> Manipulação da Pilha</h3>
 <div class="outline-text-3" id="text-6-6">
 <ol class="org-ol">
 <li><p>
@@ -2240,8 +2240,8 @@ O seguinte exemplo executa <code>trim 1</code>
 </div>
 </div>
 
-<div id="outline-container-orgd4bd98c" class="outline-3">
-<h3 id="orgd4bd98c"><span class="section-number-3">6.7</span> Operações <code>push</code> especiais</h3>
+<div id="outline-container-orga6f98a6" class="outline-3">
+<h3 id="orga6f98a6"><span class="section-number-3">6.7</span> Operações <code>push</code> especiais</h3>
 <div class="outline-text-3" id="text-6-7">
 <ol class="org-ol">
 <li><p>
@@ -2460,8 +2460,8 @@ push stack_size
 </div>
 </div>
 
-<div id="outline-container-orgf8378cf" class="outline-3">
-<h3 id="orgf8378cf"><span class="section-number-3">6.8</span> Gerenciamento de Pilhas Aninhadas</h3>
+<div id="outline-container-orgaa3011f" class="outline-3">
+<h3 id="orgaa3011f"><span class="section-number-3">6.8</span> Gerenciamento de Pilhas Aninhadas</h3>
 <div class="outline-text-3" id="text-6-8">
 <ol class="org-ol">
 <li><p>
@@ -2859,8 +2859,8 @@ drop_mark
 </div>
 </div>
 
-<div id="outline-container-org65e0029" class="outline-3">
-<h3 id="org65e0029"><span class="section-number-3">6.9</span> Controle de Fluxo</h3>
+<div id="outline-container-org505142c" class="outline-3">
+<h3 id="org505142c"><span class="section-number-3">6.9</span> Controle de Fluxo</h3>
 <div class="outline-text-3" id="text-6-9">
 <p>
 As instruções de controle de fluxo modificam o <i>program counter</i> para executar partes diferentes do código. Por padrão, a máquina virtual começa a executar a partir de:
@@ -2925,11 +2925,11 @@ out        : exit
 </div>
 </div>
 
-<div id="outline-container-org68a2ff4" class="outline-2">
-<h2 id="org68a2ff4"><span class="section-number-2">7</span> Exemplos de Código</h2>
+<div id="outline-container-orgae95f25" class="outline-2">
+<h2 id="orgae95f25"><span class="section-number-2">7</span> Exemplos de Código</h2>
 <div class="outline-text-2" id="text-7">
-</div><div id="outline-container-org7936d43" class="outline-3">
-<h3 id="org7936d43"><span class="section-number-3">7.1</span> Aritmética Básica</h3>
+</div><div id="outline-container-orgaf29fdc" class="outline-3">
+<h3 id="orgaf29fdc"><span class="section-number-3">7.1</span> Aritmética Básica</h3>
 <div class="outline-text-3" id="text-7-1">
 <ul class="org-ul">
 <li><p>
@@ -2974,8 +2974,8 @@ mul
 </div>
 </div>
 
-<div id="outline-container-org9a02398" class="outline-3">
-<h3 id="org9a02398"><span class="section-number-3">7.2</span> Controle de Fluxo</h3>
+<div id="outline-container-org590d858" class="outline-3">
+<h3 id="org590d858"><span class="section-number-3">7.2</span> Controle de Fluxo</h3>
 <div class="outline-text-3" id="text-7-2">
 <ul class="org-ul">
 <li><p>
@@ -3041,8 +3041,8 @@ out   : pop
 </div>
 </div>
 
-<div id="outline-container-org4b92138" class="outline-3">
-<h3 id="org4b92138"><span class="section-number-3">7.3</span> Operações Lógicas</h3>
+<div id="outline-container-org3e29f8c" class="outline-3">
+<h3 id="org3e29f8c"><span class="section-number-3">7.3</span> Operações Lógicas</h3>
 <div class="outline-text-3" id="text-7-3">
 <ul class="org-ul">
 <li><p>
@@ -3140,8 +3140,8 @@ ret3      : swap
 </div>
 </div>
 
-<div id="outline-container-orga4c1b7c" class="outline-3">
-<h3 id="orga4c1b7c"><span class="section-number-3">7.4</span> I/O</h3>
+<div id="outline-container-orgb9b65a0" class="outline-3">
+<h3 id="orgb9b65a0"><span class="section-number-3">7.4</span> I/O</h3>
 <div class="outline-text-3" id="text-7-4">
 <p>
 Operações de leitura e escrita
@@ -3170,8 +3170,8 @@ acreate
 </div>
 </div>
 
-<div id="outline-container-org9ee089a" class="outline-3">
-<h3 id="org9ee089a"><span class="section-number-3">7.5</span> Vetores</h3>
+<div id="outline-container-orgfb5696a" class="outline-3">
+<h3 id="orgfb5696a"><span class="section-number-3">7.5</span> Vetores</h3>
 <div class="outline-text-3" id="text-7-5">
 <ul class="org-ul">
 <li><p>
@@ -3239,8 +3239,8 @@ ret2:   exit
 </div>
 </div>
 
-<div id="outline-container-orgeb16008" class="outline-3">
-<h3 id="orgeb16008"><span class="section-number-3">7.6</span> Funções</h3>
+<div id="outline-container-org78fce17" class="outline-3">
+<h3 id="org78fce17"><span class="section-number-3">7.6</span> Funções</h3>
 <div class="outline-text-3" id="text-7-6">
 <ul class="org-ul">
 <li><p>
@@ -3480,7 +3480,7 @@ A StackVM foi desenvolvida em C++ com o sistema de build CMake. Enquanto a plata
 </div></div>
 <div id="postamble" class="status">
 <p class="author">Author: Rodrigo Kassick</p>
-<p class="date">Created: 2017-09-29 sex 23:38</p>
+<p class="date">Created: 2017-09-30 sáb 04:53</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
