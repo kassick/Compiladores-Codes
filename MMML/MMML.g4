@@ -189,7 +189,7 @@ metaexpr
     | 'get' pos=DECIMAL funcbody                 #me_tuple_access_rule   // get 0 funcTup
     | 'set' pos=DECIMAL funcbody                 #me_tuple_access_rule   // get 0 funcTup
     | 'get' name=symbol funcbody                 #me_class_get_rule      // get campo
-    | 'set' name=symbol funcbody                 #me_class_set_rule      // get campo
+    | 'set' name=symbol cl=funcbody val=funcbody #me_class_set_rule      // get campo
     | symbol                                     #me_exprsymbol_rule     // a single symbol
     | literal                                    #me_exprliteral_rule    // literal value
     | funcall                                    #me_exprfuncall_rule    // a funcion call

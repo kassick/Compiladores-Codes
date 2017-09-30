@@ -656,9 +656,25 @@ in
 #+END_SRC
 
 Pode-se, no entanto, criar uma função "construtora" para um tipo:
-#+BEGIN_SRC
+#+BEGIN_SRC fsharp
 def construct_MeuTipo a : int =
   make MeuTipo{1, {"default", length "default"}}
+#+END_SRC
+
+O acesso a campos de um tipo definido pelo usuário se faz com a palavra chave =get=:
+#+BEGIN_SRC fsharp
+let x = make MeuTipo {1, {"string", length "string"}} ,
+    f1 = get campo1 x
+in
+   // ...
+#+END_SRC
+
+Não é possível /alterar/ o conteúdo de campos em instâncias já criadas. No entanto, é possível criar uma nova instância de um tipo definido pelo usuário, alterando apenas um dos campos:
+#+BEGIN_SRC fsharp
+let x = make MeuTipo {1, {"string", length "string"}} ,
+    x1 = set campo1 x 2 // constroi MeuTipo {2, {"string", 7}}
+in
+   // ...
 #+END_SRC
 
 ** Aritmética de Tipos na linguagem {{{mml}}}

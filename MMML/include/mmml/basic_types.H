@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Thu Sep 28 00:18:58 2017"
- *         Updated: "2017-09-29 23:07:33 kassick"
+ *         Updated: "2017-09-30 01:24:07 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -310,6 +310,14 @@ class ClassType : public Type
             return base_tuple.lock()->get_nth_type(it->second);
 
         return nullptr;
+    }
+
+    int get_pos(string name) const {
+        auto it = name_map.find(name);
+        if (it != name_map.cend())
+            return it->second;
+
+        return -1;
     }
 
     const string custom_name;

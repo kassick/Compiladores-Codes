@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-09-30 01:03:10 kassick"
+ *         Updated: "2017-09-30 01:49:27 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -243,6 +243,101 @@ antlrcpp::Any CodeVisitor::visitSeq_create_seq(MMMLParser::Seq_create_seqContext
             .with_annot("type(" + type_name(seq_type) + ")");
 
     return seq_type;
+}
+antlrcpp::Any CodeVisitor::visitMe_class_get_rule(MMMLParser::Me_class_get_ruleContext *ctx)
+{
+    Type::const_pointer field_type;
+    ClassType::const_pointer class_type;
+    int pos;
+
+    auto funcbody_type = visit(ctx->funcbody()).as<Type::const_pointer>();
+    // top is tuple, get specific position
+
+    if (!funcbody_type) {
+        report_error(ctx) << "IMPL ERROR god null from funcbody" << endl;
+        goto default_return_int;
+    }
+
+    class_type = funcbody_type->as<ClassType>();
+    if (!class_type) {
+        report_error(ctx) << "Using class accessor method get on type ``"
+                          << funcbody_type->name() << "''"
+                          << endl;
+        goto default_return_int;
+    }
+
+    pos = class_type->get_pos(ctx->name->getText());
+    field_type = class_type->get_type(ctx->name->getText());
+
+    if (!field_type || pos < 0) {
+        report_error(ctx) << "Could not find field named ``"
+                          << ctx->name->getText()
+                          << "'' in class type "
+                          << class_type->name()
+                          << endl;
+        goto default_return_int;
+    }
+
+    *code_ctx << Instruction("aget", {pos}).with_annot("type(" + field_type->name() + ")");
+
+    return field_type;
+
+
+default_return_int:
+    *code_ctx << Instruction("pop").with_annot("Panic!")
+              << Instruction("push", {0}).with_annot("type(int)");
+    return int_type;
+}
+
+antlrcpp::Any CodeVisitor::visitMe_class_set_rule(MMMLParser::Me_class_set_ruleContext *ctx)
+{
+    Type::const_pointer field_type, cl_funcbody_type, val_funcbody_type;
+    ClassType::const_pointer class_type;
+    int pos;
+
+    cl_funcbody_type = visit(ctx->cl).as<Type::const_pointer>();
+
+    if (!cl_funcbody_type) {
+        report_error(ctx) << "IMPL ERROR god null from cl funcbody" << endl;
+
+        *code_ctx << Instruction("pop").with_annot("drop class")
+                  << Instruction("push", {0}).with_annot("type(int)");
+
+        return int_type;
+    }
+
+    val_funcbody_type = visit(ctx->val).as<Type::const_pointer>();
+    if (!val_funcbody_type) {
+        report_error(ctx) << "IMPL ERROR god null from val funcbody" << endl;
+        *code_ctx << Instruction("pop").with_annot("drop val");
+        return cl_funcbody_type;
+    }
+
+    class_type = cl_funcbody_type->as<ClassType>();
+    if (!class_type) {
+        report_error(ctx) << "Using class accessor method set on type ``"
+                          << cl_funcbody_type->name() << "''"
+                          << endl;
+        *code_ctx << Instruction("pop").with_annot("drop val");
+        return cl_funcbody_type;
+    }
+
+    pos = class_type->get_pos(ctx->name->getText());
+    field_type = class_type->get_type(ctx->name->getText());
+
+    if (!field_type || pos < 0) {
+        report_error(ctx) << "Could not find field named ``"
+                          << ctx->name->getText()
+                          << "'' in class type "
+                          << class_type->name()
+                          << endl;
+        *code_ctx << Instruction("pop").with_annot("drop val");
+        return cl_funcbody_type;
+    }
+
+    *code_ctx << Instruction("aset", {pos}).with_annot("type(" + class_type->name() + ")");
+
+    return class_type;
 }
 
 // Static storage for out_stream and err_stream

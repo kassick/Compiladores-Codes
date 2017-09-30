@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:45:16 2017"
- *         Updated: "2017-09-30 00:55:32 kassick"
+ *         Updated: "2017-09-30 01:10:44 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -112,6 +112,10 @@ class  CodeVisitor : public MMMLBaseVisitor {
     virtual antlrcpp::Any visitCast_rule(MMMLParser::Cast_ruleContext *ctx) override ;
 
     virtual antlrcpp::Any visitSeq_create_seq(MMMLParser::Seq_create_seqContext *ctx) override ;
+
+    virtual antlrcpp::Any visitMe_class_get_rule(MMMLParser::Me_class_get_ruleContext *ctx) override ;
+
+    virtual antlrcpp::Any visitMe_class_set_rule(MMMLParser::Me_class_set_ruleContext *ctx) override ;
 
 };
 
@@ -251,9 +255,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitMe_class_access_rule(MMMLParser::Me_class_access_ruleContext *ctx) override {
-    return visitChildren(ctx);
-  }
 
   virtual antlrcpp::Any visitMe_listconcat_rule(MMMLParser::Me_listconcat_ruleContext *ctx) override {
     return visitChildren(ctx);
