@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 17:01:22 2017"
- *         Updated: "2017-09-29 17:45:57 kassick"
+ *         Updated: "2017-09-29 21:00:55 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -24,6 +24,7 @@
 namespace std {
 
 // string has no to_string defined ... affe
+static
 string to_string(const string s)
 {
     return s;
@@ -74,10 +75,8 @@ struct Instruction
     {}
 
     template <class T>
-    Instruction(string label_, string op_, T args_, string annot_)
-            : label(label_),
-              op(op_),
-              annot(annot_)
+    Instruction(string op_, initializer_list<T> args_)
+            : op(op_)
     {
         auto b = begin(args_);
         auto e = end(args_);
@@ -94,19 +93,36 @@ struct Instruction
     }
 
     template <class T>
-    Instruction(string op, T args, string annot)
-            : Instruction("", op, args, annot)
+    Instruction(string op_, T args_)
+            : op(op_)
+    {
+        auto b = begin(args_);
+        auto e = end(args_);
+
+        args.resize(args_.size());
+
+        auto it = this->args.begin();
+
+        while(b != e) {
+            *it = std::to_string( *b );
+            it++;
+            b++;
+        }
+    }
+
+    Instruction(string op, string annot="")
+            : Instruction(op, std::vector<string>())
     {}
 
-    template <class T>
-    Instruction(string op, string annot)
-            : Instruction("", op, std::vector<string>(), annot)
-    {}
+    Instruction& with_label(const string l) {
+        this->label = l;
+        return *this;
+    }
 
-    template <class T>
-    Instruction(string op)
-            : Instruction("", op, std::vector<string>(), "")
-    {}
+    Instruction& with_annot(const string a) {
+        this->annot = a;
+        return *this;
+    }
 
     string assembly() const {
         stringstream code;

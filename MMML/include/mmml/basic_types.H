@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Thu Sep 28 00:18:58 2017"
- *         Updated: "2017-09-29 11:33:10 kassick"
+ *         Updated: "2017-09-29 21:05:48 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -385,13 +385,8 @@ class ClassType : public Type
     std::unordered_map<std::string, int> name_map;
 };
 
-void __attribute__ ((constructor)) init_basic_types()
-{
-    auto& registry = mmml::TypeRegistry::instance();
-    registry.add(make_shared<mmml::CharType>());
-    registry.add(make_shared<mmml::IntType>());
-    registry.add(make_shared<mmml::FloatType>());
-}
+void __attribute__ ((constructor)) init_basic_types();
+
 
 // end namespace mmml /////////////////////////////////////////////////////////
 }

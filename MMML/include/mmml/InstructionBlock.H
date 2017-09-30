@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 17:21:32 2017"
- *         Updated: "2017-09-29 18:14:07 kassick"
+ *         Updated: "2017-09-29 21:11:18 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -17,6 +17,7 @@
 
 #include <vector>
 #include <iostream>
+#include <memory>
 
 #include "mmml/Instruction.H"
 
@@ -26,6 +27,11 @@ using namespace std;
 
 struct InstructionBlock
 {
+    typedef shared_ptr<InstructionBlock> pointer;
+    typedef shared_ptr<const InstructionBlock> const_pointer;
+    typedef weak_ptr<InstructionBlock> weak_pointer;
+    typedef weak_ptr<const InstructionBlock> const_weak_pointer;
+
     vector<Instruction> instructions;
 
     InstructionBlock() {}
@@ -64,40 +70,10 @@ struct InstructionBlock
     friend ostream& operator<<(ostream& out, const InstructionBlock& ib);
     friend InstructionBlock& operator<<(InstructionBlock& ib, const InstructionBlock& other);
     friend InstructionBlock& operator<<(InstructionBlock& ib, InstructionBlock&& other);
+    friend InstructionBlock& operator<<(InstructionBlock& ib, const Instruction& inst);
+    friend InstructionBlock& operator<<(InstructionBlock& ib, Instruction&& inst);
 };
 
 
-ostream& operator<<(ostream& out, const InstructionBlock& ib)
-{
-    for(const auto instr: ib.instructions)
-        out << instr.assembly() << endl;
-
-    return out;
-}
-
-InstructionBlock& operator<<(InstructionBlock& ib, const InstructionBlock& other)
-{
-    // pre-allocate the right size
-    ib.instructions.reserve(ib.instructions.size() + other.instructions.size());
-
-    // cal std::copy [ begin(other), end(other) ) into back of original instructions
-    std::copy(other.instructions.begin(), other.instructions.end(),
-              std::back_inserter(ib.instructions));
-
-    return ib;
-}
-
-InstructionBlock& operator<<(InstructionBlock& ib, InstructionBlock&& other)
-{
-
-    // pre-allocate the right size
-    ib.instructions.reserve(ib.instructions.size() + other.instructions.size());
-
-    // cal std::move [ begin(other), end(other) ) into back of original instructions
-    std::move(other.instructions.begin(), other.instructions.end(),
-              std::back_inserter(ib.instructions));
-
-    return ib;
-}
 
 } // end namespace mmml ///////////////////////////////////////////////////////
