@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep  8 19:36:14 2017"
- *         Updated: "2017-09-29 19:33:20 kassick"
+ *         Updated: "2017-10-02 20:19:18 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -20,6 +20,7 @@
 #include "mmml/Instruction.H"
 #include "mmml/InstructionBlock.H"
 #include "mmml/CodeContext.H"
+#include "mmml/FunctionRegistry.H"
 
 using namespace std;
 

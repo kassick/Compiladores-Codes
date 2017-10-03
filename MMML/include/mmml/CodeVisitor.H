@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:45:16 2017"
- *         Updated: "2017-09-30 16:21:00 kassick"
+ *         Updated: "2017-10-02 21:54:20 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -17,6 +17,7 @@
 
 #include "mmml/TypeRegistry.H"
 #include "mmml/CodeContext.H"
+#include "mmml/FunctionRegistry.H"
 #include "MMMLBaseVisitor.h"
 
 namespace mmml {
@@ -42,8 +43,11 @@ struct SymbolFactory {
 class  CodeVisitor : public MMMLBaseVisitor {
 
   public:
-    TypeRegistry& type_registry = TypeRegistry::instance();
 
+    TypeRegistry& type_registry = TypeRegistry::instance();
+    FunctionRegistry& function_registry = FunctionRegistry::instance();
+
+    static Type::const_pointer recursive_type;
     static Type::const_pointer bool_type;
     static Type::const_pointer char_type;
     static Type::const_pointer int_type;
@@ -115,6 +119,12 @@ class  CodeVisitor : public MMMLBaseVisitor {
     Type::const_pointer gen_coalesce_code(
         Type::const_pointer, CodeContext::pointer,
         Type::const_pointer, CodeContext::pointer );
+
+    // Function Definition
+    virtual antlrcpp::Any visitFuncdef_impl(MMMLParser::Funcdef_implContext *ctx) override;
+
+    virtual antlrcpp::Any visitFuncdef_definition(MMMLParser::Funcdef_definitionContext *ctx) override ;
+
 
     virtual antlrcpp::Any visitLiteral_float_rule(MMMLParser::Literal_float_ruleContext *ctx) override ;
 
@@ -191,13 +201,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitFuncdef_impl(MMMLParser::Funcdef_implContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitFuncdef_definition(MMMLParser::Funcdef_definitionContext *ctx) override {
-    return visitChildren(ctx);
-  }
 
   virtual antlrcpp::Any visitDecl_custom_type(MMMLParser::Decl_custom_typeContext *ctx) override {
     return visitChildren(ctx);

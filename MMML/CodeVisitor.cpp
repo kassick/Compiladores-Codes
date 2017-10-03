@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-09-30 16:21:58 kassick"
+ *         Updated: "2017-10-02 22:31:14 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -14,6 +14,7 @@
 
 #include "mmml/CodeVisitor.H"
 #include "mmml/Instruction.H"
+#include "mmml/FunctionRegistry.H"
 
 namespace mmml {
 
@@ -30,6 +31,203 @@ static Symbol::const_pointer mmml_load_symbol(const string name, CodeContext::po
 
     return nullptr;
 }
+
+static
+Function::pointer visit_function_header(CodeVisitor* visitor,
+                                        antlr4::ParserRuleContext* ctx,
+                                        const string name, MMMLParser::Typed_arg_listContext* args)
+{
+    auto f = FunctionRegistry::instance().find(name);
+
+    if (f)
+        return f;
+
+    Function::ArgList plist = visitor->visit(args);
+
+    auto nf = make_shared<Function>(name,
+                                    plist,
+                                    ctx->getStart()->getLine(),
+                                    ctx->getStart()->getCharPositionInLine());
+
+    auto rf = FunctionRegistry::instance().add(nf);
+
+    if (nf != rf)
+    {
+        CodeVisitor::report_error(ctx) << "IMPL ERROR REGISTRY GOT NULL IN ADD" << endl;
+    }
+
+    return rf;
+}
+
+antlrcpp::Any CodeVisitor::visitFuncdef_impl(MMMLParser::Funcdef_implContext *ctx)
+{
+    auto funcStart = ctx->getStart();
+    auto fbody_start = ctx->funcbody()->getStart();
+
+    auto f = visit_function_header(this,
+                                   ctx,
+                                   ctx->functionname()->getText(),
+                                   ctx->typed_arg_list());
+
+    if (!f) {
+        report_error(ctx) << "IMPL ERROR ON FUNCDEF_IMPL"
+                          << endl;
+        return f;
+    }
+
+    if (f->implemented)
+    {
+        // oops, redefining previously defined function is an error
+        report_error(ctx) << "Re-implementation of function " << f->name
+                          << " previously implemented in line " << f->impl_line
+                          << ", column " << f->impl_col
+                          << endl;
+        return f;
+    }
+
+    if (!f->is_sane()) {
+        report_error(ctx) << "Defined function is not sane (repeated args or unknown types)"
+                          << endl;
+        return f;
+    }
+
+    // Set implemented BEFORE, so we know that the function is implemented if called recursively
+    f->set_implemented(fbody_start->getLine(), fbody_start->getCharPositionInLine());
+
+    // Default: it recurses
+    f->rtype = recursive_type;
+
+    ///// Now we visit the function body
+    CodeVisitor funcvisitor;
+    funcvisitor.code_ctx = make_shared<CodeContext>();
+    auto st = funcvisitor.code_ctx->symbol_table;
+
+    // return point always on 0
+    st->add(make_shared<Symbol>("@ret_point", int_type,
+                                funcStart->getLine(), funcStart->getCharPositionInLine()));
+
+    // args start at 1
+    for (const auto & arg: f->args)
+    {
+        auto s = make_shared<Symbol>(arg.name, arg.type,
+                                     funcStart->getLine(),
+                                     funcStart->getCharPositionInLine());
+        st->add(s);
+    }
+
+    // this one will be ignored later
+    auto nested_to_drop = st->make_nested();
+    funcvisitor.code_ctx->symbol_table = nested_to_drop;
+
+    Type::const_pointer fb_ret = funcvisitor.visit(ctx->funcbody());
+
+    if (!fb_ret) {
+        report_error(ctx) << "IMPL ERROR GOT NULL FROM FUCBODY IN FUNC IMPL" << endl;
+        f->rtype = int_type;
+
+        return f;
+    }
+
+    if (fb_ret->equals(recursive_type))
+    {
+        report_error(ctx) << "Function " << f->name
+                          << "always recurses into itself. Can not resolve recursion"
+                          << endl;
+        f->rtype = int_type;
+    }
+
+    // Now drop the temporary symbol table and visit again to resolve symbols
+    funcvisitor.code_ctx->symbol_table = st;
+    fb_ret = funcvisitor.visit(ctx->funcbody());
+
+    /*
+      Callee cleanup: Remove all symbols from stack, leave only return and ret_point
+
+      Stack:
+      4 : retval
+      3 : arg3
+      2 : arg2
+      1 : arg1
+      0 : retpoint
+      ------------
+      -1 : ...
+
+      crunch 1 symbol_table.size() - 1
+
+      1 : retval
+      0 : retpoint
+      ------------
+      -1 : ...
+
+      swap
+
+      1 : retpoint
+      0 : retval
+      ------------
+      -1 : ...
+
+      drop_mark
+
+      51 : retpoint
+      50 : retval
+      49 : ...
+
+      jump
+     */
+
+    // Now merge the function call:
+    *code_ctx << Instruction("nop").with_label(f->name).with_annot("function " + f->name)
+              << std::move(*funcvisitor.code_ctx)
+              << Instruction("crunch",
+                             {1, funcvisitor.code_ctx->symbol_table->size() - 1})
+              << Instruction("swap")
+              << Instruction("jump").with_annot("jump to return point");
+
+    return f;
+}
+antlrcpp::Any CodeVisitor::visitFuncdef_definition(MMMLParser::Funcdef_definitionContext *ctx)
+{
+    auto funcStart = ctx->getStart();
+
+    auto f = visit_function_header(this,
+                                   ctx,
+                                   ctx->functionname()->getText(),
+                                   ctx->typed_arg_list());
+
+    if (!f) {
+        report_error(ctx) << "IMPL ERROR ON FUNCDEF_IMPL"
+                          << endl;
+        return f;
+    }
+
+    if (f->implemented)
+    {
+        // oops, redefining previously defined function is an error
+        report_error(ctx) << "Header-definition of function "
+                          << f->name
+                          << "appears after it's implementation on line "
+                          << f->impl_line << ", column " << f->impl_col
+                          << endl;
+        return f;
+    }
+
+    if (!f->is_sane()) {
+        report_error(ctx) << "Defined function is not sane (repeated args or unknown types)"
+                          << endl;
+        return f;
+    }
+
+    f->rtype = type_registry.find_by_name(ctx->type()->getText());
+    if (!f->rtype) {
+        report_error(ctx) << "Unknown type in function " << f->name
+                          << endl;
+
+        f->rtype = int_type;
+    }
+
+    return f;
+}
+
 
 antlrcpp::Any CodeVisitor::visitLiteral_float_rule(MMMLParser::Literal_float_ruleContext *ctx)
 {
@@ -193,9 +391,6 @@ Type::const_pointer generic_bin_op(CodeVisitor* visitor,
         *code_ctx << Instruction("pop").with_annot("pop right");
         return CodeVisitor::int_type;
     }
-
-    visitor->nerrors += leftvisitor.nerrors + rightvisitor.nerrors;
-    visitor->nwarns += leftvisitor.nwarns + rightvisitor.nwarns;
 
     // Try to get both to be the same type
     auto coalesced_type = CodeVisitor::gen_coalesce_code(ltype, lcode, rtype, rcode);
@@ -766,9 +961,6 @@ antlrcpp::Any CodeVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleContext *
     falsevisitor.code_ctx = this->code_ctx->create_block();
     bodyfalse_type = falsevisitor.visit(ctx->bodyfalse);
 
-    // merge nerrors / nwards
-    this->nerrors += truevisitor.nerrors + falsevisitor.nerrors;
-    this->nwarns += truevisitor.nwarns + falsevisitor.nwarns;
 
     if (!bodytrue_type || !bodyfalse_type) {
         report_error(ctx) << "IMPL ERROR: BODYTRUE FUNCBODY RETURNED NULL TYPE"
@@ -826,9 +1018,6 @@ antlrcpp::Any CodeVisitor::visitFbody_let_rule(MMMLParser::Fbody_let_ruleContext
         report_error(ctx) << "IMPL ERROR LET EXPR HAS NIL TYPE" << endl;
         ltype = int_type;
     }
-
-    this->nerrors += letvisitor.nerrors;
-    this->nwarns += letvisitor.nwarns;
 
     *this->code_ctx << std::move(*letvisitor.code_ctx);
 
@@ -958,6 +1147,7 @@ ostream* CodeVisitor::err_stream = nullptr ;
 int CodeVisitor::nerrors = 0;
 int CodeVisitor::nwarns = 0;
 
+Type::const_pointer CodeVisitor::recursive_type = TypeRegistry::instance().find_by_name("@recursive");
 Type::const_pointer CodeVisitor::bool_type = TypeRegistry::instance().find_by_name("bool");
 Type::const_pointer CodeVisitor::char_type = TypeRegistry::instance().find_by_name("char");
 Type::const_pointer CodeVisitor::int_type = TypeRegistry::instance().find_by_name("int");

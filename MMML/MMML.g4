@@ -41,10 +41,10 @@ maindecl
 // Implementação de Função:
 // def f2 a : int, b : int = a / (float b)
 decl
-    :   'def' functionname typed_arg_list '=' funcbody
+    :   'def' functionname typed_arg_list '->' type
+        #funcdef_header
+    |   'def' functionname typed_arg_list '=' funcbody
         #funcdef_impl
-    |   'def' functionname typed_arg_list '->' type
-        #funcdef_definition
     |   custom_type_decl
         #decl_custom_type
     ;

@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Thu Sep 28 00:18:58 2017"
- *         Updated: "2017-09-30 03:45:19 kassick"
+ *         Updated: "2017-10-02 21:52:58 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -36,6 +36,12 @@ class BasicType : public Type
     {
         return true;
     }
+};
+
+class RecursiveType : public BasicType
+{
+public:
+    RecursiveType() : BasicType("@recursive", 1) {}
 };
 
 class CharType : public BasicType
