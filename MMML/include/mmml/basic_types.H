@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Thu Sep 28 00:18:58 2017"
- *         Updated: "2017-10-02 21:52:58 kassick"
+ *         Updated: "2017-10-03 17:04:54 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -425,6 +425,15 @@ class ClassType : public Type
   private:
     TupleType::const_weak_pointer base_tuple;
     std::unordered_map<std::string, int> name_map;
+};
+
+struct Types {
+    static Type::const_pointer recursive_type;
+    static Type::const_pointer bool_type;
+    static Type::const_pointer char_type;
+    static Type::const_pointer int_type;
+    static Type::const_pointer float_type;
+    static Type::const_pointer nil_type;
 };
 
 void __attribute__ ((constructor)) init_basic_types();

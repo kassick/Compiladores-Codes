@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Sep 27 23:58:52 2017"
- *         Updated: "2017-09-29 02:09:34 kassick"
+ *         Updated: "2017-10-03 17:08:47 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -58,6 +58,10 @@ class TypeRegistry {
     string to_string() const;
 
 };
+
+// Easy access to the singleton
+static
+TypeRegistry& type_registry = TypeRegistry::instance();
 
 // end namespace mmml /////////////////////////////////////////////////////////
 };

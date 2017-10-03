@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-10-03 16:47:38 kassick"
+ *         Updated: "2017-10-03 17:07:54 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -96,7 +96,7 @@ antlrcpp::Any CodeVisitor::visitFuncdef_impl(MMMLParser::Funcdef_implContext *ct
     f->set_implemented(fbody_start->getLine(), fbody_start->getCharPositionInLine());
 
     // Default: it recurses
-    f->rtype = recursive_type;
+    f->rtype = Types::recursive_type;
 
     ///// Now we visit the function body
     CodeVisitor funcvisitor;
@@ -104,7 +104,7 @@ antlrcpp::Any CodeVisitor::visitFuncdef_impl(MMMLParser::Funcdef_implContext *ct
     auto st = funcvisitor.code_ctx->symbol_table;
 
     // return point always on 0
-    st->add(make_shared<Symbol>("@ret_point", int_type,
+    st->add(make_shared<Symbol>("@ret_point", Types::int_type,
                                 funcStart->getLine(), funcStart->getCharPositionInLine()));
 
     // args start at 1
@@ -124,17 +124,17 @@ antlrcpp::Any CodeVisitor::visitFuncdef_impl(MMMLParser::Funcdef_implContext *ct
 
     if (!fb_ret) {
         Report::err(ctx) << "IMPL ERROR GOT NULL FROM FUCBODY IN FUNC IMPL" << endl;
-        f->rtype = int_type;
+        f->rtype = Types::int_type;
 
         return f;
     }
 
-    if (fb_ret->equals(recursive_type))
+    if (fb_ret->equals(Types::recursive_type))
     {
         Report::err(ctx) << "Function " << f->name
                           << "always recurses into itself. Can not resolve recursion"
                           << endl;
-        f->rtype = int_type;
+        f->rtype = Types::int_type;
     }
 
     // Now drop the temporary symbol table and visit again to resolve symbols
@@ -223,7 +223,7 @@ antlrcpp::Any CodeVisitor::visitFuncdef_header(MMMLParser::Funcdef_headerContext
         Report::err(ctx) << "Unknown type in function " << f->name
                           << endl;
 
-        f->rtype = int_type;
+        f->rtype = Types::int_type;
     }
 
     return f;
@@ -235,7 +235,7 @@ antlrcpp::Any CodeVisitor::visitLiteral_float_rule(MMMLParser::Literal_float_rul
     *code_ctx <<
             Instruction("push", { ctx->getText() })
             .with_annot("type(float)" );
-    return float_type;
+    return Types::float_type;
 }
 
 antlrcpp::Any CodeVisitor::visitLiteral_decimal_rule(MMMLParser::Literal_decimal_ruleContext *ctx)  {
@@ -243,7 +243,7 @@ antlrcpp::Any CodeVisitor::visitLiteral_decimal_rule(MMMLParser::Literal_decimal
             Instruction("push",
                         { ctx->getText() })
             .with_annot("type(int)");
-    return int_type;
+    return Types::int_type;
 }
 
 antlrcpp::Any CodeVisitor::visitLiteral_hexadecimal_rule(MMMLParser::Literal_hexadecimal_ruleContext *ctx)  {
@@ -259,7 +259,7 @@ antlrcpp::Any CodeVisitor::visitLiteral_binary_rule(MMMLParser::Literal_binary_r
             Instruction("push",
                         { ctx->getText() })
             .with_annot( "type(int)" );
-    return int_type;
+    return Types::int_type;
 }
 
 antlrcpp::Any CodeVisitor::visitLiteralstring_rule(MMMLParser::Literalstring_ruleContext *ctx)  {
@@ -269,13 +269,13 @@ antlrcpp::Any CodeVisitor::visitLiteralstring_rule(MMMLParser::Literalstring_rul
                         {ctx->getText().length() - 2})
             .with_annot("type(str)");
 
-    return type_registry.add(make_shared<SequenceType>(char_type));
+    return type_registry.add(make_shared<SequenceType>(Types::char_type));
 }
 
 antlrcpp::Any CodeVisitor::visitLiteral_char_rule(MMMLParser::Literal_char_ruleContext *ctx)  {
     *code_ctx << Instruction("push", { ctx->getText() })
             .with_annot("type(char)" );
-    return char_type;
+    return Types::char_type;
 }
 
 antlrcpp::Any CodeVisitor::visitLiteraltrueorfalse_rule(MMMLParser::Literaltrueorfalse_ruleContext *ctx)  {
@@ -283,7 +283,7 @@ antlrcpp::Any CodeVisitor::visitLiteraltrueorfalse_rule(MMMLParser::Literaltrueo
     *code_ctx <<
             Instruction("push", {( ctx->getText() == "true" ? 1 : 0 ) })
             .with_annot("type(int)");
-    return int_type;
+    return Types::int_type;
 }
 
 antlrcpp::Any
@@ -291,7 +291,7 @@ CodeVisitor::visitLiteralnil_rule(MMMLParser::Literalnil_ruleContext *ctx) {
 
   // *code_ctx << Instruction("push", {"null"}).with_annot("type(nil)");
 
-  return nil_type;
+    return Types::nil_type;
 }
 
 antlrcpp::Any CodeVisitor::visitMe_exprsymbol_rule(MMMLParser::Me_exprsymbol_ruleContext *ctx)  {
@@ -301,7 +301,7 @@ antlrcpp::Any CodeVisitor::visitMe_exprsymbol_rule(MMMLParser::Me_exprsymbol_rul
                           << endl;
 
         *code_ctx << Instruction("push", {0}).with_annot("type(int)");
-        return int_type;
+        return Types::int_type;
     }
 
     // mmml_load_symbol inserts load n in the ctx parameter
@@ -317,15 +317,15 @@ antlrcpp::Any CodeVisitor::visitMe_boolneg_rule(MMMLParser::Me_boolneg_ruleConte
                           << endl;
 
         *code_ctx << Instruction("push", {0}).with_annot("type(bool)");
-        return bool_type;
+        return Types::bool_type;
     }
 
     // coerce it to bool
     auto coerced_bool_type = gen_cast_code(ctx,
-                                           s->type(), bool_type,
+                                           s->type(), Types::bool_type,
                                            code_ctx);
 
-    if (!coerced_bool_type || !coerced_bool_type->equals(bool_type))
+    if (!coerced_bool_type || !coerced_bool_type->equals(Types::bool_type))
     {
         Report::err(ctx) << "Can not coerce type " << s->type()->name()
                           << " to bool";
@@ -333,7 +333,7 @@ antlrcpp::Any CodeVisitor::visitMe_boolneg_rule(MMMLParser::Me_boolneg_ruleConte
         *code_ctx << Instruction("pop").with_annot("drop invalid bool cast");
     }
 
-    return bool_type;
+    return Types::bool_type;
 }
 
 antlrcpp::Any CodeVisitor::visitMe_boolnegparens_rule(MMMLParser::Me_boolnegparens_ruleContext *ctx)
@@ -343,15 +343,15 @@ antlrcpp::Any CodeVisitor::visitMe_boolnegparens_rule(MMMLParser::Me_boolnegpare
     if (!ftype) {
         Report::err(ctx, "IMPL ERROR ON BOOLNEGPARENS");
         *code_ctx << Instruction("pop").with_annot("drop invalid bool cast");
-        return bool_type;
+        return Types::bool_type;
     }
 
     // coerce it to bool
     auto coerced_bool_type = gen_cast_code(ctx,
-                                           ftype, bool_type,
+                                           ftype, Types::bool_type,
                                            code_ctx);
 
-    if (!coerced_bool_type || !coerced_bool_type->equals(bool_type))
+    if (!coerced_bool_type || !coerced_bool_type->equals(Types::bool_type))
     {
         Report::err(ctx) << "Can not coerce type " << ftype->name()
                           << " to bool";
@@ -359,7 +359,7 @@ antlrcpp::Any CodeVisitor::visitMe_boolnegparens_rule(MMMLParser::Me_boolnegpare
         *code_ctx << Instruction("pop").with_annot("drop invalid bool cast");
     }
 
-    return bool_type;
+    return Types::bool_type;
 }
 
 template <class ValidTypePred>
@@ -382,7 +382,7 @@ Type::const_pointer generic_bin_op(CodeVisitor* visitor,
     {
         Report::err(left) << "IMPL ERROR GOT NULL FROM LEFT ON BIN OP" << endl;
         *code_ctx << Instruction("pop").with_annot("pop left");
-        return CodeVisitor::int_type;
+        return Types::int_type;
     }
 
     Type::const_pointer rtype = rightvisitor.visit(right);
@@ -390,7 +390,7 @@ Type::const_pointer generic_bin_op(CodeVisitor* visitor,
     {
         Report::err(right) << "IMPL ERROR GOT NULL FROM RIGHT ON BIN OP" << endl;
         *code_ctx << Instruction("pop").with_annot("pop right");
-        return CodeVisitor::int_type;
+        return Types::int_type;
     }
 
     // Try to get both to be the same type
@@ -424,7 +424,7 @@ antlrcpp::Any CodeVisitor::visitMe_listconcat_rule(MMMLParser::Me_listconcat_rul
                                 });
 
     if (!rtype)
-        return type_registry.add(make_shared<SequenceType>(int_type));
+        return type_registry.add(make_shared<SequenceType>(Types::int_type));
 
     *code_ctx
             << Instruction("mark", {2})
@@ -465,7 +465,7 @@ antlrcpp::Any CodeVisitor::visitMe_exprmuldiv_rule(MMMLParser::Me_exprmuldiv_rul
                                 });
 
     if (!rtype)
-        return int_type;
+        return Types::int_type;
 
     *code_ctx
             << Instruction(ctx->op->getText() == "/" ? "div" : "mul").with_annot("type(" + rtype->name() + ")");
@@ -483,7 +483,7 @@ antlrcpp::Any CodeVisitor::visitMe_exprplusminus_rule(MMMLParser::Me_exprplusmin
                                 });
 
     if (!rtype)
-        return int_type;
+        return Types::int_type;
 
     *code_ctx
             << Instruction(ctx->op->getText() == "+" ? "add" : "sub").with_annot("type(" + rtype->name() + ")");
@@ -518,7 +518,7 @@ default_cast_to_int:
     *code_ctx << Instruction("pop")
               << Instruction("push", {0}).with_annot("type(int)");
 
-    return int_type;
+    return Types::int_type;
 }
 
 Type::const_pointer CodeVisitor::gen_cast_code(antlr4::ParserRuleContext * ctx,
@@ -534,10 +534,10 @@ Type::const_pointer CodeVisitor::gen_cast_code(antlr4::ParserRuleContext * ctx,
     }
 
     // HERE: ain't null, both are basic, source ain't nil
-    if (dest_type->equals(bool_type)) {
+    if (dest_type->equals(Types::bool_type)) {
         // Bool: Anything that ain't zero should be true
 
-        if (source_type->equals(nil_type)) {
+        if (source_type->equals(Types::nil_type)) {
             // corner case: bool nil
             // just pop and push 0
             *code_ctx << Instruction("pop")
@@ -562,9 +562,9 @@ Type::const_pointer CodeVisitor::gen_cast_code(antlr4::ParserRuleContext * ctx,
                       << Instruction("nop", {}).with_label(lcont);
         }
 
-        return bool_type;
+        return Types::bool_type;
 
-    } else if (dest_type->equals(float_type)) {
+    } else if (dest_type->equals(Types::float_type)) {
         // Float -> Float (handled above)
         // Int -> Float
         // Char -> Float
@@ -573,9 +573,9 @@ Type::const_pointer CodeVisitor::gen_cast_code(antlr4::ParserRuleContext * ctx,
         // anything to float, except nil, which is handled above
         *code_ctx << Instruction("cast_d").with_annot("type(float)");
 
-        return float_type;
+        return Types::float_type;
 
-    } else if (dest_type->equals(int_type)) {
+    } else if (dest_type->equals(Types::int_type)) {
 
         // Float -> int : WARN
         // Int -> int : (handled above)
@@ -583,35 +583,35 @@ Type::const_pointer CodeVisitor::gen_cast_code(antlr4::ParserRuleContext * ctx,
         // Bool -> int : 0 or 1
 
         // Downcast Float -> Int:
-        if (source_type->equals(float_type)) {
+        if (source_type->equals(Types::float_type)) {
             Report::warn(ctx) << "Casting from float may discard precision" << endl;
         }
 
         // bool is implemented as int, don't cast if it's a bool from source
-        if (!source_type->equals(bool_type))
+        if (!source_type->equals(Types::bool_type))
             *code_ctx << Instruction("cast_i").with_annot("type(int)");
 
-        return int_type;
+        return Types::int_type;
 
-    } else if (dest_type->equals(char_type)) {
+    } else if (dest_type->equals(Types::char_type)) {
         // Float -> Char : WARN
         // Int -> Char : Downcast, but expected
         // Char -> Char : Same
         // Bool -> Char : 0 or 1
 
         // Downcast:
-        if (source_type->equals(float_type)) {
+        if (source_type->equals(Types::float_type)) {
             Report::warn(ctx) << "Casting from float may discard precision" << endl;
         }
 
         // Downcast from int is expected, do not check
 
         *code_ctx << Instruction("cast_c").with_annot("type(char)");
-        return int_type;
+        return Types::int_type;
     }
 
     Report::err() << "SHOULD NEVER REATH THIS POINT IN GEN_CAST_CODE" << endl;
-    return int_type;
+    return Types::int_type;
 }
 
 Type::const_pointer CodeVisitor::gen_coalesce_code(
@@ -675,7 +675,7 @@ antlrcpp::Any CodeVisitor::visitSeq_create_seq(MMMLParser::Seq_create_seqContext
 
     if (!base_type) {
         Report::err(ctx) << "IMPL ERROR: Got null type from funcbody" << endl;
-        base_type = int_type;
+        base_type = Types::int_type;
     }
 
     // Filter this through the registry, de-dup
@@ -731,7 +731,7 @@ antlrcpp::Any CodeVisitor::visitMe_class_get_rule(MMMLParser::Me_class_get_ruleC
 default_return_int:
     *code_ctx << Instruction("pop").with_annot("Panic!")
               << Instruction("push", {0}).with_annot("type(int)");
-    return int_type;
+    return Types::int_type;
 }
 
 antlrcpp::Any CodeVisitor::visitMe_class_set_rule(MMMLParser::Me_class_set_ruleContext *ctx)
@@ -748,7 +748,7 @@ antlrcpp::Any CodeVisitor::visitMe_class_set_rule(MMMLParser::Me_class_set_ruleC
         *code_ctx << Instruction("pop").with_annot("drop class")
                   << Instruction("push", {0}).with_annot("type(int)");
 
-        return int_type;
+        return Types::int_type;
     }
 
     val_funcbody_type = visit(ctx->val).as<Type::const_pointer>();
@@ -798,7 +798,7 @@ antlrcpp::Any CodeVisitor::visitMe_tuple_set_rule(MMMLParser::Me_tuple_set_ruleC
         Report::err(ctx) << "IMPL ERROR got null from tup funcbody" << endl;
         *code_ctx << Instruction("pop").with_annot("drop tup")
                   << Instruction("push", {0}).with_annot("type(int)");
-        return int_type;
+        return Types::int_type;
     }
 
     tuple_type = tup_funcbody_type->as<TupleType>();
@@ -873,7 +873,7 @@ antlrcpp::Any CodeVisitor::visitMe_tuple_get_rule(MMMLParser::Me_tuple_get_ruleC
 default_return_int:
     *code_ctx << Instruction("pop").with_annot("Panic!")
               << Instruction("push", {0}).with_annot("type(int)");
-    return int_type;
+    return Types::int_type;
 }
 
 antlrcpp::Any CodeVisitor::visitTuple_ctor(MMMLParser::Tuple_ctorContext *ctx)
@@ -910,7 +910,7 @@ default_return_int:
         *code_ctx << Instruction("drop").with_annot("drop " + to_string(i));
     *code_ctx << Instruction("push", {0}).with_annot("type(int)");
 
-    return int_type;
+    return Types::int_type;
 
 }
 
@@ -940,10 +940,10 @@ antlrcpp::Any CodeVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleContext *
         *code_ctx << Instruction("pop").with_annot("drop cond")
                   << Instruction("push", {0}).with_annot("type(bool)");
 
-    } else if (!cond_type->equals(bool_type)) {
+    } else if (!cond_type->equals(Types::bool_type)) {
 
         // Must cast
-        auto new_cond_type = gen_cast_code(ctx, cond_type, bool_type, this->code_ctx);
+        auto new_cond_type = gen_cast_code(ctx, cond_type, Types::bool_type, this->code_ctx);
     }
 
     string ltrue  = LabelFactory::make();
@@ -969,7 +969,7 @@ antlrcpp::Any CodeVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleContext *
         *code_ctx << Instruction("pop").with_annot("drop true or false")
                   << Instruction("push", {0}).with_annot("type(int)");
 
-        return int_type;
+        return Types::int_type;
     }
 
     Type::const_pointer rtype = gen_coalesce_code(bodytrue_type, truevisitor.code_ctx,
@@ -983,7 +983,7 @@ antlrcpp::Any CodeVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleContext *
         *code_ctx << Instruction("pop").with_annot("drop true or false")
                   << Instruction("push", {0}).with_annot("type(int)");
 
-        return int_type;
+        return Types::int_type;
     }
 
     *code_ctx << Instruction("bz", {lfalse})
@@ -1017,7 +1017,7 @@ antlrcpp::Any CodeVisitor::visitFbody_let_rule(MMMLParser::Fbody_let_ruleContext
     if (!ltype)
     {
         Report::err(ctx) << "IMPL ERROR LET EXPR HAS NIL TYPE" << endl;
-        ltype = int_type;
+        ltype = Types::int_type;
     }
 
     *this->code_ctx << std::move(*letvisitor.code_ctx);
@@ -1033,7 +1033,7 @@ antlrcpp::Any CodeVisitor::visitLetvarattr_rule(MMMLParser::Letvarattr_ruleConte
     if (!symbol_type) {
         Report::err(ctx) << "IMPL ERROR GOT NULL FROM FUNCBODY IN letvarattr"
                           << endl;
-        symbol_type = int_type;
+        symbol_type = Types::int_type;
     }
 
     if (code_ctx->symbol_table->find_local(ctx->sym->getText())) {
@@ -1063,7 +1063,7 @@ antlrcpp::Any CodeVisitor::visitLetvarresult_ignore_rule(MMMLParser::Letvarresul
     if (!symbol_type) {
         Report::err(ctx) << "IMPL ERROR GOT NULL FROM FUNCBODY IN letvarattr"
                           << endl;
-        symbol_type = int_type;
+        symbol_type = Types::int_type;
     }
 
     *code_ctx << Instruction("pop",{}).with_annot("drop _");
@@ -1127,7 +1127,7 @@ antlrcpp::Any CodeVisitor::visitLetunpack_rule(MMMLParser::Letunpack_ruleContext
         if (!decayed_type)
         {
             Report::err(ctx) << "IMPL ERROR DECAYED LIST TYPE IS NULL" << endl;
-            decayed_type = int_type;
+            decayed_type = Types::int_type;
         }
 
         auto sym = make_shared<Symbol>(ctx->tail->getText(), decayed_type,
@@ -1165,7 +1165,7 @@ antlrcpp::Any TypedArgVisitor::visitTyped_arg(MMMLParser::Typed_argContext *ctx)
     if (!type) {
         Report::err(ctx) << "Unknown type " << ctx->type()->getText()
                                        << endl;
-        type = CodeVisitor::int_type;
+        type = Types::int_type;
     }
 
     auto sstart = ctx->symbol()->getStart();
@@ -1183,13 +1183,5 @@ antlrcpp::Any TypedArgVisitor::visitTyped_arg_list_cont_rule(MMMLParser::Typed_a
 antlrcpp::Any TypedArgVisitor::visitTyped_arg_list_end(MMMLParser::Typed_arg_list_endContext *ctx) {
     return this->result;
 }
-
-
-Type::const_pointer CodeVisitor::recursive_type = TypeRegistry::instance().find_by_name("@recursive");
-Type::const_pointer CodeVisitor::bool_type = TypeRegistry::instance().find_by_name("bool");
-Type::const_pointer CodeVisitor::char_type = TypeRegistry::instance().find_by_name("char");
-Type::const_pointer CodeVisitor::int_type = TypeRegistry::instance().find_by_name("int");
-Type::const_pointer CodeVisitor::float_type = TypeRegistry::instance().find_by_name("float");
-Type::const_pointer CodeVisitor::nil_type = TypeRegistry::instance().find_by_name("nil");
 
 } // end namespace mmml ///////////////////////////////////////////////////////

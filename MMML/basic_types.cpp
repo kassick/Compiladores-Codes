@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 21:06:03 2017"
- *         Updated: "2017-10-02 21:44:28 kassick"
+ *         Updated: "2017-10-03 17:04:00 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -16,6 +16,13 @@
 #include "mmml/TypeRegistry.H"
 
 using namespace mmml;
+
+Type::const_pointer Types::recursive_type = TypeRegistry::instance().find_by_name("@recursive");
+Type::const_pointer Types::bool_type = TypeRegistry::instance().find_by_name("bool");
+Type::const_pointer Types::char_type = TypeRegistry::instance().find_by_name("char");
+Type::const_pointer Types::int_type = TypeRegistry::instance().find_by_name("int");
+Type::const_pointer Types::float_type = TypeRegistry::instance().find_by_name("float");
+Type::const_pointer Types::nil_type = TypeRegistry::instance().find_by_name("nil");
 
 void __attribute__ ((constructor)) init_basic_types()
 {

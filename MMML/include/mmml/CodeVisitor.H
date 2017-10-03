@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:45:16 2017"
- *         Updated: "2017-10-03 16:45:35 kassick"
+ *         Updated: "2017-10-03 17:06:19 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -43,16 +43,6 @@ struct SymbolFactory {
 class  CodeVisitor : public MMMLBaseVisitor {
 
   public:
-
-    TypeRegistry& type_registry = TypeRegistry::instance();
-    FunctionRegistry& function_registry = FunctionRegistry::instance();
-
-    static Type::const_pointer recursive_type;
-    static Type::const_pointer bool_type;
-    static Type::const_pointer char_type;
-    static Type::const_pointer int_type;
-    static Type::const_pointer float_type;
-    static Type::const_pointer nil_type;
 
     // Instance Variables /////////////////////////////////////////////////////
     CodeContext::pointer code_ctx;

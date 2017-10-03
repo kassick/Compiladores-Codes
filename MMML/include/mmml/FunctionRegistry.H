@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Oct  2 20:18:58 2017"
- *         Updated: "2017-10-02 22:34:00 kassick"
+ *         Updated: "2017-10-03 17:09:07 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -111,5 +111,8 @@ class FunctionRegistry {
   private:
     FunctionRegistry() {}
 };
+
+static
+FunctionRegistry& function_registry = FunctionRegistry::instance();
 
 } // end namespace mmml ///////////////////////////////////////////////////////
