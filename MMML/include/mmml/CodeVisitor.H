@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:45:16 2017"
- *         Updated: "2017-10-03 18:05:21 kassick"
+ *         Updated: "2017-10-03 18:25:27 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -19,16 +19,13 @@
 #include "mmml/CodeContext.H"
 #include "mmml/FunctionRegistry.H"
 #include "mmml/utils.H"
-#include "MMMLBaseVisitor.h"
+#include "mmml/BaseCodeVisitor.H"
 
 namespace mmml {
 
-class  CodeVisitor : public MMMLBaseVisitor {
+class  CodeVisitor : public BaseCodeVisitor {
 
   public:
-
-    // Instance Variables /////////////////////////////////////////////////////
-    CodeContext::pointer code_ctx;
 
     // Function Definition
     virtual antlrcpp::Any visitFuncdef_impl(MMMLParser::Funcdef_implContext *ctx) override;
