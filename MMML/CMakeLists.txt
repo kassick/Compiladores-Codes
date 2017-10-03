@@ -20,13 +20,14 @@ include_directories(include/)
 add_executable(mmmlc
   mmmlc.cpp
   Symbol.cpp
+  NestedSymbolTable.cpp
   TypeRegistry.cpp
   basic_types.cpp
-  NestedSymbolTable.cpp
+  InstructionBlock.cpp
   CodeVisitor.cpp
   TypedArgListVisitor.cpp
-  InstructionBlock.cpp
   mmml_error.cpp
+  casts.cpp
   ${mmml_parser_GENERATED_SRC})
 add_dependencies(mmmlc mmmlc_html generate_mmml_parser)
 target_link_libraries(mmmlc antlr4static)

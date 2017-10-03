@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:45:16 2017"
- *         Updated: "2017-10-03 17:17:10 kassick"
+ *         Updated: "2017-10-03 18:05:21 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -18,27 +18,10 @@
 #include "mmml/TypeRegistry.H"
 #include "mmml/CodeContext.H"
 #include "mmml/FunctionRegistry.H"
+#include "mmml/utils.H"
 #include "MMMLBaseVisitor.h"
 
 namespace mmml {
-
-struct LabelFactory {
-
-    static string make() {
-        static int next = 0;
-
-        return "l" + to_string(next++);
-    }
-};
-
-struct SymbolFactory {
-
-    static string make() {
-        static int next = 0;
-
-        return "@s" + to_string(next++);
-    }
-};
 
 class  CodeVisitor : public MMMLBaseVisitor {
 
@@ -46,18 +29,6 @@ class  CodeVisitor : public MMMLBaseVisitor {
 
     // Instance Variables /////////////////////////////////////////////////////
     CodeContext::pointer code_ctx;
-
-
-    static
-    Type::const_pointer gen_cast_code(antlr4::ParserRuleContext*,
-                                      Type::const_pointer source_type,
-                                      Type::const_pointer dest_type,
-                                      CodeContext::pointer code_ctx);
-
-    static
-    Type::const_pointer gen_coalesce_code(
-        Type::const_pointer, CodeContext::pointer,
-        Type::const_pointer, CodeContext::pointer );
 
     // Function Definition
     virtual antlrcpp::Any visitFuncdef_impl(MMMLParser::Funcdef_implContext *ctx) override;

@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-10-03 17:14:09 kassick"
+ *         Updated: "2017-10-03 18:05:40 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -17,22 +17,66 @@
 #include "mmml/FunctionRegistry.H"
 #include "mmml/error.H"
 #include "mmml/TypedArgListVisitor.H"
+#include "mmml/casts.H"
+#include "mmml/utils.H"
 
 namespace mmml {
 
 using namespace std;
 using stringvector = std::vector<std::string>;
 
-static Symbol::const_pointer mmml_load_symbol(const string name, CodeContext::pointer code_ctx)
+template <class ValidTypePred>
+Type::const_pointer generic_bin_op(CodeVisitor* visitor,
+                                   antlr4::ParserRuleContext* left,
+                                   antlr4::ParserRuleContext* right,
+                                   CodeContext::pointer code_ctx,
+                                   ValidTypePred pred)
 {
-    auto s = code_ctx->symbol_table->find(name);
-    if (s) {
-        *code_ctx << Instruction("load", {s->pos}).with_annot("type(" + type_name(s->type()) + ")");
-        return s;
+    CodeVisitor leftvisitor, rightvisitor;
+
+    auto rcode = code_ctx->create_block();
+    auto lcode = code_ctx->create_block();
+
+    leftvisitor.code_ctx = lcode;
+    rightvisitor.code_ctx = rcode;
+
+    Type::const_pointer ltype = leftvisitor.visit(left);
+    if (!ltype)
+    {
+        Report::err(left) << "IMPL ERROR GOT NULL FROM LEFT ON BIN OP" << endl;
+        *code_ctx << Instruction("pop").with_annot("pop left");
+        return Types::int_type;
     }
 
-    return nullptr;
+    Type::const_pointer rtype = rightvisitor.visit(right);
+    if (!rtype)
+    {
+        Report::err(right) << "IMPL ERROR GOT NULL FROM RIGHT ON BIN OP" << endl;
+        *code_ctx << Instruction("pop").with_annot("pop right");
+        return Types::int_type;
+    }
+
+    // Try to get both to be the same type
+    auto coalesced_type = gen_coalesce_code(ltype, lcode, rtype, rcode);
+
+    if (!coalesced_type || !pred(coalesced_type))
+    {
+        // Required upcasting did not result in expected type
+
+        Report::err(left) << "Could not coerce types "
+                                        << ltype->name() << " and " << rtype->name();
+
+        *code_ctx << Instruction("pop").with_annot("pop right");
+        *code_ctx << Instruction("pop").with_annot("pop left");
+
+        return nullptr;
+    }
+
+    *code_ctx << *lcode << *rcode;
+
+    return coalesced_type;
 }
+
 
 static
 Function::pointer visit_function_header(CodeVisitor* visitor,
@@ -363,57 +407,6 @@ antlrcpp::Any CodeVisitor::visitMe_boolnegparens_rule(MMMLParser::Me_boolnegpare
     return Types::bool_type;
 }
 
-template <class ValidTypePred>
-Type::const_pointer generic_bin_op(CodeVisitor* visitor,
-                                   antlr4::ParserRuleContext* left,
-                                   antlr4::ParserRuleContext* right,
-                                   CodeContext::pointer code_ctx,
-                                   ValidTypePred pred)
-{
-    CodeVisitor leftvisitor, rightvisitor;
-
-    auto rcode = code_ctx->create_block();
-    auto lcode = code_ctx->create_block();
-
-    leftvisitor.code_ctx = lcode;
-    rightvisitor.code_ctx = rcode;
-
-    Type::const_pointer ltype = leftvisitor.visit(left);
-    if (!ltype)
-    {
-        Report::err(left) << "IMPL ERROR GOT NULL FROM LEFT ON BIN OP" << endl;
-        *code_ctx << Instruction("pop").with_annot("pop left");
-        return Types::int_type;
-    }
-
-    Type::const_pointer rtype = rightvisitor.visit(right);
-    if (!rtype)
-    {
-        Report::err(right) << "IMPL ERROR GOT NULL FROM RIGHT ON BIN OP" << endl;
-        *code_ctx << Instruction("pop").with_annot("pop right");
-        return Types::int_type;
-    }
-
-    // Try to get both to be the same type
-    auto coalesced_type = CodeVisitor::gen_coalesce_code(ltype, lcode, rtype, rcode);
-
-    if (!coalesced_type || !pred(coalesced_type))
-    {
-        // Required upcasting did not result in expected type
-
-        Report::err(left) << "Could not coerce types "
-                                        << ltype->name() << " and " << rtype->name();
-
-        *code_ctx << Instruction("pop").with_annot("pop right");
-        *code_ctx << Instruction("pop").with_annot("pop left");
-
-        return nullptr;
-    }
-
-    *code_ctx << *lcode << *rcode;
-
-    return coalesced_type;
-}
 
 antlrcpp::Any CodeVisitor::visitMe_listconcat_rule(MMMLParser::Me_listconcat_ruleContext *ctx)
 {
@@ -522,151 +515,7 @@ default_cast_to_int:
     return Types::int_type;
 }
 
-Type::const_pointer CodeVisitor::gen_cast_code(antlr4::ParserRuleContext * ctx,
-                                               Type::const_pointer source_type,
-                                               Type::const_pointer dest_type,
-                                               CodeContext::pointer code_ctx)
-{
-    // cast to same type?
-    if (source_type->equals(dest_type)) {
-        // float 1.5
-        // Nothing to do
-        return source_type;
-    }
 
-    // HERE: ain't null, both are basic, source ain't nil
-    if (dest_type->equals(Types::bool_type)) {
-        // Bool: Anything that ain't zero should be true
-
-        if (source_type->equals(Types::nil_type)) {
-            // corner case: bool nil
-            // just pop and push 0
-            *code_ctx << Instruction("pop")
-                      << Instruction("push", {0}).with_annot("type(bool)");
-        } else {
-
-            // sequence cast to bool: is it 0-len?
-            // get len and then convert it to 0 or 1
-            if (source_type->as<SequenceType>()) {
-
-                *code_ctx << Instruction("alen").with_annot("type(bool)");
-            }
-
-            // convert top value to 0 or 1
-            string lfalse = LabelFactory::make();
-            string lcont = LabelFactory::make();
-
-            *code_ctx << Instruction("bz", {lfalse}).with_annot("cast bool")
-                      << Instruction("push", {1}).with_annot("type(bool)")
-                      << Instruction("jump", {lcont})
-                      << Instruction("push", {0}).with_label(lfalse).with_annot("type(bool)")
-                      << Instruction("nop", {}).with_label(lcont);
-        }
-
-        return Types::bool_type;
-
-    } else if (dest_type->equals(Types::float_type)) {
-        // Float -> Float (handled above)
-        // Int -> Float
-        // Char -> Float
-        // Bool -> Float (0 or 1)
-
-        // anything to float, except nil, which is handled above
-        *code_ctx << Instruction("cast_d").with_annot("type(float)");
-
-        return Types::float_type;
-
-    } else if (dest_type->equals(Types::int_type)) {
-
-        // Float -> int : WARN
-        // Int -> int : (handled above)
-        // Char -> int : ok
-        // Bool -> int : 0 or 1
-
-        // Downcast Float -> Int:
-        if (source_type->equals(Types::float_type)) {
-            Report::warn(ctx) << "Casting from float may discard precision" << endl;
-        }
-
-        // bool is implemented as int, don't cast if it's a bool from source
-        if (!source_type->equals(Types::bool_type))
-            *code_ctx << Instruction("cast_i").with_annot("type(int)");
-
-        return Types::int_type;
-
-    } else if (dest_type->equals(Types::char_type)) {
-        // Float -> Char : WARN
-        // Int -> Char : Downcast, but expected
-        // Char -> Char : Same
-        // Bool -> Char : 0 or 1
-
-        // Downcast:
-        if (source_type->equals(Types::float_type)) {
-            Report::warn(ctx) << "Casting from float may discard precision" << endl;
-        }
-
-        // Downcast from int is expected, do not check
-
-        *code_ctx << Instruction("cast_c").with_annot("type(char)");
-        return Types::int_type;
-    }
-
-    Report::err() << "SHOULD NEVER REATH THIS POINT IN GEN_CAST_CODE" << endl;
-    return Types::int_type;
-}
-
-Type::const_pointer CodeVisitor::gen_coalesce_code(
-    Type::const_pointer ltype, CodeContext::pointer lcode,
-    Type::const_pointer rtype, CodeContext::pointer rcode)
-{
-    if (ltype->equals(rtype))
-        return ltype;
-
-    // Basic Types:
-    // char -> int
-    // char -> float
-    // char -> bool
-    // int -> float
-    // int -> bool
-    // float -> bool
-    // Special cases:
-    // nil -> any[]
-
-    // Dirty Trick: basic_types.cpp register the basic types in the following order:
-    // - char          id 0
-    // - int           id 1
-    // - float         id 2
-    // - bool          id 3
-    // - nil           id 4
-    // ANY SEQUENCE OR TUPLE OR USED DEFINED TYPE HAS HIGHER ID
-    // By taking the type with the bigger id, we can upcast without a lot of ifs
-
-    Type::const_pointer coalesced = ltype->id() > rtype->id() ? ltype : rtype ;
-    Type::const_pointer from;
-    CodeContext::pointer code_ctx;
-
-    if (coalesced == ltype) {
-        from = rtype;
-        code_ctx = rcode;
-    } else {
-        from = ltype;
-        code_ctx = lcode;
-    }
-
-    // Basic -> Nil :: ERROR
-    if (coalesced->as<NilType>())
-        return nullptr;
-
-    // Sequence / nil ?
-    if (coalesced->as<SequenceType>() && from->as<NilType>()) {
-
-        *code_ctx << Instruction("acreate", {0}).with_annot("type (" + coalesced->name() + ")");
-
-    } else if (coalesced->is_basic() && from->is_basic())
-        return gen_cast_code(nullptr, from, coalesced, code_ctx);
-
-    return nullptr;
-}
 
 antlrcpp::Any CodeVisitor::visitSeq_create_seq(MMMLParser::Seq_create_seqContext *ctx)
 {
