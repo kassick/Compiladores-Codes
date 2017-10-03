@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:45:16 2017"
- *         Updated: "2017-10-03 17:06:19 kassick"
+ *         Updated: "2017-10-03 17:17:10 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -120,19 +120,6 @@ class  CodeVisitor : public MMMLBaseVisitor {
     virtual antlrcpp::Any visitMe_exprplusminus_rule(MMMLParser::Me_exprplusminus_ruleContext *ctx) override ;
 };
 
-class TypedArgVisitor : public MMMLBaseVisitor
-{
-    std::vector<Symbol::const_pointer> result;
-    std::set<string> param_names;
-
-    virtual antlrcpp::Any visitTyped_arg_list_rule(MMMLParser::Typed_arg_list_ruleContext *ctx) override ;
-
-    virtual antlrcpp::Any visitTyped_arg(MMMLParser::Typed_argContext *ctx) override ;
-
-    virtual antlrcpp::Any visitTyped_arg_list_cont_rule(MMMLParser::Typed_arg_list_cont_ruleContext *ctx) override ;
-
-    virtual antlrcpp::Any visitTyped_arg_list_end(MMMLParser::Typed_arg_list_endContext *ctx) override ;
-};
 
 /*
 class  __CodeVisitor : public MMMLBaseVisitor {

@@ -24,6 +24,7 @@ add_executable(mmmlc
   basic_types.cpp
   NestedSymbolTable.cpp
   CodeVisitor.cpp
+  TypedArgListVisitor.cpp
   InstructionBlock.cpp
   mmml_error.cpp
   ${mmml_parser_GENERATED_SRC})

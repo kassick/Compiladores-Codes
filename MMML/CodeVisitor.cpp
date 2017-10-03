@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-10-03 17:07:54 kassick"
+ *         Updated: "2017-10-03 17:14:09 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -16,6 +16,7 @@
 #include "mmml/Instruction.H"
 #include "mmml/FunctionRegistry.H"
 #include "mmml/error.H"
+#include "mmml/TypedArgListVisitor.H"
 
 namespace mmml {
 
@@ -43,7 +44,7 @@ Function::pointer visit_function_header(CodeVisitor* visitor,
     if (f)
         return f;
 
-    std::vector<Symbol::const_pointer> plist = TypedArgVisitor().visit(args);
+    std::vector<Symbol::const_pointer> plist = TypedArgListVisitor().visit(args);
 
     auto nf = make_shared<Function>(name,
                                     plist,
@@ -1142,46 +1143,5 @@ antlrcpp::Any CodeVisitor::visitLetunpack_rule(MMMLParser::Letunpack_ruleContext
     return code_ctx->symbol_table->offset;
 }
 
-// TypedArgVisitor
-antlrcpp::Any TypedArgVisitor::visitTyped_arg_list_rule(MMMLParser::Typed_arg_list_ruleContext *ctx) {
-    Symbol::pointer sym = visit(ctx->typed_arg());
-
-    if (param_names.find(sym->name) != param_names.end())
-    {
-        Report::err(ctx) << "Duplicate symbol found in parameter list: "
-                                       << sym->name
-                                       << endl;
-    } else {
-        result.push_back(sym);
-    }
-
-    return visit(ctx->typed_arg_list_cont());
-}
-
-antlrcpp::Any TypedArgVisitor::visitTyped_arg(MMMLParser::Typed_argContext *ctx) {
-
-    auto type = TypeRegistry::instance().find_by_name(ctx->type()->getText());
-
-    if (!type) {
-        Report::err(ctx) << "Unknown type " << ctx->type()->getText()
-                                       << endl;
-        type = Types::int_type;
-    }
-
-    auto sstart = ctx->symbol()->getStart();
-    auto sym = make_shared<Symbol>(ctx->symbol()->getText(), type,
-                                   sstart->getLine(),
-                                   sstart->getCharPositionInLine());
-
-    return sym;
-}
-
-antlrcpp::Any TypedArgVisitor::visitTyped_arg_list_cont_rule(MMMLParser::Typed_arg_list_cont_ruleContext *ctx) {
-    return visit(ctx->typed_arg_list());
-}
-
-antlrcpp::Any TypedArgVisitor::visitTyped_arg_list_end(MMMLParser::Typed_arg_list_endContext *ctx) {
-    return this->result;
-}
 
 } // end namespace mmml ///////////////////////////////////////////////////////
