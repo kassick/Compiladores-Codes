@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-10-02 22:31:14 kassick"
+ *         Updated: "2017-10-03 16:32:22 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -42,7 +42,7 @@ Function::pointer visit_function_header(CodeVisitor* visitor,
     if (f)
         return f;
 
-    Function::ArgList plist = visitor->visit(args);
+    std::vector<Symbol::const_pointer> plist = TypedArgVisitor().visit(args);
 
     auto nf = make_shared<Function>(name,
                                     plist,
@@ -109,7 +109,7 @@ antlrcpp::Any CodeVisitor::visitFuncdef_impl(MMMLParser::Funcdef_implContext *ct
     // args start at 1
     for (const auto & arg: f->args)
     {
-        auto s = make_shared<Symbol>(arg.name, arg.type,
+        auto s = make_shared<Symbol>(arg->name, arg->type(),
                                      funcStart->getLine(),
                                      funcStart->getCharPositionInLine());
         st->add(s);
@@ -185,7 +185,7 @@ antlrcpp::Any CodeVisitor::visitFuncdef_impl(MMMLParser::Funcdef_implContext *ct
 
     return f;
 }
-antlrcpp::Any CodeVisitor::visitFuncdef_definition(MMMLParser::Funcdef_definitionContext *ctx)
+antlrcpp::Any CodeVisitor::visitFuncdef_header(MMMLParser::Funcdef_headerContext *ctx)
 {
     auto funcStart = ctx->getStart();
 
@@ -1140,6 +1140,49 @@ antlrcpp::Any CodeVisitor::visitLetunpack_rule(MMMLParser::Letunpack_ruleContext
 
     return code_ctx->symbol_table->offset;
 }
+
+// TypedArgVisitor
+antlrcpp::Any TypedArgVisitor::visitTyped_arg_list_rule(MMMLParser::Typed_arg_list_ruleContext *ctx) {
+    Symbol::pointer sym = visit(ctx->typed_arg());
+
+    if (param_names.find(sym->name) != param_names.end())
+    {
+        CodeVisitor::report_error(ctx) << "Duplicate symbol found in parameter list: "
+                                       << sym->name
+                                       << endl;
+    } else {
+        result.push_back(sym);
+    }
+
+    return visit(ctx->typed_arg_list_cont());
+}
+
+antlrcpp::Any TypedArgVisitor::visitTyped_arg(MMMLParser::Typed_argContext *ctx) {
+
+    auto type = TypeRegistry::instance().find_by_name(ctx->type()->getText());
+
+    if (!type) {
+        CodeVisitor::report_error(ctx) << "Unknown type " << ctx->type()->getText()
+                                       << endl;
+        type = CodeVisitor::int_type;
+    }
+
+    auto sstart = ctx->symbol()->getStart();
+    auto sym = make_shared<Symbol>(ctx->symbol()->getText(), type,
+                                   sstart->getLine(),
+                                   sstart->getCharPositionInLine());
+
+    return sym;
+}
+
+antlrcpp::Any TypedArgVisitor::visitTyped_arg_list_cont_rule(MMMLParser::Typed_arg_list_cont_ruleContext *ctx) {
+    return visit(ctx->typed_arg_list());
+}
+
+antlrcpp::Any TypedArgVisitor::visitTyped_arg_list_end(MMMLParser::Typed_arg_list_endContext *ctx) {
+    return this->result;
+}
+
 
 // Static storage for out_stream and err_stream
 ostream* CodeVisitor::out_stream = nullptr ;

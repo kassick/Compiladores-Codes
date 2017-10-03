@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:45:16 2017"
- *         Updated: "2017-10-02 21:54:20 kassick"
+ *         Updated: "2017-10-03 16:32:52 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -123,7 +123,7 @@ class  CodeVisitor : public MMMLBaseVisitor {
     // Function Definition
     virtual antlrcpp::Any visitFuncdef_impl(MMMLParser::Funcdef_implContext *ctx) override;
 
-    virtual antlrcpp::Any visitFuncdef_definition(MMMLParser::Funcdef_definitionContext *ctx) override ;
+    virtual antlrcpp::Any visitFuncdef_header(MMMLParser::Funcdef_headerContext *ctx) override ;
 
 
     virtual antlrcpp::Any visitLiteral_float_rule(MMMLParser::Literal_float_ruleContext *ctx) override ;
@@ -179,6 +179,20 @@ class  CodeVisitor : public MMMLBaseVisitor {
     virtual antlrcpp::Any visitMe_exprmuldiv_rule(MMMLParser::Me_exprmuldiv_ruleContext *ctx) override ;
 
     virtual antlrcpp::Any visitMe_exprplusminus_rule(MMMLParser::Me_exprplusminus_ruleContext *ctx) override ;
+};
+
+class TypedArgVisitor : public MMMLBaseVisitor
+{
+    std::vector<Symbol::const_pointer> result;
+    std::set<string> param_names;
+
+    virtual antlrcpp::Any visitTyped_arg_list_rule(MMMLParser::Typed_arg_list_ruleContext *ctx) override ;
+
+    virtual antlrcpp::Any visitTyped_arg(MMMLParser::Typed_argContext *ctx) override ;
+
+    virtual antlrcpp::Any visitTyped_arg_list_cont_rule(MMMLParser::Typed_arg_list_cont_ruleContext *ctx) override ;
+
+    virtual antlrcpp::Any visitTyped_arg_list_end(MMMLParser::Typed_arg_list_endContext *ctx) override ;
 };
 
 /*
