@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:45:16 2017"
- *         Updated: "2017-10-03 16:32:52 kassick"
+ *         Updated: "2017-10-03 16:45:35 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -54,60 +54,9 @@ class  CodeVisitor : public MMMLBaseVisitor {
     static Type::const_pointer float_type;
     static Type::const_pointer nil_type;
 
-    // Static: Set this so we don't have to set it every time we construct
-    static ostream *err_stream, *out_stream;
-
-    static int nerrors;
-    static int nwarns;
-
-    static ostream& out() {
-        if (out_stream)
-            return *out_stream;
-
-        return cout;
-    }
-
-    static ostream& err() {
-        if (err_stream)
-            return *err_stream;
-
-        return cerr;
-    }
-
     // Instance Variables /////////////////////////////////////////////////////
     CodeContext::pointer code_ctx;
 
-    static
-    ostream& warn(antlr4::ParserRuleContext * ctx, const string message = "")
-    {
-        err() << "Warning at line " << ctx->getStart()->getLine()
-              << ", column " << ctx->getStart()->getCharPositionInLine()
-              << " : ";
-        if (message.length() > 0)
-            err() << message << endl;
-
-        nwarns++;
-
-        return err();
-    }
-
-    static
-    ostream& report_error(antlr4::ParserRuleContext * ctx, const string message = "")
-    {
-        if (!ctx)
-            return err();
-
-        err() << "Error at line" << ctx->getStart()->getLine()
-              << ", column " << ctx->getStart()->getCharPositionInLine()
-              << " : ";
-
-        if (message.length() > 0)
-            err() << message << endl;
-
-        nerrors++;
-
-        return err();
-    }
 
     static
     Type::const_pointer gen_cast_code(antlr4::ParserRuleContext*,

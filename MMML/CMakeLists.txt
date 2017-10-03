@@ -25,6 +25,7 @@ add_executable(mmmlc
   NestedSymbolTable.cpp
   CodeVisitor.cpp
   InstructionBlock.cpp
+  mmml_error.cpp
   ${mmml_parser_GENERATED_SRC})
 add_dependencies(mmmlc mmmlc_html generate_mmml_parser)
 target_link_libraries(mmmlc antlr4static)
