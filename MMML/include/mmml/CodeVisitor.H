@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:45:16 2017"
- *         Updated: "2017-10-03 18:25:27 kassick"
+ *         Updated: "2017-10-04 14:19:01 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -27,11 +27,7 @@ class  CodeVisitor : public BaseCodeVisitor {
 
   public:
 
-    // Function Definition
-    virtual antlrcpp::Any visitFuncdef_impl(MMMLParser::Funcdef_implContext *ctx) override;
-
-    virtual antlrcpp::Any visitFuncdef_header(MMMLParser::Funcdef_headerContext *ctx) override ;
-
+    CodeVisitor() : BaseCodeVisitor() {}
 
     virtual antlrcpp::Any visitLiteral_float_rule(MMMLParser::Literal_float_ruleContext *ctx) override ;
 
@@ -64,7 +60,6 @@ class  CodeVisitor : public BaseCodeVisitor {
     virtual antlrcpp::Any visitMe_tuple_get_rule(MMMLParser::Me_tuple_get_ruleContext *ctx) override ;
 
     virtual antlrcpp::Any visitTuple_ctor(MMMLParser::Tuple_ctorContext *ctx) override ;
-
 
     virtual antlrcpp::Any visitFbody_if_rule(MMMLParser::Fbody_if_ruleContext *ctx) override ;
 

@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Oct  2 20:18:58 2017"
- *         Updated: "2017-10-03 17:09:07 kassick"
+ *         Updated: "2017-10-04 10:20:29 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -37,6 +37,7 @@ class Function {
     const string name;
     const ArgList args;
     const int def_line, def_col;
+    string label;
     int impl_line, impl_col;
     Type::const_pointer rtype;
     bool implemented = false;
@@ -48,7 +49,8 @@ class Function {
             def_line(line), def_col(col)
     {}
 
-    Function* set_implemented(int line, int col) {
+    Function* set_implemented(string label, int line, int col) {
+        this->label = label;
         this->impl_line = line;
         this->impl_col = col;
         this->implemented = true;
