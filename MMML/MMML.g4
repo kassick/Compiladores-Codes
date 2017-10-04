@@ -110,9 +110,15 @@ functionname
 // ou
 // 1 + 2 + 3
 funcbody
-  :   'if' cond=funcbody 'then' bodytrue=funcbody 'else' bodyfalse=funcbody #fbody_if_rule
-  |   'let' letlist 'in' fnested=funcbody                                   #fbody_let_rule
-  |   metaexpr                                                              #fbody_expr_rule
+    :   'if' cond=funcbody
+        'then' bodytrue=funcbody
+        'else' bodyfalse=funcbody
+        #fbody_if_rule
+    |   'let' letlist
+        'in' fnested=funcbody
+        #fbody_let_rule
+    |   metaexpr
+        #fbody_expr_rule
   ;
 
 // Lista de declarações
