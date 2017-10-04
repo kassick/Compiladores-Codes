@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Tue Oct  3 17:33:29 2017"
- *         Updated: "2017-10-03 18:04:22 kassick"
+ *         Updated: "2017-10-04 17:29:23 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -39,16 +39,16 @@ struct SymbolFactory {
     }
 };
 
-    static inline
-            Symbol::const_pointer mmml_load_symbol(const string name, CodeContext::pointer code_ctx)
-    {
-        auto s = code_ctx->symbol_table->find(name);
-        if (s) {
-            *code_ctx << Instruction("load", {s->pos}).with_annot("type(" + type_name(s->type()) + ")");
-            return s;
-        }
-
-        return nullptr;
+static inline
+Symbol::const_pointer mmml_load_symbol(const string name, CodeContext::pointer code_ctx)
+{
+    auto s = code_ctx->symbol_table->find(name);
+    if (s) {
+        *code_ctx << Instruction("load", {s->pos}).with_annot("type(" + type_name(s->type()) + ")");
+        return s;
     }
+
+    return nullptr;
+}
 
 }

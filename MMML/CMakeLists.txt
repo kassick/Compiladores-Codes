@@ -24,10 +24,10 @@ add_executable(mmmlc
   TypeRegistry.cpp
   basic_types.cpp
   InstructionBlock.cpp
-  CodeVisitor.cpp
   ToplevelVisitor.cpp
   TypedArgListVisitor.cpp
   FuncbodyVisitor.cpp
+  MetaExprVisitor.cpp
   mmml_error.cpp
   casts.cpp
   ${mmml_parser_GENERATED_SRC})

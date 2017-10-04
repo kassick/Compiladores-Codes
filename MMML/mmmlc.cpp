@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep  8 19:36:14 2017"
- *         Updated: "2017-10-04 14:25:26 kassick"
+ *         Updated: "2017-10-04 17:11:25 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -23,6 +23,7 @@
 #include "mmml/FunctionRegistry.H"
 #include "mmml/ToplevelVisitor.H"
 #include "mmml/FuncbodyVisitor.H"
+#include "mmml/MetaExprVisitor.H"
 
 using namespace std;
 

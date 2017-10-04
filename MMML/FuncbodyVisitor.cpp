@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Oct  4 10:09:35 2017"
- *         Updated: "2017-10-04 16:52:32 kassick"
+ *         Updated: "2017-10-04 18:03:41 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -25,6 +25,7 @@ namespace mmml
 
 antlrcpp::Any FuncbodyVisitor::visitFbody_expr_rule(MMMLParser::Fbody_expr_ruleContext *ctx)
 {
+    make_entry_label();
     // MetaExprVisitor mev(code_context->create_block());
     // mev.lout = lout;
     // mev.lin = lin;
@@ -32,6 +33,7 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_expr_rule(MMMLParser::Fbody_expr_ruleC
     // mev.lfalse = lfalse;
 
     // return mev.visit(ctx->metaexpr());
+    make_out_jump();
 
     return nullptr;
 }
@@ -92,12 +94,16 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleConte
     FuncbodyVisitor truevisitor(this->code_ctx->create_block());
     truevisitor.lin = ltrue;
     truevisitor.lout = this->lout;
+    truevisitor.ltrue = this->ltrue;
+    truevisitor.lfalse = this->lfalse;
     bodytrue_type =  truevisitor.visit(ctx->bodytrue);
 
     // visit false
     FuncbodyVisitor falsevisitor(this->code_ctx->create_block());
     falsevisitor.lin = lfalse;
     falsevisitor.lout = this->lout;
+    falsevisitor.ltrue = this->ltrue;
+    falsevisitor.lfalse = this->lfalse;
     bodyfalse_type = falsevisitor.visit(ctx->bodyfalse);
 
     if (!bodytrue_type || !bodyfalse_type) {
