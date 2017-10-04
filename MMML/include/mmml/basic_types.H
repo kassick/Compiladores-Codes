@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Thu Sep 28 00:18:58 2017"
- *         Updated: "2017-10-03 17:04:54 kassick"
+ *         Updated: "2017-10-04 10:08:10 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -16,6 +16,7 @@
 #pragma once
 
 #include "mmml/TypeRegistry.H"
+#include "mmml/Symbol.H"
 #include <sstream>
 #include <vector>
 #include <iterator>
@@ -253,7 +254,7 @@ class TupleType : public Type
 
 struct ClassField {
     std::string name;
-    Type::const_weak_pointer type;
+    Type::const_pointer type;
 };
 
 struct class_field_name {
@@ -264,7 +265,7 @@ struct class_field_name {
 };
 
 struct class_field_type {
-    Type::const_weak_pointer
+    Type::const_pointer
     operator()(const ClassField& f) {
         return f.type;
     }
@@ -301,7 +302,7 @@ class ClassType : public Type
             if (name_map.find(name) == name_map.end())
             {
                 name_map[name] = i;
-                field_types[i] = get_type(field).lock();
+                field_types[i] = get_type(field);
                 i++;
             } else {
                 // should never happen!
@@ -312,6 +313,18 @@ class ClassType : public Type
         Type::pointer tup = make_shared<TupleType>(field_types);
         this->base_tuple = static_pointer_cast<const TupleType>(TypeRegistry::instance().add(tup)) ;
     }
+
+    ClassType(const string name,
+              std::vector<Symbol::const_pointer> v) :
+            ClassType(name,
+                      v,
+                      [](Symbol::const_pointer s) {
+                          return s->name;
+                      },
+                      [](Symbol::const_pointer s) {
+                          return s->type();
+                      })
+    {}
 
     Type::const_pointer get_type(string name) const {
         auto it = name_map.find(name);
