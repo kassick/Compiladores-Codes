@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:33:27 2017"
- *         Updated: "2017-09-30 11:40:04 kassick"
+ *         Updated: "2017-10-04 16:52:38 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -52,7 +52,7 @@ struct CodeContext
     }
 
     CodeContext::pointer create_subcontext() {
-        return make_shared<CodeContext>(this->symbol_table);
+        return make_shared<CodeContext>(this->symbol_table->make_nested());
     }
 };
 

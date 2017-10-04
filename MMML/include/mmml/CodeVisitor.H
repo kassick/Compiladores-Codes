@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:45:16 2017"
- *         Updated: "2017-10-04 14:19:01 kassick"
+ *         Updated: "2017-10-04 14:30:31 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -61,15 +61,6 @@ class  CodeVisitor : public BaseCodeVisitor {
 
     virtual antlrcpp::Any visitTuple_ctor(MMMLParser::Tuple_ctorContext *ctx) override ;
 
-    virtual antlrcpp::Any visitFbody_if_rule(MMMLParser::Fbody_if_ruleContext *ctx) override ;
-
-    virtual antlrcpp::Any visitFbody_let_rule(MMMLParser::Fbody_let_ruleContext *ctx) override;
-
-    virtual antlrcpp::Any visitLetvarattr_rule(MMMLParser::Letvarattr_ruleContext *ctx) override ;
-
-    virtual antlrcpp::Any visitLetvarresult_ignore_rule(MMMLParser::Letvarresult_ignore_ruleContext *ctx) override ;
-
-    virtual antlrcpp::Any visitLetunpack_rule(MMMLParser::Letunpack_ruleContext *ctx) override ;
 
     virtual antlrcpp::Any visitMe_boolneg_rule(MMMLParser::Me_boolneg_ruleContext *ctx) override ;
 

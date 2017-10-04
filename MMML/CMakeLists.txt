@@ -27,6 +27,7 @@ add_executable(mmmlc
   CodeVisitor.cpp
   ToplevelVisitor.cpp
   TypedArgListVisitor.cpp
+  FuncbodyVisitor.cpp
   mmml_error.cpp
   casts.cpp
   ${mmml_parser_GENERATED_SRC})
