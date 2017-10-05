@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Thu Sep 28 00:12:18 2017"
- *         Updated: "2017-09-29 02:41:49 kassick"
+ *         Updated: "2017-10-05 11:13:36 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -58,6 +58,35 @@ TypeRegistry::add(Type::pointer& t)
     }
 
     int id = next_id++;
+
+    if (output)
+        cout << "Adding " << t->to_string() << " with id " << id << endl;
+
+    t->set_id(id);
+    name_registry[t->name()] = t;
+    registry[id] = t;
+
+    return t;
+}
+
+Type::const_pointer
+TypeRegistry::add(Type::pointer&& t, int id)
+{
+    auto dup_id_it = registry.find(id);
+    if (dup_id_it != registry.end())
+    {
+        return dup_id_it->second.lock();
+    }
+
+    auto dup_it = name_registry.find(t->name());
+    if (dup_it != name_registry.end())
+    {
+        if (output)
+            cout << "found equal at " << dup_it->second->to_string() << endl;
+
+        t.reset();
+        return dup_it->second;
+    }
 
     if (output)
         cout << "Adding " << t->to_string() << " with id " << id << endl;

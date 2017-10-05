@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Tue Oct  3 16:34:31 2017"
- *         Updated: "2017-10-03 16:49:10 kassick"
+ *         Updated: "2017-10-05 12:10:38 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -18,11 +18,15 @@
 #include <iostream>
 #include <string>
 #include "antlr4-runtime.h"
+#include "BaseErrorListener.h"
+#include "Token.h"
 
 namespace mmml
 {
 
 using namespace std;
+using namespace antlr4;
+
 
 // struct Types {
 //     static Type::const_pointer recursive_type;
@@ -116,6 +120,31 @@ struct Report
 
         return out();
     }
+};
+
+struct ErrorListener : public antlr4::BaseErrorListener {
+
+    std::ostream & out;
+
+    ErrorListener(std::ostream & out_) : out(out_) {}
+
+    virtual void syntaxError(Recognizer *recognizer, Token * offendingSymbol, size_t line, size_t charPositionInLine,
+                             const std::string &msg, std::exception_ptr e) override
+    {
+        out << "Syntax error on token " << offendingSymbol->toString()
+            << " at line" << line << ", column" << charPositionInLine
+            << " : " << msg
+            << std::endl;
+    }
+
+    // virtual void reportAmbiguity(Parser *recognizer, const dfa::DFA &dfa, size_t startIndex, size_t stopIndex, bool exact,
+    //                              const antlrcpp::BitSet &ambigAlts, atn::ATNConfigSet *configs) override;
+
+    // virtual void reportAttemptingFullContext(Parser *recognizer, const dfa::DFA &dfa, size_t startIndex, size_t stopIndex,
+    //                                          const antlrcpp::BitSet &conflictingAlts, atn::ATNConfigSet *configs) override;
+
+    // virtual void reportContextSensitivity(Parser *recognizer, const dfa::DFA &dfa, size_t startIndex, size_t stopIndex,
+    //                                       size_t prediction, atn::ATNConfigSet *configs) override;
 };
 
 

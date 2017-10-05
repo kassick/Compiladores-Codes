@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 17:01:22 2017"
- *         Updated: "2017-09-29 21:00:55 kassick"
+ *         Updated: "2017-10-05 13:33:49 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -114,6 +114,8 @@ struct Instruction
             : Instruction(op, std::vector<string>())
     {}
 
+    Instruction() : Instruction("") {}
+
     Instruction& with_label(const string l) {
         this->label = l;
         return *this;
@@ -127,16 +129,25 @@ struct Instruction
     string assembly() const {
         stringstream code;
 
+        // Empty instructions don't produce code
+        if (this->op.length() == 0 && this->label.length() == 0) {
+            if (this->annot.length() > 0)
+                code << "# " << this->annot << endl;
+
+            return code.str();
+        }
+
         if (this->label.length() == 0)
-            code << MMML_EMPTY_LABEL;
+            code << MMML_EMPTY_LABEL
+                 << "   ";
         else {
             code << this->label;
             for (int i = this->label.length(); i < MMML_LABEL_LEN; i++)
                 code << " ";
+            code << " : ";
         }
 
-        code << " : "
-             << this->op;
+        code << this->op;
 
         int instr_missing_spaces = MMML_INSTR_LEN - this->op.length();;
         for(const auto& arg : this->args)

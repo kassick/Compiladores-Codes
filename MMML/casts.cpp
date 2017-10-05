@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Tue Oct  3 17:25:16 2017"
- *         Updated: "2017-10-05 01:49:24 kassick"
+ *         Updated: "2017-10-05 11:55:11 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -19,22 +19,33 @@
 
 namespace mmml {
 
+/*-----------------------------------------------------------------------------
+ * Function: gen_coalesce_code
+ *
+ * Description: Tries to force the lowest type to the highest type
+ *
+ * Basic Types:
+ *       char -> int -> float -> bool
+ *
+ * Sequence Types:
+ *       nil -> T[] -> bool  (for any T)
+ *       nil -> bool (false)
+ *
+ * Anything that can cast to bool:
+ *       T -> BooleanBranchCode
+ *       Use extra instructions to define where it should beanch to.
+ *
+ *       gen_coalesce_code(bool_type, lcode, BooleanBranchCode, rcode,
+ *                         {Instruction("bz", {"l0"}),
+ *                          Instruction("jump", {"l1"})})
+ *---------------------------------------------------------------------------*/
 Type::const_pointer gen_coalesce_code(
     Type::const_pointer ltype, CodeContext::pointer lcode,
-    Type::const_pointer rtype, CodeContext::pointer rcode)
+    Type::const_pointer rtype, CodeContext::pointer rcode,
+    const std::vector<Instruction> &extra_instructions)
 {
     if (ltype->equals(rtype))
         return ltype;
-
-    // Basic Types:
-    // char -> int
-    // char -> float
-    // char -> bool
-    // int -> float
-    // int -> bool
-    // float -> bool
-    // Special cases:
-    // nil -> any[]
 
     // Dirty Trick: basic_types.cpp register the basic types in the following order:
     // - char          id 0
@@ -42,12 +53,14 @@ Type::const_pointer gen_coalesce_code(
     // - float         id 2
     // - bool          id 3
     // - nil           id 4
+    // - BooleanCast   id MAX_INT
     // ANY SEQUENCE OR TUPLE OR USED DEFINED TYPE HAS HIGHER ID
     // By taking the type with the bigger id, we can upcast without a lot of ifs
 
-    Type::const_pointer coalesced = ltype->id() > rtype->id() ? ltype : rtype ;
     Type::const_pointer from;
     CodeContext::pointer code_ctx;
+    Type::const_pointer ret_ype;
+    Type::const_pointer coalesced = ltype->id() > rtype->id() ? ltype : rtype ;
 
     if (coalesced == ltype) {
         from = rtype;
@@ -65,13 +78,32 @@ Type::const_pointer gen_coalesce_code(
     if (coalesced->as<SequenceType>() && from->as<NilType>()) {
 
         *code_ctx << Instruction("acreate", {0}).with_annot("type (" + coalesced->name() + ")");
+        rtype = coalesced;
 
-    } else if (coalesced->is_basic() && from->is_basic())
-        return gen_cast_code(nullptr, from, coalesced, code_ctx);
+    } else if (coalesced->is_basic() && from->is_basic()) {
+        auto r = gen_cast_code(nullptr, from, coalesced, code_ctx);
+        if (!r) // can't cast?
+            return nullptr;
 
-    return nullptr;
+        rtype = coalesced;
+
+    } else if (coalesced->as<BooleanBranchCode>()) {
+
+        // target is a branch code, cast origin from bool
+        auto t = gen_cast_code(nullptr, from, Types::bool_type, code_ctx);
+
+        if (!t) // can't cast to bool? bail!
+            return nullptr;
+
+        rtype = coalesced;
+    }
+
+    if (rtype)
+        for (const auto& instr : extra_instructions)
+            *code_ctx << instr;
+
+    return rtype;
 }
-
 
 Type::const_pointer gen_cast_code(
     antlr4::ParserRuleContext * ctx,

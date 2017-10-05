@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 17:21:32 2017"
- *         Updated: "2017-09-29 21:11:18 kassick"
+ *         Updated: "2017-10-05 12:15:51 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -22,6 +22,15 @@
 #include "mmml/Instruction.H"
 
 namespace mmml {
+struct InstructionBlock;
+}
+
+namespace std {
+ostream& operator<<(ostream& out, const mmml::InstructionBlock& ib);
+}
+
+namespace mmml {
+
 
 using namespace std;
 
@@ -67,13 +76,12 @@ struct InstructionBlock
                   std::back_inserter(this->instructions));
     }
 
-    friend ostream& operator<<(ostream& out, const InstructionBlock& ib);
+    friend ostream& std::operator<<(ostream& out, const InstructionBlock& ib);
     friend InstructionBlock& operator<<(InstructionBlock& ib, const InstructionBlock& other);
     friend InstructionBlock& operator<<(InstructionBlock& ib, InstructionBlock&& other);
     friend InstructionBlock& operator<<(InstructionBlock& ib, const Instruction& inst);
     friend InstructionBlock& operator<<(InstructionBlock& ib, Instruction&& inst);
 };
-
 
 
 } // end namespace mmml ///////////////////////////////////////////////////////

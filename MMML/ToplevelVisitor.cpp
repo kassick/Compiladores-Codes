@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Oct  4 10:09:35 2017"
- *         Updated: "2017-10-04 14:14:08 kassick"
+ *         Updated: "2017-10-05 13:51:47 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -13,6 +13,7 @@
  ****************************************************************************/
 
 #include "mmml/ToplevelVisitor.H"
+#include "mmml/FuncbodyVisitor.H"
 #include "mmml/FunctionRegistry.H"
 #include "mmml/TypedArgListVisitor.H"
 #include "mmml/error.H"
@@ -25,21 +26,19 @@ antlrcpp::Any ToplevelVisitor::visitProgrammain_rule(MMMLParser::Programmain_rul
 {
     auto funcStart = ctx->getStart();
     auto fbody_start = ctx->funcbody()->getStart();
+    auto ret_point = LabelFactory::make();
 
     ///// Now we visit the function body
-    ToplevelVisitor funcvisitor;
-    funcvisitor.code_ctx = make_shared<CodeContext>();
+    FuncbodyVisitor funcvisitor(make_shared<CodeContext>());
+    funcvisitor.lout = ret_point;
     auto st = funcvisitor.code_ctx->symbol_table;
-
-    // return point always on 0
-    st->add(make_shared<Symbol>("@ret_point", Types::int_type,
-                                funcStart->getLine(), funcStart->getCharPositionInLine()));
 
     Type::const_pointer fb_ret = funcvisitor.visit(ctx->funcbody());
 
     // Now merge the function call:
-    *code_ctx << Instruction("nop").with_label("start").with_annot("main function")
+    *code_ctx << Instruction().with_label("start").with_annot("main function")
               << std::move(*funcvisitor.code_ctx)
+            // << Instruction().with_label(ret_point)
               << Instruction("print")
               << Instruction("exit");
 
@@ -120,9 +119,8 @@ antlrcpp::Any ToplevelVisitor::visitFuncdef_impl(MMMLParser::Funcdef_implContext
 
     ///// Now we visit the function body
     // FuncbodyVisitor
-    ToplevelVisitor funcvisitor;
-    // funcvisitor.out_label = out_label;
-    funcvisitor.code_ctx = make_shared<CodeContext>();
+    FuncbodyVisitor funcvisitor(make_shared<CodeContext>());
+    funcvisitor.lout = out_label;
     auto st = funcvisitor.code_ctx->symbol_table;
 
     // return point always on 0
@@ -159,8 +157,9 @@ antlrcpp::Any ToplevelVisitor::visitFuncdef_impl(MMMLParser::Funcdef_implContext
         f->rtype = Types::int_type;
     }
 
-    // Now drop the temporary symbol table and visit again to resolve symbols
-    funcvisitor.code_ctx->symbol_table = st;
+    // Now drop the temporary symbol table and the code,
+    // visit again to resolve symbols
+    funcvisitor.code_ctx = make_shared<CodeContext>(st);
     fb_ret = funcvisitor.visit(ctx->funcbody());
 
     /*
@@ -199,15 +198,16 @@ antlrcpp::Any ToplevelVisitor::visitFuncdef_impl(MMMLParser::Funcdef_implContext
      */
 
     // Now merge the function call:
+    auto ncrunch = funcvisitor.code_ctx->symbol_table->size() - 1;
     *code_ctx <<
-            Instruction("nop")
+            Instruction()
             .with_label(f->label)
             .with_annot("function " + f->name)
               <<
             std::move(*funcvisitor.code_ctx)
               <<
             Instruction("crunch",
-                        {1, funcvisitor.code_ctx->symbol_table->size() - 1})
+                        {1, ncrunch})
             .with_label(out_label)
             .with_annot("return")
               <<

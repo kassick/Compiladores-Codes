@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 21:02:33 2017"
- *         Updated: "2017-09-29 21:09:30 kassick"
+ *         Updated: "2017-10-05 13:19:25 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -49,6 +49,8 @@ namespace mmml {
         // cal std::move [ begin(other), end(other) ) into back of original instructions
         std::move(other.instructions.begin(), other.instructions.end(),
                   std::back_inserter(ib.instructions));
+
+        other.instructions.resize(0);
 
         return ib;
     }

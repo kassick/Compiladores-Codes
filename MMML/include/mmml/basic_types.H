@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Thu Sep 28 00:18:58 2017"
- *         Updated: "2017-10-04 10:08:10 kassick"
+ *         Updated: "2017-10-05 10:57:09 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -38,6 +38,13 @@ class BasicType : public Type
         return true;
     }
 };
+
+// Tag to make differentiate when we have a value on the top of the stack
+struct BooleanBranchCode : Type
+{
+    BooleanBranchCode(): Type("boolean branch", 0) {}
+};
+
 
 class RecursiveType : public BasicType
 {

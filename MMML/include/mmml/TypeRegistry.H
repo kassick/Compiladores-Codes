@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Sep 27 23:58:52 2017"
- *         Updated: "2017-10-03 17:08:47 kassick"
+ *         Updated: "2017-10-05 11:13:43 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -48,6 +48,8 @@ class TypeRegistry {
     Type::const_pointer add(Type::pointer& t) ;
 
     Type::const_pointer add(Type::pointer&& t) ;
+
+    Type::const_pointer add(Type::pointer&& t, int id);
 
     Type::const_pointer find_by_type(Type::const_pointer) const;
 

@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Oct  4 10:10:13 2017"
- *         Updated: "2017-10-04 10:24:58 kassick"
+ *         Updated: "2017-10-05 12:11:15 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -23,6 +23,8 @@ using namespace std;
 
 class ToplevelVisitor : public BaseCodeVisitor
 {
+  public:
+
     ToplevelVisitor() :
             BaseCodeVisitor(make_shared<CodeContext>())
     {}

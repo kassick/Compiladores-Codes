@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Oct  4 10:09:35 2017"
- *         Updated: "2017-10-05 02:14:48 kassick"
+ *         Updated: "2017-10-05 13:49:33 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -23,20 +23,16 @@
 namespace mmml
 {
 
-
 antlrcpp::Any FuncbodyVisitor::visitFbody_expr_rule(MMMLParser::Fbody_expr_ruleContext *ctx)
 {
-    make_entry_label();
     MetaExprVisitor mev(code_ctx->create_block());
-    mev.lout = lout;
-    mev.lin = lin;
+    //mev.lout = lout;
+    //mev.lin = lin;
     mev.ltrue = ltrue;
     mev.lfalse = lfalse;
 
     Type::const_pointer t = mev.visit(ctx->metaexpr());
     *code_ctx << *mev.code_ctx;
-    make_out_jump();
-
 
     return t;
 }
@@ -57,45 +53,53 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleConte
 
     */
 
-    make_entry_label();
 
     Type::const_pointer cond_type, bodytrue_type, bodyfalse_type;
 
-    string laftercond = LabelFactory::make();
-    string ltrue  = LabelFactory::make();
-    string lfalse = LabelFactory::make();
+    string _laftercond = LabelFactory::make();
+    string _ltrue  = LabelFactory::make();
+    string _lfalse = LabelFactory::make();
+    string _lout;
+
+    if (this->lout.length() > 0)
+        _lout = this->lout;
+    else
+        _lout = LabelFactory::make();
 
     FuncbodyVisitor boolvisitor(this->code_ctx->create_block());
-    boolvisitor.lout = laftercond;
-    boolvisitor.ltrue = ltrue;
-    boolvisitor.lfalse = lfalse;
+    boolvisitor.lout = _laftercond;
+    boolvisitor.ltrue = _ltrue;
+    boolvisitor.lfalse = _lfalse;
 
     cond_type = boolvisitor.visit(ctx->cond).as<Type::const_pointer>();
 
-    *boolvisitor.code_ctx << Instruction("nop").with_label(laftercond);
+    *boolvisitor.code_ctx << Instruction().with_label(_laftercond);
 
     if (!cond_type) {
         Report::err(ctx) << "IMPL ERROR: COND FUNCBODY RETURNED NULL TYPE"
                           << endl;
-        *boolvisitor.code_ctx <<
-                Instruction("pop").with_annot("drop cond")
-                               <<
-                Instruction("push", {0}).with_annot("type(bool)");
 
-    } else if (!cond_type->equals(Types::bool_type)) {
+        return Types::int_type;
+    }
+
+    if (!cond_type->as<BooleanBranchCode>()) {
+        // funcbody wasn't evaluated to boolean context
+        // Must cast to bool
+        // If it's bool, gen_cast_code just returns
 
         // Must cast
         auto new_cond_type =
                 gen_cast_code(ctx,
                               cond_type, Types::bool_type,
-                              boolvisitor.code_ctx);
+                              boolvisitor.code_ctx, false);
+
+        *boolvisitor.code_ctx << Instruction("bz", {_lfalse}).with_annot("branch if");
     }
 
     // Visit each side with a different code context
 
     // visit true
     FuncbodyVisitor truevisitor(this->code_ctx->create_block());
-    truevisitor.lin = ltrue;
     truevisitor.lout = this->lout;
     truevisitor.ltrue = this->ltrue;
     truevisitor.lfalse = this->lfalse;
@@ -103,7 +107,6 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleConte
 
     // visit false
     FuncbodyVisitor falsevisitor(this->code_ctx->create_block());
-    falsevisitor.lin = lfalse;
     falsevisitor.lout = this->lout;
     falsevisitor.ltrue = this->ltrue;
     falsevisitor.lfalse = this->lfalse;
@@ -112,33 +115,40 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleConte
     if (!bodytrue_type || !bodyfalse_type) {
         Report::err(ctx) << "IMPL ERROR: BODYTRUE FUNCBODY RETURNED NULL TYPE"
                           << endl;
-        *code_ctx << Instruction("pop").with_annot("drop true or false")
-                  << Instruction("push", {0}).with_annot("type(int)");
-
         return Types::int_type;
     }
 
-    Type::const_pointer rtype =
-            gen_coalesce_code(bodytrue_type, truevisitor.code_ctx,
-                              bodyfalse_type, falsevisitor.code_ctx);
+    Type::const_pointer rtype;
+    if (bodytrue_type->as<BooleanBranchCode>() ||
+        bodytrue_type->as<BooleanBranchCode>())
+        // Must coalesce with extra instructions
+        rtype = gen_coalesce_code(bodytrue_type, truevisitor.code_ctx,
+                                  bodyfalse_type, falsevisitor.code_ctx,
+                                  {Instruction("bz", {this->lfalse}), Instruction("jump", {this->ltrue}) } );
+    else
+        rtype = gen_coalesce_code(bodytrue_type, truevisitor.code_ctx,
+                                  bodyfalse_type, falsevisitor.code_ctx);
 
     if (!rtype) {
         Report::err(ctx) << "Could not coalesce types " << bodytrue_type
                           << " and " << bodyfalse_type
                           << " . Maybe a cast?"
                           << endl;
-        *code_ctx << Instruction("pop").with_annot("drop true or false")
-                  << Instruction("push", {0}).with_annot("type(int)");
 
         return Types::int_type;
     }
 
     *code_ctx
             << *boolvisitor.code_ctx
+            << Instruction().with_label(_ltrue).with_annot("true branch")
             << *truevisitor.code_ctx
-            << *falsevisitor.code_ctx;
+            << Instruction("jump", {_lout})
+            << Instruction().with_label(_lfalse).with_annot("false branch")
+            << *falsevisitor.code_ctx
+            << Instruction("jump", {_lout});
 
-    make_out_jump();
+    if (this->lout.length() == 0)
+        *code_ctx << Instruction().with_label(_lout);
 
     return rtype;
 }
@@ -153,13 +163,20 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_let_rule(MMMLParser::Fbody_let_ruleCon
 
     auto exe_label = LabelFactory::make();
 
-    FuncbodyVisitor decls_visitor(this->code_ctx->create_subcontext());
+    cerr << "before new ctx: " << code_ctx->symbol_table->to_string() << endl;
+
+    auto new_context = this->code_ctx->create_subcontext();
+
+    cerr << "Before visiting decls: " << new_context->symbol_table->to_string() << endl;
+
+    FuncbodyVisitor decls_visitor(new_context);
 
     // visit letlist, populate the new symbol table
     decls_visitor.visit(ctx->letlist());
 
-    FuncbodyVisitor exe_visitor(this->code_ctx->create_block());
-    exe_visitor.lout = this->lout;
+    // Evaluate body with the symbol table
+    FuncbodyVisitor exe_visitor(new_context);
+    //exe_visitor.lout = this->lout;
     exe_visitor.lin = exe_label;
 
     Type::const_pointer ltype = exe_visitor.visit(ctx->fnested);
@@ -171,8 +188,7 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_let_rule(MMMLParser::Fbody_let_ruleCon
     }
 
     *this->code_ctx
-            << std::move(*decls_visitor.code_ctx)
-            << std::move(*exe_visitor.code_ctx);
+            << std::move(*new_context);
 
     return ltype;
 }
@@ -199,7 +215,7 @@ antlrcpp::Any FuncbodyVisitor::visitLetvarattr_rule(MMMLParser::Letvarattr_ruleC
     auto lcont = LabelFactory::make();
 
     FuncbodyVisitor fbvisitor(this->code_ctx->create_block());
-    fbvisitor.lout = lcont;
+    //fbvisitor.lout = lcont;
 
     // let x = funcbody
     Type::const_pointer symbol_type = fbvisitor.visit(ctx->funcbody());
@@ -217,9 +233,7 @@ antlrcpp::Any FuncbodyVisitor::visitLetvarattr_rule(MMMLParser::Letvarattr_ruleC
                           << endl;
 
         return code_ctx->symbol_table->offset;
-
     }
-
 
     auto sym = make_shared<Symbol>(ctx->sym->getText(),
                                    symbol_type,
@@ -230,9 +244,13 @@ antlrcpp::Any FuncbodyVisitor::visitLetvarattr_rule(MMMLParser::Letvarattr_ruleC
 
     *code_ctx
             << *fbvisitor.code_ctx
-            << Instruction("store", {sym->pos})
+            << Instruction()
             .with_label(lcont)
-            .with_annot("type(" + symbol_type->name() + ")");
+            .with_annot("store at " + to_string(sym->pos) +
+                        " type(" + symbol_type->name() + ")");
+
+    cerr << "After " << ctx->getText() << ":" << endl;
+    cerr << code_ctx->symbol_table->to_string() << endl;
 
     return code_ctx->symbol_table->offset;
 }
@@ -243,7 +261,7 @@ antlrcpp::Any FuncbodyVisitor::visitLetvarresult_ignore_rule(MMMLParser::Letvarr
     auto lcont = LabelFactory::make();
 
     FuncbodyVisitor fbvisitor(code_ctx->create_block());
-    fbvisitor.lout = lcont;
+    //fbvisitor.lout = lcont;
 
     Type::const_pointer symbol_type = fbvisitor.visit(ctx->funcbody());
 
@@ -282,7 +300,7 @@ antlrcpp::Any FuncbodyVisitor::visitLetunpack_rule(MMMLParser::Letunpack_ruleCon
     auto lcont = LabelFactory::make();
 
     FuncbodyVisitor fbvisitor(code_ctx->create_block());
-    fbvisitor.lout = lcont;
+    //fbvisitor.lout = lcont;
 
     Type::const_pointer list_type = fbvisitor.visit(ctx->funcbody());
 

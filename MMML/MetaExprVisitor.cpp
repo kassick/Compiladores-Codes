@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-10-05 02:12:59 kassick"
+ *         Updated: "2017-10-05 13:54:29 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -74,10 +74,6 @@ Type::const_pointer generic_bin_op(
 }
 
 
-// Tag to make differentiate when we have a value on the top of the stack
-struct BooleanBranchCode : BasicType
-{};
-
 antlrcpp::Any MetaExprVisitor::visitMe_bool_and_rule(MMMLParser::Me_bool_and_ruleContext *ctx)
 {
     MetaExprVisitor leftvisitor(code_ctx->create_block());
@@ -107,7 +103,10 @@ antlrcpp::Any MetaExprVisitor::visitMe_bool_and_rule(MMMLParser::Me_bool_and_rul
     if (!lt->as<BooleanBranchCode>())
     {
         // return is some type, try to convert to bool
-        auto lboolt = gen_cast_code(ctx->l, lt, Types::bool_type, leftvisitor.code_ctx, false);
+        auto lboolt = gen_cast_code(ctx->l,
+                                    lt, /* -> */ Types::bool_type,
+                                    leftvisitor.code_ctx,
+                                    false);
 
         if (!lboolt)
             Report::err(ctx->l) << "Could not coerce type " << lt->name()
@@ -286,8 +285,8 @@ antlrcpp::Any MetaExprVisitor::visitLiteraltrueorfalse_rule(MMMLParser::Literalt
 
     *code_ctx <<
             Instruction("push", {( ctx->getText() == "true" ? 1 : 0 ) })
-            .with_annot("type(int)");
-    return Types::int_type;
+            .with_annot("type(bool)");
+    return Types::bool_type;
 }
 
 antlrcpp::Any

@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 21:06:03 2017"
- *         Updated: "2017-10-03 17:04:00 kassick"
+ *         Updated: "2017-10-05 11:11:29 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -14,6 +14,7 @@
 
 #include "mmml/basic_types.H"
 #include "mmml/TypeRegistry.H"
+#include <limits>
 
 using namespace mmml;
 
@@ -33,5 +34,6 @@ void __attribute__ ((constructor)) init_basic_types()
     registry.add(make_shared<mmml::FloatType>());
     registry.add(make_shared<mmml::BoolType>());
     registry.add(make_shared<mmml::NilType>());
+    registry.add(make_shared<mmml::BooleanBranchCode>(), std::numeric_limits<int>::max());
 
 }
