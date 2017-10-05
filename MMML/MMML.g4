@@ -181,26 +181,27 @@ class_ctor
     ;
 
 metaexpr
-    : '(' funcbody ')'                           #me_exprparens_rule     // Anything in parenthesis -- if, let, funcion call, etc
-    | tuple_ctor                                 #me_tup_create_rule     // tuple creation
-    | class_ctor                                 #me_class_ctor_rule     // create a class from
-    | sequence_expr                              #me_list_create_rule    // creates a list [x]
-    | TOK_NEG symbol                             #me_boolneg_rule        // Negate a variable
-    | TOK_NEG '(' funcbody ')'                   #me_boolnegparens_rule  // or anything in between ( )
-    | l=metaexpr op=TOK_CONCAT r=metaexpr        #me_listconcat_rule     // Sequence concatenation
-    | l=metaexpr op=TOK_DIV_OR_MUL r=metaexpr    #me_exprmuldiv_rule     // Div and Mult are equal
-    | l=metaexpr op=TOK_PLUS_OR_MINUS r=metaexpr #me_exprplusminus_rule  // Sum and Sub are equal
-    | metaexpr TOK_CMP_GT_LT metaexpr            #me_boolgtlt_rule       // < <= >= > are equal
-    | metaexpr TOK_CMP_EQ_DIFF metaexpr          #me_booleqdiff_rule     // == and != are egual
-    | metaexpr TOK_BOOL_AND_OR metaexpr          #me_boolandor_rule      // &&   and  ||  are equal
-    | 'get' pos=DECIMAL funcbody                 #me_tuple_get_rule      // get 0 funcTup
+    : '(' funcbody ')'                            #me_exprparens_rule     // Anything in parenthesis -- if, let, funcion call, etc
+    | tuple_ctor                                  #me_tup_create_rule     // tuple creation
+    | class_ctor                                  #me_class_ctor_rule     // create a class from
+    | sequence_expr                               #me_list_create_rule    // creates a list [x]
+    | TOK_NEG symbol                              #me_boolneg_rule        // Negate a variable
+    | TOK_NEG '(' funcbody ')'                    #me_boolnegparens_rule  // or anything in between ( )
+    | l=metaexpr op=TOK_CONCAT r=metaexpr         #me_listconcat_rule     // Sequence concatenation
+    | l=metaexpr op=TOK_DIV_OR_MUL r=metaexpr     #me_exprmuldiv_rule     // Div and Mult are equal
+    | l=metaexpr op=TOK_PLUS_OR_MINUS r=metaexpr  #me_exprplusminus_rule  // Sum and Sub are equal
+    | l=metaexpr TOK_CMP_GT_LT r=metaexpr         #me_boolgtlt_rule       // < <= >= > are equal
+    | l=metaexpr TOK_CMP_EQ_DIFF r=metaexpr       #me_booleqdiff_rule     // == and != are egual
+    | l=metaexpr TOK_BOOL_AND r=metaexpr          #me_bool_and_rule      // &&
+    | l=metaexpr TOK_BOOL_OR r=metaexpr           #me_bool_or_rule      // ||
+    | 'get' pos=DECIMAL funcbody                  #me_tuple_get_rule      // get 0 funcTup
     | 'set' pos=DECIMAL tup=funcbody val=funcbody #me_tuple_set_rule      // get 0 funcTup
-    | 'get' name=symbol funcbody                 #me_class_get_rule      // get campo
-    | 'set' name=symbol cl=funcbody val=funcbody #me_class_set_rule      // get campo
-    | symbol                                     #me_exprsymbol_rule     // a single symbol
-    | literal                                    #me_exprliteral_rule    // literal value
-    | funcall                                    #me_exprfuncall_rule    // a funcion call
-    | cast                                       #me_exprcast_rule       // cast a type to other
+    | 'get' name=symbol funcbody                  #me_class_get_rule      // get campo
+    | 'set' name=symbol cl=funcbody val=funcbody  #me_class_set_rule      // get campo
+    | symbol                                      #me_exprsymbol_rule     // a single symbol
+    | literal                                     #me_exprliteral_rule    // literal value
+    | funcall                                     #me_exprfuncall_rule    // a funcion call
+    | cast                                        #me_exprcast_rule       // cast a type to other
     ;
 
 // Criação de sequência:
@@ -264,7 +265,8 @@ TOK_DIV_OR_MUL: ('/'|'*');
 TOK_PLUS_OR_MINUS: ('+'|'-');
 TOK_CMP_GT_LT: ('<='|'>='|'<'|'>');
 TOK_CMP_EQ_DIFF: ('=='|'!=');
-TOK_BOOL_AND_OR: ('&&'|'||');
+TOK_BOOL_OR: '||' ;
+TOK_BOOL_AND: '&&' ;
 TOK_REL_OP : ('>'|'<'|'=='|'>='|'<=') ;
 
 // TOK_STR_LIT

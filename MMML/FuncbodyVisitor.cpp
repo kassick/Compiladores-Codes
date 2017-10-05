@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Oct  4 10:09:35 2017"
- *         Updated: "2017-10-04 18:03:41 kassick"
+ *         Updated: "2017-10-05 02:14:48 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -15,6 +15,7 @@
 #include "mmml/FuncbodyVisitor.H"
 #include "mmml/FunctionRegistry.H"
 #include "mmml/TypedArgListVisitor.H"
+#include "mmml/MetaExprVisitor.H"
 #include "mmml/error.H"
 #include "mmml/utils.H"
 #include "mmml/casts.H"
@@ -26,16 +27,18 @@ namespace mmml
 antlrcpp::Any FuncbodyVisitor::visitFbody_expr_rule(MMMLParser::Fbody_expr_ruleContext *ctx)
 {
     make_entry_label();
-    // MetaExprVisitor mev(code_context->create_block());
-    // mev.lout = lout;
-    // mev.lin = lin;
-    // mev.ltrue = ltrue;
-    // mev.lfalse = lfalse;
+    MetaExprVisitor mev(code_ctx->create_block());
+    mev.lout = lout;
+    mev.lin = lin;
+    mev.ltrue = ltrue;
+    mev.lfalse = lfalse;
 
-    // return mev.visit(ctx->metaexpr());
+    Type::const_pointer t = mev.visit(ctx->metaexpr());
+    *code_ctx << *mev.code_ctx;
     make_out_jump();
 
-    return nullptr;
+
+    return t;
 }
 
 antlrcpp::Any FuncbodyVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleContext *ctx)

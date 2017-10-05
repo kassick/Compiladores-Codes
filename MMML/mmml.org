@@ -175,6 +175,21 @@ c // C, uma lista, é nao vazio?
 
 #+END_SRC
 
+** Operadores Relacionais
+
+Os operadores relacionais comparam dois *tipos básicos* e retornam um valor booleano
+
+- Menor e Menor ou Igual: =<= , =<==
+- Maior e Maior ou Igual: =>=, =>==
+- Igual: ====
+- Diferente: =!==
+
+#+BEGIN_SRC fsharp
+a == 1
+
+x <= 2 + 1
+#+END_SRC
+
 ** Expressões Aritméticas
 
 As expressões aritméticas são as operações aritméticas básicas de linguagens de programação:
@@ -909,9 +924,27 @@ def main =
   [[file:inputs/lists.png]]
 
 - Exemplo 13 : Precedência com operadores booleanos e expressões
-  #+INCLUDE "inputs/precedence1.mmml"
+  #+INCLUDE: "inputs/precedence1.mmml" example
 
   #+CALL: mmml_gen_tree("inputs/precedence1.mmml")
 
   #+RESULTS:
   [[file:inputs/precedence1.png]]
+
+- Exemplo 14 : Precedência de operadores booleanos
+
+  #+INCLUDE: "inputs/precedence_bool.mmml" example
+
+  #+CALL: mmml_gen_tree("inputs/precedence_bool.mmml")
+
+  #+RESULTS:
+  [[file:inputs/precedence_bool.png]]
+
+- Exemplo 15 : Precedência de operadores booleanos
+
+  #+INCLUDE: "inputs/precedence_bool2.mmml" example
+
+  #+CALL: mmml_gen_tree("inputs/precedence_bool2.mmml")
+
+  #+RESULTS:
+  [[file:inputs/precedence_bool2.png]]

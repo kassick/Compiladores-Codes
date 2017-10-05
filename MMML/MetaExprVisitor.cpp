@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-10-04 18:12:45 kassick"
+ *         Updated: "2017-10-05 02:12:59 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -19,6 +19,7 @@
 #include "mmml/TypedArgListVisitor.H"
 #include "mmml/casts.H"
 #include "mmml/utils.H"
+#include "mmml/FuncbodyVisitor.H"
 
 namespace mmml {
 
@@ -70,6 +71,146 @@ Type::const_pointer generic_bin_op(
     *code_ctx << *lcode << *rcode;
 
     return coalesced_type;
+}
+
+
+// Tag to make differentiate when we have a value on the top of the stack
+struct BooleanBranchCode : BasicType
+{};
+
+antlrcpp::Any MetaExprVisitor::visitMe_bool_and_rule(MMMLParser::Me_bool_and_ruleContext *ctx)
+{
+    MetaExprVisitor leftvisitor(code_ctx->create_block());
+    MetaExprVisitor rightvisitor(code_ctx->create_block());
+
+    string _ltrue = this->ltrue;
+    string _lfalse = this->lfalse;
+
+    if (_ltrue.length() == 0) {
+        // we are not in a boolean context, we must leave the result on the top of the stack
+        _ltrue = LabelFactory::make();
+        _lfalse = LabelFactory::make();
+    }
+
+    string lnext = LabelFactory::make();
+
+    leftvisitor.lfalse = _lfalse;
+    leftvisitor.ltrue = lnext; // if true, check next
+    //leftvisitor.lout = lnext;
+
+    rightvisitor.lfalse = _lfalse; // if false, jump out
+    rightvisitor.ltrue = _ltrue; // if true, jump true
+
+    Type::const_pointer lt = leftvisitor.visit(ctx->l).as<Type::const_pointer>();
+    Type::const_pointer rt = rightvisitor.visit(ctx->r).as<Type::const_pointer>();
+
+    if (!lt->as<BooleanBranchCode>())
+    {
+        // return is some type, try to convert to bool
+        auto lboolt = gen_cast_code(ctx->l, lt, Types::bool_type, leftvisitor.code_ctx, false);
+
+        if (!lboolt)
+            Report::err(ctx->l) << "Could not coerce type " << lt->name()
+                                << " to bool";
+
+        *leftvisitor.code_ctx << Instruction("bz", {_lfalse});
+    }
+
+    if (!rt->as<BooleanBranchCode>()) {
+        auto rboolt = gen_cast_code(ctx->r, rt, Types::bool_type, rightvisitor.code_ctx, false);
+        if (!rboolt)
+            Report::err(ctx->l) << "Could not coerce type " << rt->name()
+                                << " to bool";
+
+        *rightvisitor.code_ctx << Instruction("bz", {_lfalse});
+    }
+
+
+    *code_ctx << *leftvisitor.code_ctx
+              << Instruction("nop").with_label(lnext)
+              << *rightvisitor.code_ctx
+              << Instruction("jump", {_ltrue});
+
+    if (this->ltrue.length() == 0) {
+        auto _lout = LabelFactory::make();
+        // not in boolean context, must push true or false
+        *code_ctx << Instruction("push", {1}).with_label(_ltrue)
+                  << Instruction("jump", {_lout})
+                  << Instruction("push", {0}).with_label(_lfalse)
+                  << Instruction("nop").with_label(_lout);
+        return Types::bool_type;
+    } else {
+        // boolean context
+        *code_ctx << Instruction("jump", {_ltrue});
+        return make_shared<BooleanBranchCode>();
+    }
+}
+
+
+antlrcpp::Any MetaExprVisitor::visitMe_bool_or_rule(MMMLParser::Me_bool_or_ruleContext *ctx)
+{    MetaExprVisitor leftvisitor(code_ctx->create_block());
+    MetaExprVisitor rightvisitor(code_ctx->create_block());
+
+    string _ltrue = this->ltrue;
+    string _lfalse = this->lfalse;
+
+    if (_ltrue.length() == 0) {
+        // we are not in a boolean context, we must leave the result on the top of the stack
+        _ltrue = LabelFactory::make();
+        _lfalse = LabelFactory::make();
+    }
+
+    string lnext = LabelFactory::make();
+
+    leftvisitor.lfalse = lnext; // if false, check next
+    leftvisitor.ltrue = _ltrue;
+    //leftvisitor.lout = lnext;
+
+    rightvisitor.lfalse = _lfalse; // if false, jump out
+    rightvisitor.ltrue = _ltrue; // if true, jump true
+
+    Type::const_pointer lt = leftvisitor.visit(ctx->l).as<Type::const_pointer>();
+    Type::const_pointer rt = rightvisitor.visit(ctx->r).as<Type::const_pointer>();
+
+    if (!lt->as<BooleanBranchCode>())
+    {
+        // return is some type, try to convert to bool
+        auto lboolt = gen_cast_code(ctx->l, lt, Types::bool_type, leftvisitor.code_ctx, false);
+
+        if (!lboolt)
+            Report::err(ctx->l) << "Could not coerce type " << lt->name()
+                                << " to bool";
+
+        *leftvisitor.code_ctx << Instruction("bnz", {_ltrue});
+    }
+
+    if (!rt->as<BooleanBranchCode>()) {
+        auto rboolt = gen_cast_code(ctx->r, rt, Types::bool_type, rightvisitor.code_ctx, false);
+        if (!rboolt)
+            Report::err(ctx->l) << "Could not coerce type " << rt->name()
+                                << " to bool";
+
+        *rightvisitor.code_ctx << Instruction("bnz", {_ltrue});
+    }
+
+    *code_ctx << *leftvisitor.code_ctx
+              << Instruction("nop").with_label(lnext)
+              << *rightvisitor.code_ctx
+              << Instruction("jump", {_lfalse});
+
+    if (this->ltrue.length() == 0) {
+        auto _lout = LabelFactory::make();
+        // not in boolean context, must push true or false
+        *code_ctx << Instruction("push", {0}).with_label(_lfalse)
+                  << Instruction("jump", {_lout})
+                  << Instruction("push", {1}).with_label(_ltrue)
+                  << Instruction("nop").with_label(_lout);
+        return Types::bool_type;
+    } else {
+        // boolean context
+        *code_ctx << Instruction("jump", {_ltrue});
+        return make_shared<BooleanBranchCode>();
+    }
 }
 
 // Load Symbol ////////////////////////////////////////////////////////////////
@@ -171,7 +312,7 @@ antlrcpp::Any MetaExprVisitor::visitMe_boolneg_rule(MMMLParser::Me_boolneg_ruleC
     // coerce it to bool
     auto coerced_bool_type = gen_cast_code(ctx,
                                            s->type(), Types::bool_type,
-                                           code_ctx);
+                                           code_ctx, true);
 
     if (!coerced_bool_type || !coerced_bool_type->equals(Types::bool_type))
     {
@@ -180,11 +321,30 @@ antlrcpp::Any MetaExprVisitor::visitMe_boolneg_rule(MMMLParser::Me_boolneg_ruleC
 
     }
 
+    // 0 - 1    ->  -1  (true)
+    // 1 - 1    ->   0 (false)
+    *code_ctx << Instruction("push 1")
+              << Instruction("sub");
+
     return Types::bool_type;
 }
 
 antlrcpp::Any MetaExprVisitor::visitMe_boolnegparens_rule(MMMLParser::Me_boolnegparens_ruleContext *ctx)
 {
+    string _ltrue, _lfalse;
+    FuncbodyVisitor fbvisitor(code_ctx->create_block());
+
+    if (this->ltrue.size() > 0)
+    {
+        // boolean context: invert funcbody targets
+        _lfalse = this->ltrue;
+        _ltrue = this->lfalse;
+    } else
+    {
+        _lfalse = LabelFactory::make();
+        _ltrue = LabelFactory::make();
+    }
+
     Type::const_pointer ftype = visit(ctx->funcbody());
 
     if (!ftype) {
@@ -192,21 +352,41 @@ antlrcpp::Any MetaExprVisitor::visitMe_boolnegparens_rule(MMMLParser::Me_boolneg
         return Types::bool_type;
     }
 
-    // coerce it to bool
-    auto coerced_bool_type = gen_cast_code(ctx,
-                                           ftype, Types::bool_type,
-                                           code_ctx);
+    if (!ftype->as<BooleanBranchCode>()) {
+        // has type, must branch
+        // coerce it to bool
+        auto coerced_bool_type = gen_cast_code(ctx,
+                                               ftype, Types::bool_type,
+                                               fbvisitor.code_ctx, false);
 
-    if (!coerced_bool_type || !coerced_bool_type->equals(Types::bool_type))
-    {
-        Report::err(ctx) << "Can not coerce type " << ftype->name()
-                          << " to bool";
+        if (!coerced_bool_type || !coerced_bool_type->equals(Types::bool_type))
+        {
+            Report::err(ctx) << "Can not coerce type " << ftype->name()
+                             << " to bool";
 
+            return Types::bool_type;
+        }
+
+        *fbvisitor.code_ctx << Instruction("bz", {_ltrue});
     }
 
-    return Types::bool_type;
-}
+    *code_ctx << *fbvisitor.code_ctx;
 
+    if (this->ltrue.size() == 0) {
+        // not in bool context
+
+        auto _lout = LabelFactory::make();
+        *code_ctx << Instruction("push", {0}).with_label(_lfalse)
+                  << Instruction("jump", {_lout})
+                  << Instruction("push", {1}).with_label(_ltrue)
+                  << Instruction("nop").with_label(_lout);
+
+        return Types::bool_type;
+    } else {
+        *code_ctx << Instruction("jump", {_lfalse});
+        return make_shared<BooleanBranchCode>();
+    }
+}
 
 antlrcpp::Any MetaExprVisitor::visitMe_listconcat_rule(MMMLParser::Me_listconcat_ruleContext *ctx)
 {
@@ -217,6 +397,8 @@ antlrcpp::Any MetaExprVisitor::visitMe_listconcat_rule(MMMLParser::Me_listconcat
                                     return c->as<SequenceType>();
                                 });
 
+
+    // invalid types in join, but recover as if
     if (!rtype)
         return type_registry.add(make_shared<SequenceType>(Types::int_type));
 
@@ -251,11 +433,12 @@ antlrcpp::Any MetaExprVisitor::visitMe_listconcat_rule(MMMLParser::Me_listconcat
 
 antlrcpp::Any MetaExprVisitor::visitMe_exprmuldiv_rule(MMMLParser::Me_exprmuldiv_ruleContext *ctx)
 {
+    // Can multiply any basic type (char, int, float) with any other. Will accept recursive type as "valid" -- any type is higher than recursive, so rtype should be the non-recursive
     auto rtype = generic_bin_op(this,
                                 ctx->l, ctx->r,
                                 code_ctx,
                                 [](Type::const_pointer c) {
-                                    return c->is_basic();
+                                    return c->as<RecursiveType>() || (c->is_basic() && !c->as<BoolType>());
                                 });
 
     if (!rtype)
@@ -273,7 +456,7 @@ antlrcpp::Any MetaExprVisitor::visitMe_exprplusminus_rule(MMMLParser::Me_exprplu
                                 ctx->l, ctx->r,
                                 code_ctx,
                                 [](Type::const_pointer c) {
-                                    return c->is_basic();
+                                    return c->as<RecursiveType>() || (c->is_basic() && !c->as<BoolType>());
                                 });
 
     if (!rtype)

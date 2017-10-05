@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Tue Oct  3 17:23:52 2017"
- *         Updated: "2017-10-03 18:07:33 kassick"
+ *         Updated: "2017-10-05 01:06:05 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -24,7 +24,8 @@ namespace mmml {
 Type::const_pointer gen_cast_code(antlr4::ParserRuleContext*,
                                   Type::const_pointer source_type,
                                   Type::const_pointer dest_type,
-                                  CodeContext::pointer code_ctx);
+                                  CodeContext::pointer code_ctx,
+                                  bool sanitize_bool = false);
 
 Type::const_pointer gen_coalesce_code(
     Type::const_pointer, CodeContext::pointer,

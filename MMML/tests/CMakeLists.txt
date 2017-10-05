@@ -18,3 +18,6 @@ add_executable(test_sequence_types
   test_sequence_types.cpp
   ../TypeRegistry.cpp
   )
+
+add_executable(test_antlr_any
+  test_antlr_any.cpp)

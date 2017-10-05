@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Oct  4 14:20:23 2017"
- *         Updated: "2017-10-04 16:50:14 kassick"
+ *         Updated: "2017-10-05 02:09:46 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -24,6 +24,7 @@ using namespace std;
 
 class FuncbodyVisitor : public BaseCodeVisitor
 {
+  public:
     // Labels: out and in
     string lout, lin;
     // Labels: true and false

@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Tue Oct  3 17:25:16 2017"
- *         Updated: "2017-10-03 18:04:47 kassick"
+ *         Updated: "2017-10-05 01:49:24 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -77,7 +77,8 @@ Type::const_pointer gen_cast_code(
     antlr4::ParserRuleContext * ctx,
     Type::const_pointer source_type,
     Type::const_pointer dest_type,
-    CodeContext::pointer code_ctx)
+    CodeContext::pointer code_ctx,
+    bool sanitize_bool)
 {
     // cast to same type?
     if (source_type->equals(dest_type)) {
@@ -95,15 +96,24 @@ Type::const_pointer gen_cast_code(
             // just pop and push 0
             *code_ctx << Instruction("pop")
                       << Instruction("push", {0}).with_annot("type(bool)");
-        } else {
 
-            // sequence cast to bool: is it 0-len?
-            // get len and then convert it to 0 or 1
-            if (source_type->as<SequenceType>()) {
+            return Types::bool_type;
+        }
 
-                *code_ctx << Instruction("alen").with_annot("type(bool)");
-            }
+        // sequence cast to bool: is it 0-len?
+        // get len and then convert it to 0 or 1
+        if (source_type->as<SequenceType>()) {
 
+            *code_ctx << Instruction("alen").with_annot("type(bool)");
+
+        } else if (!source_type->is_basic()) {
+            // not sequence, not basic, error
+            return nullptr;
+        }
+
+        // Sequence or basic: value on top of stack. Should we sanitize?
+        if (sanitize_bool)
+        {
             // convert top value to 0 or 1
             string lfalse = LabelFactory::make();
             string lcont = LabelFactory::make();
@@ -160,11 +170,42 @@ Type::const_pointer gen_cast_code(
         // Downcast from int is expected, do not check
 
         *code_ctx << Instruction("cast_c").with_annot("type(char)");
-        return Types::int_type;
+        return Types::char_type;
+
+    } else if (source_type->equals(Types::bool_type)) {
+        // convert top value to 0 or 1
+        string lfalse = LabelFactory::make();
+        string lcont = LabelFactory::make();
+
+        *code_ctx << Instruction("bz", {lfalse}).with_annot("cast bool")
+                  << Instruction("push", {1}).with_annot("type(bool)")
+                  << Instruction("jump", {lcont})
+                  << Instruction("push", {0}).with_label(lfalse).with_annot("type(bool)")
+                  << Instruction("nop", {}).with_label(lcont);
+
+        if (dest_type->equals(Types::char_type))
+        {
+            *code_ctx << Instruction("cast_c").with_annot("type(char)");
+            return Types::char_type;
+        }
+        else if (dest_type->equals(Types::int_type))
+        {
+            *code_ctx << Instruction("cast_i").with_annot("type(int)");
+            return Types::int_type;
+        }
+        else if (dest_type->equals(Types::float_type))
+        {
+            *code_ctx << Instruction("cast_d").with_annot("type(float)");
+            return Types::float_type;
+        }
+        else {
+            Report::err(ctx) << "Could not cast boolean to non-primitive type" << endl;
+            return nullptr;
+        }
     }
 
-    Report::err() << "SHOULD NEVER REATH THIS POINT IN GEN_CAST_CODE" << endl;
-    return Types::int_type;
+    return nullptr;
 }
+
 
 } // end namespace mmml; //////////////////////////////////////////////////////

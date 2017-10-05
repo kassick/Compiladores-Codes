@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:45:16 2017"
- *         Updated: "2017-10-04 17:33:43 kassick"
+ *         Updated: "2017-10-04 19:16:55 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -27,9 +27,19 @@ class  MetaExprVisitor : public BaseCodeVisitor {
 
   public:
 
+    // Labels: out and in
+    string lout, lin;
+    // Labels: true and false
+    string ltrue, lfalse;
+
+
     MetaExprVisitor() : BaseCodeVisitor() {}
 
     MetaExprVisitor(CodeContext::pointer ctx) : BaseCodeVisitor(ctx) {}
+
+    virtual antlrcpp::Any visitMe_bool_and_rule(MMMLParser::Me_bool_and_ruleContext *ctx) override ;
+
+    virtual antlrcpp::Any visitMe_bool_or_rule(MMMLParser::Me_bool_or_ruleContext *ctx) override ;
 
     virtual antlrcpp::Any visitMe_exprcast_rule(MMMLParser::Me_exprcast_ruleContext *ctx) override ;
 
