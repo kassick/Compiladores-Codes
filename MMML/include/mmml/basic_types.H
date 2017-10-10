@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Thu Sep 28 00:18:58 2017"
- *         Updated: "2017-10-05 10:57:09 kassick"
+ *         Updated: "2017-10-10 11:42:57 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -42,7 +42,7 @@ class BasicType : public Type
 // Tag to make differentiate when we have a value on the top of the stack
 struct BooleanBranchCode : Type
 {
-    BooleanBranchCode(): Type("boolean branch", 0) {}
+    BooleanBranchCode(): Type("@BooleanBranchCode", 0) {}
 };
 
 
@@ -454,6 +454,7 @@ struct Types {
     static Type::const_pointer int_type;
     static Type::const_pointer float_type;
     static Type::const_pointer nil_type;
+    static Type::const_pointer boolean_branch;
 };
 
 void __attribute__ ((constructor)) init_basic_types();

@@ -7,7 +7,8 @@ start
 
 instruction_line
     :   (label ':' )?
-        instruction
+        NEWLINE*
+        instruction?
         NEWLINE
         #instructionLine
     |   NEWLINE // linhas em branco
@@ -185,11 +186,10 @@ strarg : LITERAL_STRING ;
 
 // Tokens
 
-WS : [ \t] -> skip;
 
 NEWLINE : '\r'? '\n'; // dos or windows newlines
 
-COMMENT : '#' ~[\r\n]* -> skip ;
+SKIP_: (COMMENT | WS) -> skip;
 
 LITERAL_STRING
     :   '"'
@@ -226,3 +226,9 @@ HEX_DIGIT : [0-9A-Fa-f];
 
 fragment
 DEC_DIGIT : [0-9] ;
+
+fragment
+COMMENT : '#' ~[\n\r\f]* ;
+
+fragment
+WS : [ \t]+ ;

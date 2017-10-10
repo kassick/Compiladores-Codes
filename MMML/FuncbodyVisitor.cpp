@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Oct  4 10:09:35 2017"
- *         Updated: "2017-10-05 13:49:33 kassick"
+ *         Updated: "2017-10-10 15:28:40 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -26,12 +26,14 @@ namespace mmml
 antlrcpp::Any FuncbodyVisitor::visitFbody_expr_rule(MMMLParser::Fbody_expr_ruleContext *ctx)
 {
     MetaExprVisitor mev(code_ctx->create_block());
-    //mev.lout = lout;
-    //mev.lin = lin;
+    mev.lout = lout;
     mev.ltrue = ltrue;
     mev.lfalse = lfalse;
 
-    Type::const_pointer t = mev.visit(ctx->metaexpr());
+    auto ret = mev.visit(ctx->metaexpr());
+    cerr << (ret.is<Type::const_pointer>() ? "not null" : "null")
+         << endl;
+    Type::const_pointer t = ret;
     *code_ctx << *mev.code_ctx;
 
     return t;
@@ -72,12 +74,9 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleConte
     boolvisitor.lfalse = _lfalse;
 
     cond_type = boolvisitor.visit(ctx->cond).as<Type::const_pointer>();
-
-    *boolvisitor.code_ctx << Instruction().with_label(_laftercond);
-
     if (!cond_type) {
         Report::err(ctx) << "IMPL ERROR: COND FUNCBODY RETURNED NULL TYPE"
-                          << endl;
+                         << endl;
 
         return Types::int_type;
     }
@@ -93,10 +92,11 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleConte
                               cond_type, Types::bool_type,
                               boolvisitor.code_ctx, false);
 
-        *boolvisitor.code_ctx << Instruction("bz", {_lfalse}).with_annot("branch if");
-    }
+        *boolvisitor.code_ctx
+                << Instruction("bz", {_lfalse}).with_annot("branch if")
+                << Instruction("jump", {_ltrue}).with_label(_laftercond).with_annot("IF COND JUMP NOT BBRANCH");
 
-    // Visit each side with a different code context
+    }
 
     // visit true
     FuncbodyVisitor truevisitor(this->code_ctx->create_block());
@@ -118,13 +118,23 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleConte
         return Types::int_type;
     }
 
+    // Now calculate the return type
     Type::const_pointer rtype;
+
+    // If any side was a branch code (because this if is in bool context), we
+    // must coalesce both to a branch code. The one that wasn't, must convert to
+    // bool and add a bz to false and a jump to true.
+
     if (bodytrue_type->as<BooleanBranchCode>() ||
         bodytrue_type->as<BooleanBranchCode>())
-        // Must coalesce with extra instructions
-        rtype = gen_coalesce_code(bodytrue_type, truevisitor.code_ctx,
-                                  bodyfalse_type, falsevisitor.code_ctx,
-                                  {Instruction("bz", {this->lfalse}), Instruction("jump", {this->ltrue}) } );
+        rtype = gen_coalesce_code (
+                    bodytrue_type, truevisitor.code_ctx,
+                    bodyfalse_type, falsevisitor.code_ctx,
+                    {
+                        Instruction("bz", {this->lfalse}),
+                                Instruction("jump", {this->ltrue}).with_annot("Coalesce jump")
+                    }
+                 );
     else
         rtype = gen_coalesce_code(bodytrue_type, truevisitor.code_ctx,
                                   bodyfalse_type, falsevisitor.code_ctx);
@@ -141,14 +151,22 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleConte
     *code_ctx
             << *boolvisitor.code_ctx
             << Instruction().with_label(_ltrue).with_annot("true branch")
-            << *truevisitor.code_ctx
-            << Instruction("jump", {_lout})
-            << Instruction().with_label(_lfalse).with_annot("false branch")
-            << *falsevisitor.code_ctx
-            << Instruction("jump", {_lout});
+            << *truevisitor.code_ctx;
+
+    // If we are in boolean context, the bodies already do the jump
+    if (!rtype->as<BooleanBranchCode>())
+        *code_ctx << Instruction("jump", {_lout}).with_annot("OUT OF TRUE BRANCH");
+
+    *code_ctx << Instruction().with_label(_lfalse).with_annot("false branch")
+              << *falsevisitor.code_ctx;
+
+    if (!rtype->as<BooleanBranchCode>())
+        *code_ctx << Instruction("jump", {_lout}).with_annot("OUT OF FALSE BRANCH");
 
     if (this->lout.length() == 0)
         *code_ctx << Instruction().with_label(_lout);
+    else
+        cerr << "Not adding out jump for if " << ctx->getText() << " it already has label at " << this->lout << endl;
 
     return rtype;
 }

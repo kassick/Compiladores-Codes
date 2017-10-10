@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 21:06:03 2017"
- *         Updated: "2017-10-05 11:11:29 kassick"
+ *         Updated: "2017-10-10 11:39:56 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -24,6 +24,7 @@ Type::const_pointer Types::char_type = TypeRegistry::instance().find_by_name("ch
 Type::const_pointer Types::int_type = TypeRegistry::instance().find_by_name("int");
 Type::const_pointer Types::float_type = TypeRegistry::instance().find_by_name("float");
 Type::const_pointer Types::nil_type = TypeRegistry::instance().find_by_name("nil");
+Type::const_pointer Types::boolean_branch = TypeRegistry::instance().find_by_name("@BooleanBranchCode");
 
 void __attribute__ ((constructor)) init_basic_types()
 {

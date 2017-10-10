@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Oct  4 10:09:35 2017"
- *         Updated: "2017-10-05 13:51:47 kassick"
+ *         Updated: "2017-10-10 15:51:07 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -38,8 +38,7 @@ antlrcpp::Any ToplevelVisitor::visitProgrammain_rule(MMMLParser::Programmain_rul
     // Now merge the function call:
     *code_ctx << Instruction().with_label("start").with_annot("main function")
               << std::move(*funcvisitor.code_ctx)
-            // << Instruction().with_label(ret_point)
-              << Instruction("print")
+              << Instruction("print").with_label(ret_point)
               << Instruction("exit");
 
 
@@ -268,7 +267,8 @@ antlrcpp::Any ToplevelVisitor::visitCustom_type_decl_rule(MMMLParser::Custom_typ
     auto name = ctx->custom_type_name()->getText();
     auto oldtype = type_registry.find_by_name(name);
 
-    std::vector<Symbol::const_pointer> plist = TypedArgListVisitor().visit(ctx->typed_arg_list());
+    std::vector<Symbol::const_pointer> plist =
+            TypedArgListVisitor().visit(ctx->typed_arg_list());
 
     if (oldtype) {
         Report::err(ctx) << "Type ``" << name
@@ -279,6 +279,8 @@ antlrcpp::Any ToplevelVisitor::visitCustom_type_decl_rule(MMMLParser::Custom_typ
     auto newclass = make_shared<ClassType>(name, plist);
 
     type_registry.add(newclass);
+
+    cerr << "defined new class" << newclass->name() << endl;
 
     return nullptr;
 }

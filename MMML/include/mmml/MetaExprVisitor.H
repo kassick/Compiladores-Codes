@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:45:16 2017"
- *         Updated: "2017-10-04 19:16:55 kassick"
+ *         Updated: "2017-10-10 15:52:52 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -36,6 +36,8 @@ class  MetaExprVisitor : public BaseCodeVisitor {
     MetaExprVisitor() : BaseCodeVisitor() {}
 
     MetaExprVisitor(CodeContext::pointer ctx) : BaseCodeVisitor(ctx) {}
+
+    virtual antlrcpp::Any visitMe_exprparens_rule(MMMLParser::Me_exprparens_ruleContext *ctx) override ;
 
     virtual antlrcpp::Any visitMe_bool_and_rule(MMMLParser::Me_bool_and_ruleContext *ctx) override ;
 
@@ -68,17 +70,27 @@ class  MetaExprVisitor : public BaseCodeVisitor {
 
     virtual antlrcpp::Any visitSeq_create_seq(MMMLParser::Seq_create_seqContext *ctx) override ;
 
+    // Class Access / Creation
+
+    virtual antlrcpp::Any visitClass_ctor(MMMLParser::Class_ctorContext *ctx) override;
+
+    virtual antlrcpp::Any visitMe_class_ctor_rule(MMMLParser::Me_class_ctor_ruleContext *ctx) override;
+
     virtual antlrcpp::Any visitMe_class_get_rule(MMMLParser::Me_class_get_ruleContext *ctx) override ;
 
     virtual antlrcpp::Any visitMe_class_set_rule(MMMLParser::Me_class_set_ruleContext *ctx) override ;
+
+    // Tuples:
+    virtual antlrcpp::Any visitMe_tup_create_rule(MMMLParser::Me_tup_create_ruleContext *ctx) override;
+
+    virtual antlrcpp::Any visitTuple_ctor(MMMLParser::Tuple_ctorContext *ctx) override ;
 
     virtual antlrcpp::Any visitMe_tuple_set_rule(MMMLParser::Me_tuple_set_ruleContext *ctx) override ;
 
     virtual antlrcpp::Any visitMe_tuple_get_rule(MMMLParser::Me_tuple_get_ruleContext *ctx) override ;
 
-    virtual antlrcpp::Any visitTuple_ctor(MMMLParser::Tuple_ctorContext *ctx) override ;
 
-
+    // Booleans
     virtual antlrcpp::Any visitMe_boolneg_rule(MMMLParser::Me_boolneg_ruleContext *ctx) override ;
 
     virtual antlrcpp::Any visitMe_boolnegparens_rule(MMMLParser::Me_boolnegparens_ruleContext *ctx) override ;
