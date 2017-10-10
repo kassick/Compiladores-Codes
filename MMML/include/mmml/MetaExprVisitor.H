@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:45:16 2017"
- *         Updated: "2017-10-10 17:14:08 kassick"
+ *         Updated: "2017-10-10 18:18:31 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -104,6 +104,12 @@ class  MetaExprVisitor : public BaseCodeVisitor {
     virtual antlrcpp::Any visitMe_exprmuldiv_rule(MMMLParser::Me_exprmuldiv_ruleContext *ctx) override ;
 
     virtual antlrcpp::Any visitMe_exprplusminus_rule(MMMLParser::Me_exprplusminus_ruleContext *ctx) override ;
+
+    // Relacional
+    virtual antlrcpp::Any visitMe_boolgtlt_rule(MMMLParser::Me_boolgtlt_ruleContext *ctx) override;
+
+    virtual antlrcpp::Any visitMe_booleqdiff_rule(MMMLParser::Me_booleqdiff_ruleContext *ctx) override;
+
 };
 
 

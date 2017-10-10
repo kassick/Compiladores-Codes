@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-10-10 17:14:41 kassick"
+ *         Updated: "2017-10-10 18:41:56 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -88,7 +88,8 @@ Type::const_pointer generic_bin_op(
         return nullptr;
     }
 
-    *code_ctx << *lcode << *rcode;
+    *code_ctx << std::move(*lcode)
+              << std::move(*rcode);
 
     return coalesced_type;
 }
@@ -480,6 +481,114 @@ antlrcpp::Any MetaExprVisitor::visitMe_exprplusminus_rule(MMMLParser::Me_exprplu
     return rtype;
 }
 
+// Relational
+antlrcpp::Any
+MetaExprVisitor::visitMe_boolgtlt_rule(MMMLParser::Me_boolgtlt_ruleContext *ctx)
+{
+    auto rtype = generic_bin_op(this,
+                                ctx->l, ctx->r,
+                                code_ctx,
+                                [](Type::const_pointer c) {
+                                    return c->as<RecursiveType>() || (c->is_basic() && !c->as<BoolType>());
+                                });
+
+    if (!rtype)
+        return Types::int_type;
+
+    string _ltrue, _lfalse;
+    bool boolean_ctx = this->ltrue.length() > 0;
+    if (boolean_ctx) {
+        _ltrue = this->ltrue;
+        _lfalse = this->lfalse;
+    } else {
+        _ltrue = LabelFactory::make();
+        _lfalse = LabelFactory::make();
+    }
+
+    // cmp_instr jumps to false or falls through
+    // cmp_instr _lfalse
+    // jump _ltrue
+    *code_ctx << Instruction("sub").with_annot("cmp");
+
+    auto cmp_txt = ctx->TOK_CMP_GT_LT()->getText();
+    if (cmp_txt == "<=")
+        // x <= y <=> x-y <= 0 <=> !(x-y > 0)
+        *code_ctx << Instruction("bpos", {_lfalse})
+                  << Instruction("jump", {_ltrue});
+    else if (cmp_txt == "<")
+        // x < y <=> x-y < 0
+        *code_ctx << Instruction("bneg", {_ltrue})
+                  << Instruction("jump", {_lfalse});
+    else if (cmp_txt == ">=")
+        // x >= y  <=>  x-y >= 0  <=> !(x-y < 0)
+        *code_ctx << Instruction("bneg", {_lfalse})
+                  << Instruction("jump", {_ltrue});
+    else if (cmp_txt == ">")
+        // x > y <=> x-y > 0
+        *code_ctx << Instruction("bpos", {_ltrue})
+                  << Instruction("jump", {_lfalse});
+    else
+        throw logic_error("UNHANDLED COMPARE");
+
+    if (boolean_ctx)
+        return Types::boolean_branch;
+
+    auto _lout = LabelFactory::make();
+    *code_ctx << Instruction("push", {1}).with_label(_ltrue)
+              << Instruction("jump", {_lout})
+              << Instruction("push", {0}).with_label(_lfalse)
+              << Instruction().with_label(_lout);
+
+    return Types::bool_type;
+}
+
+antlrcpp::Any
+MetaExprVisitor::visitMe_booleqdiff_rule(MMMLParser::Me_booleqdiff_ruleContext *ctx)
+{
+    auto rtype = generic_bin_op(this,
+                                ctx->l, ctx->r,
+                                code_ctx,
+                                [](Type::const_pointer c) {
+                                    return c->as<RecursiveType>() || (c->is_basic() && !c->as<BoolType>());
+                                });
+
+    if (!rtype)
+        return Types::int_type;
+
+    string _ltrue, _lfalse;
+    bool boolean_ctx = this->ltrue.length() > 0;
+    if (boolean_ctx) {
+        _ltrue = this->ltrue;
+        _lfalse = this->lfalse;
+    } else {
+        _ltrue = LabelFactory::make();
+        _lfalse = LabelFactory::make();
+    }
+
+    // cmp_instr jumps to false or falls through
+    // cmp_instr _lfalse
+    // jump _ltrue
+    *code_ctx << Instruction("sub").with_annot("cmp");
+
+    auto cmp_txt = ctx->TOK_CMP_EQ_DIFF()->getText();
+    if (cmp_txt == "==")
+        *code_ctx << Instruction("bz", {_ltrue})
+                  << Instruction("jump", {_lfalse});
+    else if (cmp_txt == "!=")
+        *code_ctx << Instruction("bnz", {_ltrue})
+                  << Instruction("jump", {_lfalse});
+
+    if (boolean_ctx)
+        return Types::boolean_branch;
+
+    auto _lout = LabelFactory::make();
+    *code_ctx << Instruction("push", {1}).with_label(_ltrue)
+              << Instruction("jump", {_lout})
+              << Instruction("push", {0}).with_label(_lfalse)
+              << Instruction().with_label(_lout);
+
+    return Types::bool_type;
+}
 // Cast ///////////////////////////////////////////////////////////////////////
 antlrcpp::Any MetaExprVisitor::visitMe_exprcast_rule(MMMLParser::Me_exprcast_ruleContext *ctx)
 {
