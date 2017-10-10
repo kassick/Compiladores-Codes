@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Tue Oct  3 17:10:53 2017"
- *         Updated: "2017-10-10 16:55:35 kassick"
+ *         Updated: "2017-10-10 17:12:06 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -44,6 +44,5 @@ class TypedArgListVisitor : public MMMLBaseVisitor
     virtual antlrcpp::Any visitType_custom_rule(MMMLParser::Type_custom_ruleContext *ctx) override;
 
     virtual antlrcpp::Any visitType_sequence_rule(MMMLParser::Type_sequence_ruleContext *ctx) override;
-
 };
 }

@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:45:16 2017"
- *         Updated: "2017-10-10 15:52:52 kassick"
+ *         Updated: "2017-10-10 17:14:08 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -68,7 +68,12 @@ class  MetaExprVisitor : public BaseCodeVisitor {
 
     virtual antlrcpp::Any visitCast_rule(MMMLParser::Cast_ruleContext *ctx) override ;
 
+    // Sequences
+    virtual antlrcpp::Any visitMe_list_create_rule(MMMLParser::Me_list_create_ruleContext *ctx) override;
+
     virtual antlrcpp::Any visitSeq_create_seq(MMMLParser::Seq_create_seqContext *ctx) override ;
+
+    virtual antlrcpp::Any visitMe_listconcat_rule(MMMLParser::Me_listconcat_ruleContext *ctx) override ;
 
     // Class Access / Creation
 
@@ -96,8 +101,6 @@ class  MetaExprVisitor : public BaseCodeVisitor {
     virtual antlrcpp::Any visitMe_boolnegparens_rule(MMMLParser::Me_boolnegparens_ruleContext *ctx) override ;
 
     // binary ops
-    virtual antlrcpp::Any visitMe_listconcat_rule(MMMLParser::Me_listconcat_ruleContext *ctx) override ;
-
     virtual antlrcpp::Any visitMe_exprmuldiv_rule(MMMLParser::Me_exprmuldiv_ruleContext *ctx) override ;
 
     virtual antlrcpp::Any visitMe_exprplusminus_rule(MMMLParser::Me_exprplusminus_ruleContext *ctx) override ;

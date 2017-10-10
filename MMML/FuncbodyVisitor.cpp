@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Oct  4 10:09:35 2017"
- *         Updated: "2017-10-10 15:28:40 kassick"
+ *         Updated: "2017-10-10 18:04:38 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -181,7 +181,7 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_let_rule(MMMLParser::Fbody_let_ruleCon
 
     auto exe_label = LabelFactory::make();
 
-    cerr << "before new ctx: " << code_ctx->symbol_table->to_string() << endl;
+    auto old_stack_top = this->code_ctx->symbol_table->local_size();
 
     auto new_context = this->code_ctx->create_subcontext();
 
@@ -205,8 +205,13 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_let_rule(MMMLParser::Fbody_let_ruleCon
         ltype = Types::int_type;
     }
 
+    int new_stack_top = new_context->symbol_table->local_size();
+
     *this->code_ctx
-            << std::move(*new_context);
+            << std::move(*new_context)
+            << Instruction("crunch",
+                           {old_stack_top, new_stack_top - old_stack_top })
+            .with_annot("end of context");
 
     return ltype;
 }
@@ -333,25 +338,14 @@ antlrcpp::Any FuncbodyVisitor::visitLetunpack_rule(MMMLParser::Letunpack_ruleCon
         list_type = type_registry.add(make_shared<SequenceType>(list_type));
     }
 
-    auto previous_tail = code_ctx->symbol_table->find_local(ctx->tail->getText());
-    if (previous_tail) {
-        Report::err(ctx) << "Re-definition of symbol ``" << previous_tail->name
-                          << " shadows previously defined in line "
-                          << previous_tail->line << ", column" << previous_tail->col
-                          << endl;
-    } else {
-        auto sym = make_shared<Symbol>(ctx->tail->getText(), list_type,
-                                       ctx->tail->getStart()->getLine(),
-                                       ctx->tail->getStart()->getCharPositionInLine());
+    *fbvisitor.code_ctx
+            << Instruction("aload").with_annot("unpack sequence")
+            << Instruction("push", {-1})
+            << Instruction("add")
+            << Instruction("acreate").with_annot("repack n-1");
 
-        code_ctx->symbol_table->add(sym);
-
-        *fbvisitor.code_ctx <<
-                Instruction("store", {sym->pos})
-                .with_label(lcont)
-                .with_annot("type(" + list_type->name() + ")");
-    }
-
+    // Stack is TOP> tail head
+    // Add FIRST HEAD, so the position in in the symbol table matches the stack size
     auto previous_head = code_ctx->symbol_table->find_local(ctx->head->getText());
     if (previous_head) {
         Report::err(ctx) << "Re-definition of symbol ``" << previous_head->name
@@ -366,16 +360,42 @@ antlrcpp::Any FuncbodyVisitor::visitLetunpack_rule(MMMLParser::Letunpack_ruleCon
             decayed_type = Types::int_type;
         }
 
-        auto sym = make_shared<Symbol>(ctx->tail->getText(), decayed_type,
+        auto sym = make_shared<Symbol>(ctx->head->getText(), decayed_type,
                                        ctx->head->getStart()->getLine(),
                                        ctx->head->getStart()->getCharPositionInLine());
 
         code_ctx->symbol_table->add(sym);
 
         *fbvisitor.code_ctx <<
-                Instruction("store", {sym->pos})
-                .with_annot("type(" + decayed_type->name() + ")");
+                Instruction()
+                .with_annot("store at " + to_string(sym->pos) +
+                            " type(" + decayed_type->name() + ")");
     }
+
+
+    // SECOND: store TAIL
+    auto previous_tail = code_ctx->symbol_table->find_local(ctx->tail->getText());
+    if (previous_tail) {
+        Report::err(ctx) << "Re-definition of symbol ``" << previous_tail->name
+                          << " shadows previously defined in line "
+                          << previous_tail->line << ", column" << previous_tail->col
+                          << endl;
+    } else {
+        auto sym = make_shared<Symbol>(ctx->tail->getText(), list_type,
+                                       ctx->tail->getStart()->getLine(),
+                                       ctx->tail->getStart()->getCharPositionInLine());
+
+        code_ctx->symbol_table->add(sym);
+
+        *fbvisitor.code_ctx <<
+                Instruction()
+                .with_label(lcont)
+                .with_annot("store at " + to_string(sym->pos) +
+                            " type(" + list_type->name() + ")");
+    }
+
+
+    *code_ctx << std::move(*fbvisitor.code_ctx);
 
     return code_ctx->symbol_table->offset;
 }

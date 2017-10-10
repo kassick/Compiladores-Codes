@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-10-10 16:37:20 kassick"
+ *         Updated: "2017-10-10 17:14:41 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -508,7 +508,11 @@ antlrcpp::Any MetaExprVisitor::visitCast_rule(MMMLParser::Cast_ruleContext *ctx)
     return gen_cast_code(ctx, source_type, dest_type, code_ctx);
 }
 
-
+antlrcpp::Any
+MetaExprVisitor::visitMe_list_create_rule(MMMLParser::Me_list_create_ruleContext *ctx)
+{
+    return this->visit(ctx->sequence_expr());
+}
 
 antlrcpp::Any MetaExprVisitor::visitSeq_create_seq(MMMLParser::Seq_create_seqContext *ctx)
 {

@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep  8 20:55:04 2017"
- *         Updated: "2017-09-30 12:43:53 kassick"
+ *         Updated: "2017-10-10 17:44:35 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -76,6 +76,8 @@ class NestedSymbolTable : public enable_shared_from_this<NestedSymbolTable>
     void add(const Symbol::pointer s);
 
     int size() const;
+
+    int local_size() const {return _size;}
 
     int fullNestedSize() const;
 
