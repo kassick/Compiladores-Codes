@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Tue Oct  3 16:34:31 2017"
- *         Updated: "2017-10-05 12:10:38 kassick"
+ *         Updated: "2017-10-10 20:36:31 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -62,6 +62,9 @@ struct Report
     static
     ostream& warn(antlr4::ParserRuleContext * ctx, const string message = "")
     {
+        if (!ctx)
+            return err();
+
         err() << "Warning at line " << ctx->getStart()->getLine()
               << ", column " << ctx->getStart()->getCharPositionInLine()
               << " : ";
@@ -79,7 +82,7 @@ struct Report
         if (!ctx)
             return err();
 
-        err() << "Error at line" << ctx->getStart()->getLine()
+        err() << "Error at line " << ctx->getStart()->getLine()
               << ", column " << ctx->getStart()->getCharPositionInLine()
               << " : ";
 
@@ -106,12 +109,13 @@ struct Report
         return out();
     }
 
+    static
     ostream& info(antlr4::ParserRuleContext* ctx, const string message="")
     {
         if (!ctx)
             return out();
 
-        out() << "Into: at line" << ctx->getStart()->getLine()
+        out() << "Info: at line " << ctx->getStart()->getLine()
               << ", column " << ctx->getStart()->getCharPositionInLine()
               << " : ";
 

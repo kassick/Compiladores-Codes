@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Tue Oct  3 17:25:16 2017"
- *         Updated: "2017-10-05 11:55:11 kassick"
+ *         Updated: "2017-10-10 20:39:49 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -40,6 +40,7 @@ namespace mmml {
  *                          Instruction("jump", {"l1"})})
  *---------------------------------------------------------------------------*/
 Type::const_pointer gen_coalesce_code(
+    antlr4::ParserRuleContext * ctx,
     Type::const_pointer ltype, CodeContext::pointer lcode,
     Type::const_pointer rtype, CodeContext::pointer rcode,
     const std::vector<Instruction> &extra_instructions)
@@ -81,7 +82,7 @@ Type::const_pointer gen_coalesce_code(
         rtype = coalesced;
 
     } else if (coalesced->is_basic() && from->is_basic()) {
-        auto r = gen_cast_code(nullptr, from, coalesced, code_ctx);
+        auto r = gen_cast_code(ctx, from, coalesced, code_ctx);
         if (!r) // can't cast?
             return nullptr;
 
@@ -90,7 +91,7 @@ Type::const_pointer gen_coalesce_code(
     } else if (coalesced->as<BooleanBranchCode>()) {
 
         // target is a branch code, cast origin from bool
-        auto t = gen_cast_code(nullptr, from, Types::bool_type, code_ctx);
+        auto t = gen_cast_code(ctx, from, Types::bool_type, code_ctx);
 
         if (!t) // can't cast to bool? bail!
             return nullptr;
@@ -112,6 +113,9 @@ Type::const_pointer gen_cast_code(
     CodeContext::pointer code_ctx,
     bool sanitize_bool)
 {
+    if (!source_type || !dest_type)
+        return nullptr;
+
     // cast to same type?
     if (source_type->equals(dest_type)) {
         // float 1.5
@@ -119,7 +123,7 @@ Type::const_pointer gen_cast_code(
         return source_type;
     }
 
-    // HERE: ain't null, both are basic, source ain't nil
+    // ALMOST anything bool
     if (dest_type->equals(Types::bool_type)) {
         // Bool: Anything that ain't zero should be true
 

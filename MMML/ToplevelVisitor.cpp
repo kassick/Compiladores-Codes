@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Oct  4 10:09:35 2017"
- *         Updated: "2017-10-10 15:51:07 kassick"
+ *         Updated: "2017-10-10 20:34:13 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -118,7 +118,7 @@ antlrcpp::Any ToplevelVisitor::visitFuncdef_impl(MMMLParser::Funcdef_implContext
 
     ///// Now we visit the function body
     // FuncbodyVisitor
-    FuncbodyVisitor funcvisitor(make_shared<CodeContext>());
+    FuncbodyVisitor funcvisitor(code_ctx->create_subcontext());
     funcvisitor.lout = out_label;
     auto st = funcvisitor.code_ctx->symbol_table;
 
@@ -148,10 +148,12 @@ antlrcpp::Any ToplevelVisitor::visitFuncdef_impl(MMMLParser::Funcdef_implContext
         return f;
     }
 
-    if (fb_ret->equals(Types::recursive_type))
+    f->rtype = fb_ret;
+
+    if (f->rtype->equals(Types::recursive_type))
     {
         Report::err(ctx) << "Function " << f->name
-                          << "always recurses into itself. Can not resolve recursion"
+                          << " always recurses into itself. Can not resolve recursion"
                           << endl;
         f->rtype = Types::int_type;
     }
@@ -197,7 +199,7 @@ antlrcpp::Any ToplevelVisitor::visitFuncdef_impl(MMMLParser::Funcdef_implContext
      */
 
     // Now merge the function call:
-    auto ncrunch = funcvisitor.code_ctx->symbol_table->size() - 1;
+    auto ncrunch = funcvisitor.code_ctx->symbol_table->local_size() - 1;
     *code_ctx <<
             Instruction()
             .with_label(f->label)
@@ -212,8 +214,13 @@ antlrcpp::Any ToplevelVisitor::visitFuncdef_impl(MMMLParser::Funcdef_implContext
               <<
             Instruction("swap")
               <<
+            Instruction("drop_mark")
+              <<
             Instruction("jump").with_annot("jump to return point");
 
+    Report::info(ctx) << "Function ``" << f->name << "´´"
+                      << " implemented here"
+                      << endl;
     return f;
 }
 
@@ -258,6 +265,9 @@ antlrcpp::Any ToplevelVisitor::visitFuncdef_header(MMMLParser::Funcdef_headerCon
         f->rtype = Types::int_type;
     }
 
+    Report::info(ctx) << "Function ``" << f->name << "´´"
+                      << " defined here"
+                      << endl;
     return f;
 }
 
@@ -279,8 +289,6 @@ antlrcpp::Any ToplevelVisitor::visitCustom_type_decl_rule(MMMLParser::Custom_typ
     auto newclass = make_shared<ClassType>(name, plist);
 
     type_registry.add(newclass);
-
-    cerr << "defined new class" << newclass->name() << endl;
 
     return nullptr;
 }

@@ -26,6 +26,7 @@ add_executable(mmmlc
   InstructionBlock.cpp
   ToplevelVisitor.cpp
   TypedArgListVisitor.cpp
+  FunctionCallArgListVisitor.cpp
   FuncbodyVisitor.cpp
   MetaExprVisitor.cpp
   mmml_error.cpp

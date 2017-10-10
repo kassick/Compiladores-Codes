@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Oct  4 10:09:35 2017"
- *         Updated: "2017-10-10 18:04:38 kassick"
+ *         Updated: "2017-10-10 20:41:25 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -31,8 +31,6 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_expr_rule(MMMLParser::Fbody_expr_ruleC
     mev.lfalse = lfalse;
 
     auto ret = mev.visit(ctx->metaexpr());
-    cerr << (ret.is<Type::const_pointer>() ? "not null" : "null")
-         << endl;
     Type::const_pointer t = ret;
     *code_ctx << *mev.code_ctx;
 
@@ -127,16 +125,20 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleConte
 
     if (bodytrue_type->as<BooleanBranchCode>() ||
         bodytrue_type->as<BooleanBranchCode>())
-        rtype = gen_coalesce_code (
+        rtype = gen_coalesce_code
+                (
+                    ctx,
                     bodytrue_type, truevisitor.code_ctx,
                     bodyfalse_type, falsevisitor.code_ctx,
                     {
                         Instruction("bz", {this->lfalse}),
-                                Instruction("jump", {this->ltrue}).with_annot("Coalesce jump")
+                        Instruction("jump", {this->ltrue})
+                                .with_annot("Coalesce jump")
                     }
                  );
     else
-        rtype = gen_coalesce_code(bodytrue_type, truevisitor.code_ctx,
+        rtype = gen_coalesce_code(ctx,
+                                  bodytrue_type, truevisitor.code_ctx,
                                   bodyfalse_type, falsevisitor.code_ctx);
 
     if (!rtype) {
@@ -184,8 +186,6 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_let_rule(MMMLParser::Fbody_let_ruleCon
     auto old_stack_top = this->code_ctx->symbol_table->local_size();
 
     auto new_context = this->code_ctx->create_subcontext();
-
-    cerr << "Before visiting decls: " << new_context->symbol_table->to_string() << endl;
 
     FuncbodyVisitor decls_visitor(new_context);
 
@@ -271,9 +271,6 @@ antlrcpp::Any FuncbodyVisitor::visitLetvarattr_rule(MMMLParser::Letvarattr_ruleC
             .with_label(lcont)
             .with_annot("store at " + to_string(sym->pos) +
                         " type(" + symbol_type->name() + ")");
-
-    cerr << "After " << ctx->getText() << ":" << endl;
-    cerr << code_ctx->symbol_table->to_string() << endl;
 
     return code_ctx->symbol_table->offset;
 }

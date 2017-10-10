@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-10-10 18:41:56 kassick"
+ *         Updated: "2017-10-10 20:42:41 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -20,6 +20,7 @@
 #include "mmml/casts.H"
 #include "mmml/utils.H"
 #include "mmml/FuncbodyVisitor.H"
+#include "mmml/FunctionCallArgListVisitor.H"
 
 namespace mmml {
 
@@ -76,7 +77,7 @@ Type::const_pointer generic_bin_op(
     }
 
     // Try to get both to be the same type
-    auto coalesced_type = gen_coalesce_code(ltype, lcode, rtype, rcode);
+    auto coalesced_type = gen_coalesce_code(left, ltype, lcode, rtype, rcode);
 
     if (!coalesced_type || !pred(coalesced_type))
     {
@@ -174,8 +175,6 @@ antlrcpp::Any MetaExprVisitor::visitMe_bool_or_rule(MMMLParser::Me_bool_or_ruleC
     MetaExprVisitor leftvisitor(code_ctx->create_block());
     MetaExprVisitor rightvisitor(code_ctx->create_block());
 
-    cerr << "visit me bool or" << endl;
-
     string _ltrue = this->ltrue;
     string _lfalse = this->lfalse;
 
@@ -233,11 +232,9 @@ antlrcpp::Any MetaExprVisitor::visitMe_bool_or_rule(MMMLParser::Me_bool_or_ruleC
                   << Instruction("jump", {_lout}).with_annot("OR JUMP OUT")
                   << Instruction("push", {1}).with_label(_ltrue)
                   << Instruction().with_label(_lout);
-        cerr << "returning bool" << endl;
         return Types::bool_type;
     } else {
         // boolean context
-        cerr << "returning branch" << endl;
         // *code_ctx << Instruction("jump", {_ltrue});
         return Types::boolean_branch;
     }
@@ -246,7 +243,6 @@ antlrcpp::Any MetaExprVisitor::visitMe_bool_or_rule(MMMLParser::Me_bool_or_ruleC
 // Load Symbol ////////////////////////////////////////////////////////////////
 antlrcpp::Any MetaExprVisitor::visitMe_exprsymbol_rule(MMMLParser::Me_exprsymbol_ruleContext *ctx)
 {
-    cerr << "visit expr symbol" << endl;
     auto s = mmml_load_symbol(ctx->symbol()->getText(), code_ctx);
     if (!s) {
         Report::err(ctx) << " : Unknown symbol " << ctx->symbol()->getText()
@@ -263,7 +259,6 @@ antlrcpp::Any MetaExprVisitor::visitMe_exprsymbol_rule(MMMLParser::Me_exprsymbol
 antlrcpp::Any
 MetaExprVisitor::visitMe_exprliteral_rule(MMMLParser::Me_exprliteral_ruleContext *ctx)
 {
-    cerr << "visit literal" << endl;
     return visit(ctx->literal());
 }
 
@@ -301,10 +296,7 @@ antlrcpp::Any MetaExprVisitor::visitLiteral_binary_rule(MMMLParser::Literal_bina
 
 antlrcpp::Any MetaExprVisitor::visitLiteralstring_rule(MMMLParser::Literalstring_ruleContext *ctx)  {
     *code_ctx << Instruction("push", { ctx->getText() })
-              <<
-            Instruction("acreate",
-                        {ctx->getText().length() - 2})
-            .with_annot("type(str)");
+              << Instruction("acreate").with_annot("type(str)");
 
     return type_registry.add(make_shared<SequenceType>(Types::char_type));
 }
@@ -333,7 +325,6 @@ MetaExprVisitor::visitLiteralnil_rule(MMMLParser::Literalnil_ruleContext *ctx) {
 
 antlrcpp::Any MetaExprVisitor::visitMe_boolneg_rule(MMMLParser::Me_boolneg_ruleContext *ctx)
 {
-    cerr << "visit bool neg" << endl;
     // ! sym
 
     auto s = mmml_load_symbol(ctx->symbol()->getText(), code_ctx);
@@ -383,7 +374,6 @@ antlrcpp::Any MetaExprVisitor::visitMe_boolneg_rule(MMMLParser::Me_boolneg_ruleC
 
 antlrcpp::Any MetaExprVisitor::visitMe_boolnegparens_rule(MMMLParser::Me_boolnegparens_ruleContext *ctx)
 {
-    cerr << "visit bool neg parens" << endl;
     FuncbodyVisitor fbvisitor(code_ctx->create_block());
     fbvisitor.ltrue = this->lfalse;
     fbvisitor.lfalse = this->ltrue;
@@ -947,6 +937,75 @@ antlrcpp::Any MetaExprVisitor::visitTuple_ctor(MMMLParser::Tuple_ctorContext *ct
 }
 
 
+// Function call //////////////////////////////////////////////////////////////
 
+antlrcpp::Any
+MetaExprVisitor::visitFuncall_rule(MMMLParser::Funcall_ruleContext *ctx)
+{
+    auto function = function_registry.find(ctx->symbol()->getText());
+    if (!function)
+    {
+        Report::err(ctx) << "Calling unknown function ``"
+                         << ctx->symbol()->getText()
+                         << "´´"
+                         << endl;
+        return Types::int_type;
+    }
+
+    FunctionCallArgListVisitor fcvisitor(this->code_ctx);
+
+    int nargs = fcvisitor.visit(ctx->funcall_params());
+
+    if (nargs != function->args.size())
+    {
+        Report::err(ctx) << "Invalid number of arguments for function ``"
+                         << function->name
+                         << "´´. Got " << nargs
+                         << ", expected " << function->args.size();
+        return function->rtype;
+    }
+
+    auto call_ctx = this->code_ctx->create_block();
+
+    for (int i = 0; i < fcvisitor.args.size(); i++)
+    {
+        auto cast_type = gen_cast_code(ctx,
+                                       fcvisitor.args[i].first,
+                                       function->args[i]->type(),
+                                       fcvisitor.args[i].second,
+                                       true);
+
+        if (!cast_type)
+        {
+            Report::err(ctx) << "Could not coerce type "
+                             << fcvisitor.args[i].first->name()
+                             << " to " << function->args[i]->type()->name()
+                             << " in function call";
+            return function->rtype;
+        }
+
+        *call_ctx << std::move(*fcvisitor.args[i].second);
+    }
+
+    auto ret_label = LabelFactory::make();
+
+    *call_ctx ;
+
+    *code_ctx <<
+            Instruction("push", {ret_label})
+            .with_annot("@ret_point for " + function->name)
+              <<
+            std::move(*call_ctx)
+              <<
+            Instruction("mark", {nargs + 1})
+            .with_annot("keep params for " + function->name)
+              <<
+            Instruction("jump", {function->label})
+            .with_annot("call " + function->name)
+              <<
+            Instruction("nop").with_label(ret_label);
+
+    return function->rtype;
+}
 
 } // end namespace mmml ///////////////////////////////////////////////////////

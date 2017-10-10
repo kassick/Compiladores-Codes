@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Tue Oct  3 17:23:52 2017"
- *         Updated: "2017-10-05 11:37:03 kassick"
+ *         Updated: "2017-10-10 20:40:05 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -28,6 +28,7 @@ Type::const_pointer gen_cast_code(antlr4::ParserRuleContext*,
                                   bool sanitize_bool = false);
 
 Type::const_pointer gen_coalesce_code(
+    antlr4::ParserRuleContext*,
     Type::const_pointer, CodeContext::pointer,
     Type::const_pointer, CodeContext::pointer,
     const std::vector<Instruction> &extra_instructions ={});

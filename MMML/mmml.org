@@ -755,10 +755,14 @@ Quando um tipo inteiro for passado como parâmetro para uma função que espera 
 
 As seguintes coerções de tipos são válidas:
 
-| Char     | \to | Integer  |
-| Char     | \to | Float    |
-| Integer  | \to | Float    |
-| Qualquer | \to | Booleano |
+| Char      | \to | Integer  |
+| Char      | \to | Float    |
+| Integer   | \to | Char     |
+| Integer   | \to | Float    |
+| Char      | \to | Booleano |
+| Inteiro   | \to | Booleano |
+| Float     | \to | Booleano |
+| Sequência | \to | Booleano |
 
 No caso da coerção para /booleano/, o /valor/ obtido será equivalente a /false/ caso o valor coagido for:
 - sequência vazia
