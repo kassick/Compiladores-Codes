@@ -948,3 +948,12 @@ def main =
 
   #+RESULTS:
   [[file:inputs/precedence_bool2.png]]
+
+- Exemplo 16 : Tipos Sequência
+
+  #+INCLUDE: "inputs/seq1" example
+
+  #+CALL: mmml_gen_tree("inputs/seq1.mmml")
+
+  #+RESULTS:
+  [[file:inputs/seq1.png]]

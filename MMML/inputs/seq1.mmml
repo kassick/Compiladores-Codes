@@ -1,0 +1,3 @@
+def fun m2 : int[][] = 0
+
+def main = 1
