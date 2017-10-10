@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Tue Oct  3 17:10:53 2017"
- *         Updated: "2017-10-03 17:15:29 kassick"
+ *         Updated: "2017-10-10 16:55:35 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -36,5 +36,14 @@ class TypedArgListVisitor : public MMMLBaseVisitor
     virtual antlrcpp::Any visitTyped_arg_list_cont_rule(MMMLParser::Typed_arg_list_cont_ruleContext *ctx) override ;
 
     virtual antlrcpp::Any visitTyped_arg_list_end(MMMLParser::Typed_arg_list_endContext *ctx) override ;
+
+    virtual antlrcpp::Any visitType_basictype_rule(MMMLParser::Type_basictype_ruleContext *ctx) override ;
+
+    virtual antlrcpp::Any visitType_tuple_rule(MMMLParser::Type_tuple_ruleContext *ctx) override ;
+
+    virtual antlrcpp::Any visitType_custom_rule(MMMLParser::Type_custom_ruleContext *ctx) override;
+
+    virtual antlrcpp::Any visitType_sequence_rule(MMMLParser::Type_sequence_ruleContext *ctx) override;
+
 };
 }

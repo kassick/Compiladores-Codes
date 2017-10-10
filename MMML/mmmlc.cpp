@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep  8 19:36:14 2017"
- *         Updated: "2017-10-05 12:26:17 kassick"
+ *         Updated: "2017-10-10 17:09:08 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -62,6 +62,9 @@ void parse_stream(istream& text_stream, ostream& err_stream, ostream& out_stream
     if (Report::nerrors == 0) {
         code_stream << *visitor.code_ctx->code;
     }
+
+    //err_stream << type_registry.to_string() << endl;
+
 }
 
 int main(int argc, char *argv[])
