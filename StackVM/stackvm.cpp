@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Sep 13 11:00:28 2017"
- *         Updated: "2017-10-11 00:25:09 kassick"
+ *         Updated: "2017-10-11 00:46:35 kassick"
  *
  *          Author:
  *
@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
 
     if (args["FILE"])
     {
-        fstream * fh = new fstream(argv[1], ios_base::in);
+        fstream * fh = new fstream(args["FILE"].asString(), ios_base::in);
         if (!fh->is_open()) {
             cerr << "Could not open input file ``"
                  << argv[1]
@@ -179,15 +179,11 @@ int main(int argc, char *argv[])
         in = fh;
     }
 
-    for (const auto & p : args) {
-        cout << p.first << " -> " << endl;
-    }
-    // cout << parse_string_c("readi\nprint\n", "3\n") << endl;
-
     // New vm that will interact with stdin and stdout
     VM vm(cin, cout);
     vm.step_by_step = args["--interactive"].asBool();
     vm.interactive = !args["--quiet"].asBool();
+    vm.instruction_limit = -1;
 
     // Parse stream from stdin or a file
     parse_stream(*in, cout, vm);

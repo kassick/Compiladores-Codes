@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 14:06:37 2017"
- *         Updated: "2017-10-11 00:16:48 kassick"
+ *         Updated: "2017-10-11 00:46:17 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -26,6 +26,7 @@
 #include <sstream>
 #include <thread>
 #include <chrono>
+#include <limits>
 
 #include "data.H"
 
@@ -51,6 +52,7 @@ struct VM {
     bool ok_to_go; // if the machine was correctly loaded
     bool interactive = true;
     bool step_by_step = false;
+    long instruction_limit = 10000000;
 
     istream& in;
     ostream& out;
@@ -130,6 +132,14 @@ struct VM {
 
     void run(int window_size = 0) {
         while(pc >= 0 && pc < instructions.size()) {
+            // If instruction_limit = -1, it never decrements : executes until break
+            if (this->instruction_limit == 0)
+            {
+                this->out << "Exceeded instruction limit" << endl;
+                break;
+            } else if (this->instruction_limit > 0)
+                this->instruction_limit--;
+
             try {
                 last_pc = pc;
                 Instruction::pointer instr = instructions[pc++];
