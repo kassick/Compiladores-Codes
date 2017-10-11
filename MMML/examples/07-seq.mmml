@@ -1,0 +1,18 @@
+def str_capitalize_ s : char[],
+                    r : char[] =
+if ! s                                               // Se vazia, retorna vazia
+then r
+else let // _ = print "s=" :: s :: ['\n'],           // Debug, descomentar
+         // _ = print "r=" :: r :: ['\n'],           // Debug, descomentar
+         h::t = s                                    // quebra em primeiro elemento e resto da lista
+     in let up = if h >= 'a' && h <= 'z'
+                 then h - ('a' - 'A')
+                 else h
+        in str_capitalize_ t (r :: [up])
+
+def str_capitalize s : char[] = str_capitalize_ s ""
+
+def main =
+let sin = read_string _
+in
+  print (str_capitalize sin)

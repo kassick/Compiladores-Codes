@@ -1,0 +1,12 @@
+def filtra_positivos_menores_que n : int,
+                                 v : int[],
+                                 result : int[] =
+if ! v then result
+else let primeiro :: resto = v
+     in
+        if primeiro < 0 || !(primeiro < n)
+           then filtra_positivos_menores_que n resto result
+           else let result = result :: [primeiro]
+                in filtra_positivos_menores_que n resto result
+
+def main = filtra_positivos_menores_que 10 [1] :: [-2] :: [100] :: [9] :: [10] nil

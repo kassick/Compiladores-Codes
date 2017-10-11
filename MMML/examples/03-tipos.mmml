@@ -1,0 +1,17 @@
+def main =
+  let x = 1,              // x tem tipo int
+      y = 'c',            // y tem tipo char
+      z = 1.4,            // z tem tipo float
+      s = "abc",          // s tem tipo char[], sequencia
+      f1 = x + z,         // f1 tem tipo float
+      i1 = x + y,         // i1 tem tipo int
+      s2 = [y],           // s2 tem tipo char[]
+      s3 = [s2],          // s3 tem tipo char[][]
+      s4 = s2 :: s,       // s4 tem tipo char[]
+      b0 = true && false, // b0 tem tipo bool
+      b1 = y || z,        // b1 tem tipo bool
+      b2 = s || s2,       // b2 tem tipo bool
+      f2 = float x,       // f2 tem tipo float
+      c1 = char z         // c1 tem tipo char
+in
+  print b1

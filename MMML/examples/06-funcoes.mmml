@@ -1,0 +1,16 @@
+def ping_ cur : int, limit : int -> int
+def pong_ cur : int, limit : int -> int
+
+def ping_ cur : int, limit : int =
+if cur == limit
+then limit
+else let _ = print "Ping " :: (str cur) :: ['\n']
+     in pong_ cur limit
+
+def pong_ cur : int, limit : int =
+if cur == limit
+then limit
+else let _ = print "Pong " :: (str cur) :: ['\n']
+     in ping_ cur + 1 limit
+
+def main = ping_ 0 10

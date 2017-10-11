@@ -1,0 +1,16 @@
+// ping_ retorna int
+def ping_ cur : int, limit : int =
+   if cur < limit
+   then let _ = print "Ping " :: (str cur) :: ['\n']
+        in
+          ping_ cur + 1 limit // Retorna o que ping_ retornar
+   else
+     limit                    // Retorna int
+
+// ping retorna o que ping_ retornar (int)
+def ping limit : int = ping_ 0 limit
+
+def main =
+let limit = read_int _
+in
+  ping limit

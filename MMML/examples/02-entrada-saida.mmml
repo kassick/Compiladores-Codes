@@ -1,0 +1,7 @@
+def main =
+let _ = print "Digite seu nome: ",
+    name = read_string _ ,
+    _ = print "Digite sua idade: ",
+    idade = read_int _
+in
+    print "Olá, " :: name :: ", voce tem " :: (str idade) :: " anos" :: ['\n']
