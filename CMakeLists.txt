@@ -34,12 +34,20 @@ message(STATUS Docopt compiled into ${install_dir})
 SET(docopt_install_dir ${install_dir})
 include_directories(${DOCOPT_PREFIX}/install/include)
 
-find_library(DOCOPT_LIB NAMES docopt
-  PATHS ${DOCOPT_PREFIX}/install PATH_SUFFIXES lib/ lib64/)
+# for some reason, find_file and find_library both fail under emscripten
+if (EXISTS ${DOCOPT_PREFIX}/install/lib/libdocopt.so)
+  set(DOCOPT_LIB ${DOCOPT_PREFIX}/install/lib/libdocopt.so)
+else()
+if (EXISTS ${DOCOPT_PREFIX}/install/lib64/libdocopt.so)
+  set(DOCOPT_LIB ${DOCOPT_PREFIX}/install/lib64/libdocopt.so)
+else()
+  set(DOCOPT_PREFIX DOCOPT-NOTFOUND)
+endif()
+endif()
 
- add_library(docopt UNKNOWN IMPORTED)
- set_property(TARGET docopt PROPERTY IMPORTED_LOCATION
-     ${DOCOPT_LIB})
+add_library(docopt UNKNOWN IMPORTED)
+set_property(TARGET docopt PROPERTY IMPORTED_LOCATION
+  ${DOCOPT_LIB})
 
 
 ###################################################

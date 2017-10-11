@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep  8 19:36:14 2017"
- *         Updated: "2017-10-11 00:57:17 kassick"
+ *         Updated: "2017-10-11 03:18:57 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -53,28 +53,85 @@ void parse_stream(istream& text_stream, ostream& err_stream, ostream& out_stream
     Report::out_stream = &out_stream;
     Report::err_stream = &err_stream;
 
-    ANTLRInputStream ain (text_stream);
-
-    MMMLLexer lexer(&ain);
-
-    CommonTokenStream tokens(&lexer);
-    tokens.fill();
-
-    MMMLParser parser(&tokens);
-
-    ErrorListener err_listener(err_stream);
-    parser.addErrorListener(&err_listener);
-
-    tree::ParseTree * tree = parser.program();
-
     ToplevelVisitor visitor;
+    try {
+        ErrorListener err_listener(err_stream);
 
-    visitor.visit(tree);
+        ANTLRInputStream ain (text_stream);
+
+        MMMLLexer lexer(&ain);
+        lexer.addErrorListener(&err_listener);
+
+        CommonTokenStream tokens(&lexer);
+        tokens.fill();
+
+        MMMLParser parser(&tokens);
+
+        parser.addErrorListener(&err_listener);
+
+        tree::ParseTree * tree = parser.program();
+
+
+        visitor.visit(tree);
+    } catch (exception & e) {
+        err_stream << "Pikachu! " << e.what() << endl;
+        Report::nerrors++;
+    }
 
     err_stream << "Errors: " << Report::nerrors << endl;
 
     if (Report::nerrors == 0) {
         code_stream << *visitor.code_ctx->code;
+    }
+}
+
+const string parse_string(const string &text)
+{
+    stringstream
+            text_stream(text),
+            err_stream,
+            out_stream,
+            asm_stream;
+
+    parse_stream(text_stream, err_stream, out_stream, asm_stream);
+
+    if (Report::nerrors > 0)
+        return err_stream.str();
+
+    stringstream ret_stream;
+
+    auto str = err_stream.str();
+    int pos;
+    do {
+         pos = str.find('\n');
+         ret_stream << "# "
+                    << str.substr(0, pos)
+                    << "\n";
+         str = str.substr(pos + 1);
+    } while (str.length() > 0);
+
+    ret_stream << endl;
+
+    str = out_stream.str();
+    do {
+        pos = str.find('\n');
+        ret_stream << "# "
+                   << str.substr(0, pos)
+                   << "\n";
+        str = str.substr(pos + 1);
+    } while (str.length() > 0);
+
+    ret_stream << endl;
+
+    ret_stream << asm_stream.str();
+
+    return ret_stream.str();
+}
+
+extern "C" {
+    const char * parse_string_c(const char * text)
+    {
+        return strdup(parse_string(string(text)).c_str());
     }
 }
 
