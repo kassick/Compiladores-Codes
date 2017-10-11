@@ -9,16 +9,14 @@
 #+OPTIONS: ^:nil
 #+OPTIONS: _:nil toc:nil num:nil
 #+MACRO: mml @@latex:\ensuremath{\mu}mML@@@@html:\(\mu\)mML@@
-#+HTML_HEAD: <script type="text/javascript" src="./sparser.js"></script>
+#+HTML_HEAD: <script type="text/javascript" src="./mmmlc.js"></script>
 
 * PlayGround Javascript Helpers                                      :ignore:
 #+BEGIN_EXPORT html
 <script>
  doParse = function(text)
  {
-     console.log('text is ' + text);
      r = ccall('parse_string_c', 'string', ['string'], [text]);
-     console.log('resault is ' + r);
      return r;
  };
 
@@ -955,7 +953,7 @@ def main =
 
 - Exemplo 16 : Tipos Sequência
 
-  #+INCLUDE: "inputs/seq1" example
+  #+INCLUDE: "inputs/seq1.mmml" example
 
   #+CALL: mmml_gen_tree("inputs/seq1.mmml")
 
