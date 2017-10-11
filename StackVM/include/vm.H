@@ -5,11 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 14:06:37 2017"
-<<<<<<< HEAD
- *         Updated: "2017-09-22 15:18:43 kassick"
-=======
- *         Updated: "2017-09-20 15:43:13 kassick"
->>>>>>> fc9b4b320089f3b5080b34cc98d145bc066a1330
+ *         Updated: "2017-10-11 00:16:48 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -54,6 +50,7 @@ struct VM {
     int last_pc = -1;
     bool ok_to_go; // if the machine was correctly loaded
     bool interactive = true;
+    bool step_by_step = false;
 
     istream& in;
     ostream& out;
@@ -138,7 +135,7 @@ struct VM {
                 Instruction::pointer instr = instructions[pc++];
                 instr->run(*this);
 
-                if (interactive) {
+                if (step_by_step) {
                     cout << endl << endl
                          << "--------------------"
                          << endl

@@ -19,22 +19,27 @@ include(ExternalProject)
 
 #############
 # # Docopt C++
-# ExternalProject_Add(ex_docopt
-    # #GIT_REPOSITORY https://github.com/docopt/docopt.cpp.git
-    # URL ${CMAKE_CURRENT_LIST_DIR}/deps/docopt.cpp-0.6.2.zip
-    # PREFIX ${CMAKE_CURRENT_BINARY_DIR}/deps/docopt
-    # BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/docopt/build
-    # INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/docopt/install
-    # CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/docopt/install
-# )
-# ExternalProject_Get_Property(ex_docopt install_dir)
-# message(STATUS Docopt compiled into ${install_dir})
-# SET(docopt_install_dir ${install_dir})
-# include_directories(${docopt_install_dir}/include/)
+SET(DOCOPT_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/deps/docopt)
+ExternalProject_Add(ex_docopt
+  #GIT_REPOSITORY https://github.com/docopt/docopt.cpp.git
+  URL ${CMAKE_CURRENT_LIST_DIR}/deps/docopt.cpp-0.6.2.zip
+  PREFIX ${DOCOPT_PREFIX}
+  BINARY_DIR ${DOCOPT_PREFIX}/build
+  INSTALL_DIR ${DOCOPT_PREFIX}/install
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${DOCOPT_PREFIX}/install
+)
 
-add_library(docopt UNKNOWN IMPORTED)
-set_property(TARGET docopt PROPERTY IMPORTED_LOCATION
-    ${docopt_install_dir}/lib/libdocopt.so)
+ExternalProject_Get_Property(ex_docopt install_dir)
+message(STATUS Docopt compiled into ${install_dir})
+SET(docopt_install_dir ${install_dir})
+include_directories(${DOCOPT_PREFIX}/install/include)
+
+find_library(DOCOPT_LIB NAMES docopt
+  PATHS ${DOCOPT_PREFIX}/install PATH_SUFFIXES lib/ lib64/)
+
+ add_library(docopt UNKNOWN IMPORTED)
+ set_property(TARGET docopt PROPERTY IMPORTED_LOCATION
+     ${DOCOPT_LIB})
 
 
 ###################################################

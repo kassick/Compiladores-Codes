@@ -22,4 +22,4 @@ add_dependencies(stackvm
   StackVM_html
   generate_stackvm_antlr
   )
-target_link_libraries(stackvm antlr4static)
+target_link_libraries(stackvm antlr4static docopt)

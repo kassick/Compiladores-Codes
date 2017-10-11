@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Sep 13 11:00:28 2017"
- *         Updated: "2017-09-22 15:21:35 kassick"
+ *         Updated: "2017-10-11 00:25:09 kassick"
  *
  *          Author:
  *
@@ -15,6 +15,7 @@
 #include <iostream>
 #include <stack>
 #include <vector>
+#include <map>
 
 #include "vm.H"
 #include "instructions.H"
@@ -24,9 +25,25 @@
 #include "StackVMInstructionListener.H"
 #include "StackVMErrorListener.H"
 
+#include "docopt/docopt.h"
+
 using namespace std;
 using namespace antlr4;
 using namespace StackVM;
+
+static const char USAGE[] =
+        R"(StackVM
+
+    Usage:
+      stackvm [--interactive] [--show-start] [--show-end] [--quiet] [FILE]
+
+    Options:
+      -h --help         Show this screen.
+      --interactive     Runs in interactive mode, step by step
+      --quiet           Do not present prompts for input/output
+      --show-start      Show code and stack before execution
+      --show-end        Show code and stack after execution
+)";
 
 VM& parse_labels(tree::ParseTree & tree, VM& vm, ostream& out )
 {
@@ -88,6 +105,9 @@ VM& parse_stream(istream& in, ostream& out, VM& vm)
 
         tree::ParseTree* tree = parser.start();
 
+        if (errl.has_errors)
+            return vm;
+
         return parse_full(*tree,
                           parse_labels(*tree, vm, out),
                           out);
@@ -106,6 +126,7 @@ std::string parsestring(std::string s, std::string input) {
 
     VM vm(input_stream, out);
     vm.interactive = false;
+    vm.step_by_step = false;
 
     parse_stream(code_stream, out, vm);
 
@@ -138,11 +159,14 @@ extern "C" {
 
 int main(int argc, char *argv[])
 {
+    std::map<std::string, docopt::value> args = docopt::docopt(USAGE,
+                                                               { argv + 1, argv + argc },
+                                                               true,               // show help if requested
+                                                               "StackVM 1.0");     // version string
     istream * in = &cin;
 
-    // cout << parse_string_c("readi\nprint\n", "3\n") << endl;
-
-    if (argc > 1) {
+    if (args["FILE"])
+    {
         fstream * fh = new fstream(argv[1], ios_base::in);
         if (!fh->is_open()) {
             cerr << "Could not open input file ``"
@@ -155,8 +179,15 @@ int main(int argc, char *argv[])
         in = fh;
     }
 
+    for (const auto & p : args) {
+        cout << p.first << " -> " << endl;
+    }
+    // cout << parse_string_c("readi\nprint\n", "3\n") << endl;
+
     // New vm that will interact with stdin and stdout
     VM vm(cin, cout);
+    vm.step_by_step = args["--interactive"].asBool();
+    vm.interactive = !args["--quiet"].asBool();
 
     // Parse stream from stdin or a file
     parse_stream(*in, cout, vm);
@@ -167,15 +198,21 @@ int main(int argc, char *argv[])
         if (vm.set_pc_to("start") < 0)
             vm.set_pc_to(0);
 
-        cout << "Running: " << endl;
-        cout << vm.to_string() << endl << endl;
+        if (args["--show-start"].asBool())
+        {
+            cout << "Running: " << endl;
+            cout << vm.to_string() << endl << endl;
+        }
 
         // Run with a display window size of 10
         vm.run(10);
 
-        cout << endl << endl
-             << "Finished " << endl;
-        cout << vm.to_string();
+        if (args["--show-end"].asBool())
+        {
+            cout << endl << endl
+                 << "Finished " << endl;
+            cout << vm.to_string();
+        }
     }
 
     return 0;

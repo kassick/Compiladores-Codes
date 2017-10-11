@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Sep 20 15:54:55 2017"
- *         Updated: "2017-09-20 16:06:03 kassick"
+ *         Updated: "2017-10-11 00:23:58 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -28,6 +28,7 @@ using namespace antlrcpp;
 struct ErrorListener : public antlr4::BaseErrorListener {
 
     std::ostream & out;
+    bool has_errors = false;
 
     ErrorListener(std::ostream & out_) : out(out_) {}
 
@@ -38,6 +39,7 @@ struct ErrorListener : public antlr4::BaseErrorListener {
             << " at line" << line << ", column" << charPositionInLine
             << " : " << msg
             << std::endl;
+        has_errors = true;
     }
 
     // virtual void reportAmbiguity(Parser *recognizer, const dfa::DFA &dfa, size_t startIndex, size_t stopIndex, bool exact,
