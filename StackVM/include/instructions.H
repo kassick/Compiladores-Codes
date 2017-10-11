@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 14:14:39 2017"
- *         Updated: "2017-10-11 01:20:25 kassick"
+ *         Updated: "2017-10-11 01:51:50 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -20,7 +20,7 @@
 #include <cassert>
 
 struct NopInstr : public Instruction {
-    virtual VM& run(VM& vm) const {
+    virtual VM& run(VM& vm) const override {
         // nop
         return vm;
     }
