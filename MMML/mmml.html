@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="pt" xml:lang="pt">
 <head>
-<!-- 2017-10-11 qua 02:40 -->
+<!-- 2017-10-11 qua 03:34 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Linguagem MMML</title>
@@ -273,11 +273,16 @@ for the JavaScript code in this tag.
 </script>
 
 <p>
-<b>Entrada:</b>
+<b>Código Fonte:</b>
 </p>
 
 <textarea name="source" id="esource" rows="10" cols="70">
-(a b)
+def main =
+let i = read_int _,
+    s = str i,
+    msg = "voce digitou: " :: s :: ['\n']
+in
+    print msg
 </textarea>
 
 <p>
@@ -292,9 +297,9 @@ for the JavaScript code in this tag.
 
 <textarea id="result" rows="10" cols="70"></textarea>
 
-<div id="outline-container-org323c9d7" class="outline-2">
-<h2 id="org323c9d7">A Linguagem Micro Mini ML</h2>
-<div class="outline-text-2" id="text-org323c9d7">
+<div id="outline-container-orga4162f8" class="outline-2">
+<h2 id="orga4162f8">A Linguagem Micro Mini ML</h2>
+<div class="outline-text-2" id="text-orga4162f8">
 <p>
 \(\mu\)mML é uma linguagem da família ML (F#, OCaML, Nemerle, dentre outras). Ela é uma linguagem funcional <i>pura</i> &#x2013; isto é, cada variável é atribuída uma única vez, não sendo permitidas alterações posteriores. Iterações devem ser feitas utilizando recursão.
 </p>
@@ -308,9 +313,9 @@ As próximas seções exemplificam os conceitos básicos da linguagem \(\mu\)mML
 </p>
 </div>
 
-<div id="outline-container-org139433d" class="outline-3">
-<h3 id="org139433d">Tipos Básicos</h3>
-<div class="outline-text-3" id="text-org139433d">
+<div id="outline-container-org9511241" class="outline-3">
+<h3 id="org9511241">Tipos Básicos</h3>
+<div class="outline-text-3" id="text-org9511241">
 <p>
 A linguagem possui os seguintes tipos básicos:
 </p>
@@ -329,9 +334,9 @@ A linguagem possui os seguintes tipos básicos:
 </div>
 </div>
 
-<div id="outline-container-orgdeec6d4" class="outline-3">
-<h3 id="orgdeec6d4">Literais</h3>
-<div class="outline-text-3" id="text-orgdeec6d4">
+<div id="outline-container-org009e328" class="outline-3">
+<h3 id="org009e328">Literais</h3>
+<div class="outline-text-3" id="text-org009e328">
 <p>
 A linguagem suporta os seguintes literais em seu código:
 </p>
@@ -369,9 +374,9 @@ A linguagem suporta os seguintes literais em seu código:
 </div>
 </div>
 
-<div id="outline-container-org683e126" class="outline-3">
-<h3 id="org683e126">Expressões Booleanas</h3>
-<div class="outline-text-3" id="text-org683e126">
+<div id="outline-container-org63cc4a5" class="outline-3">
+<h3 id="org63cc4a5">Expressões Booleanas</h3>
+<div class="outline-text-3" id="text-org63cc4a5">
 <p>
 As seguintes expressões booleanas são aceitas na linguagem:
 </p>
@@ -411,9 +416,9 @@ c <span style="color: #656565;">// </span><span style="color: #757575;">C, uma l
 </div>
 </div>
 
-<div id="outline-container-orga0367d1" class="outline-3">
-<h3 id="orga0367d1">Operadores Relacionais</h3>
-<div class="outline-text-3" id="text-orga0367d1">
+<div id="outline-container-org27e1f84" class="outline-3">
+<h3 id="org27e1f84">Operadores Relacionais</h3>
+<div class="outline-text-3" id="text-org27e1f84">
 <p>
 Os operadores relacionais comparam dois <b>tipos básicos</b> e retornam um valor booleano
 </p>
@@ -434,9 +439,9 @@ x &lt;= <span style="color: #ab75c3;">2</span> + <span style="color: #ab75c3;">1
 </div>
 </div>
 
-<div id="outline-container-orgebcc4e9" class="outline-3">
-<h3 id="orgebcc4e9">Expressões Aritméticas</h3>
-<div class="outline-text-3" id="text-orgebcc4e9">
+<div id="outline-container-org9793813" class="outline-3">
+<h3 id="org9793813">Expressões Aritméticas</h3>
+<div class="outline-text-3" id="text-org9793813">
 <p>
 As expressões aritméticas são as operações aritméticas básicas de linguagens de programação:
 </p>
@@ -466,9 +471,9 @@ a * b * c / d
 </div>
 </div>
 
-<div id="outline-container-org3f5ac65" class="outline-3">
-<h3 id="org3f5ac65">Condicional <i>if</i></h3>
-<div class="outline-text-3" id="text-org3f5ac65">
+<div id="outline-container-org7971007" class="outline-3">
+<h3 id="org7971007">Condicional <i>if</i></h3>
+<div class="outline-text-3" id="text-org7971007">
 <p>
 A estrutura <i>if</i> da linguagem tem a seguinte forma:
 </p>
@@ -546,9 +551,9 @@ Uma vez que a condição do if é uma <i>expressão</i>, podemos utilizar parên
 </div>
 </div>
 
-<div id="outline-container-orgd535a1f" class="outline-3">
-<h3 id="orgd535a1f">Declarações de Símbolos</h3>
-<div class="outline-text-3" id="text-orgd535a1f">
+<div id="outline-container-org981b9fd" class="outline-3">
+<h3 id="org981b9fd">Declarações de Símbolos</h3>
+<div class="outline-text-3" id="text-org981b9fd">
 <p>
 A linguagem é \(\mu\)mML é uma linguagem funcional <i>pura</i>: uma vez que um valor é atribuído a um <i>símbolo</i>, este símbolo não pode ser alterado. Uma ``variável'' em {{mml}}, portanto, não é <i>variável</i> &#x2013; é como uma declaração de constante.
 </p>
@@ -629,9 +634,9 @@ A seguinte expressão retorna 20:
 </div>
 </div>
 
-<div id="outline-container-org02aa74d" class="outline-3">
-<h3 id="org02aa74d">Chamadas de Função</h3>
-<div class="outline-text-3" id="text-org02aa74d">
+<div id="outline-container-orgefe74f0" class="outline-3">
+<h3 id="orgefe74f0">Chamadas de Função</h3>
+<div class="outline-text-3" id="text-orgefe74f0">
 <p>
 Para invocar uma função em \(\mu\)mML, deve-se utilizar o nome da função seguido de seus parâmetros. O código a seguir chama a função <code>funct</code> com os parâmetros <code>a</code>, <code>b</code> e <code>c</code>.
 </p>
@@ -700,9 +705,9 @@ A chamada de uma função também é uma <i>expressão</i>. Assim, podemos atrib
 </div>
 </div>
 
-<div id="outline-container-org6d454c6" class="outline-3">
-<h3 id="org6d454c6">Declaração de Funções</h3>
-<div class="outline-text-3" id="text-org6d454c6">
+<div id="outline-container-orgdfae999" class="outline-3">
+<h3 id="orgdfae999">Declaração de Funções</h3>
+<div class="outline-text-3" id="text-orgdfae999">
 <p>
 Uma função na linguagem \(\mu\)mML é declarada com a primitiva <code>def</code>:
 </p>
@@ -792,9 +797,9 @@ Quando o valor de uma função não necessitar ser armazenado, pode-se, no <code
 </div>
 </div>
 
-<div id="outline-container-orge5cb189" class="outline-3">
-<h3 id="orge5cb189">Funções Especiais</h3>
-<div class="outline-text-3" id="text-orge5cb189">
+<div id="outline-container-orgc887a0c" class="outline-3">
+<h3 id="orgc887a0c">Funções Especiais</h3>
+<div class="outline-text-3" id="text-orgc887a0c">
 <p>
 Algumas funções são consideradas especiais da linguagem e devem estar disponíveis para o usuário nativamente:
 </p>
@@ -818,9 +823,9 @@ Algumas funções são consideradas especiais da linguagem e devem estar dispon�
 </div>
 </div>
 
-<div id="outline-container-org8f38b63" class="outline-3">
-<h3 id="org8f38b63">Tipos Sequência</h3>
-<div class="outline-text-3" id="text-org8f38b63">
+<div id="outline-container-org6a32c43" class="outline-3">
+<h3 id="org6a32c43">Tipos Sequência</h3>
+<div class="outline-text-3" id="text-org6a32c43">
 <p>
 Um tipo sequência em \(\mu\)mML é equivalente a um vetor ou uma lista em outras linguagens. Toda sequência possui tamanho definido. Uma função especial chamada <code>length</code> é responsável por indicar quantos elementos existem na sequência.
 </p>
@@ -926,9 +931,9 @@ O mesmo vale para as operações de desempacotamento de lista, concatenação e 
 </div>
 </div>
 
-<div id="outline-container-org1417404" class="outline-3">
-<h3 id="org1417404">Conversão entre Tipos</h3>
-<div class="outline-text-3" id="text-org1417404">
+<div id="outline-container-org90ea440" class="outline-3">
+<h3 id="org90ea440">Conversão entre Tipos</h3>
+<div class="outline-text-3" id="text-org90ea440">
 <p>
 Quando for necessário converter um tipo primitivo para outro tipo primitivo, devemos usar uma operação de <i>cast</i>. Em \(\mu\)mML, um cast funciona como uma chamada de função cujo nome é o tipo destino. <code class="src src-fsharp">int <span style="color: #ab75c3;">0</span>.<span style="color: #ab75c3;">2</span></code> converte para inteiro o valor em ponto flutuante 0.2 .
 </p>
@@ -1144,9 +1149,9 @@ def charToString c : <span style="color: #cd5542;">char</span> = <span style="co
 </div>
 </div>
 
-<div id="outline-container-orgc893a34" class="outline-3">
-<h3 id="orgc893a34">Tipos Tupla</h3>
-<div class="outline-text-3" id="text-orgc893a34">
+<div id="outline-container-org19dadae" class="outline-3">
+<h3 id="org19dadae">Tipos Tupla</h3>
+<div class="outline-text-3" id="text-org19dadae">
 <p>
 Uma <i>tupla</i> é como um vetor que suporta tipos distintos em cada posição. Tuplas são úteis para retornar mais de um valor em uma função.
 </p>
@@ -1166,9 +1171,9 @@ Diferente de um tipo sequência, que pode conter de 0 a n valores, um tipo tupla
 </div>
 </div>
 
-<div id="outline-container-orgf3204a6" class="outline-3">
-<h3 id="orgf3204a6">Tipos Definidos pelo Usuário</h3>
-<div class="outline-text-3" id="text-orgf3204a6">
+<div id="outline-container-orgcd964a4" class="outline-3">
+<h3 id="orgcd964a4">Tipos Definidos pelo Usuário</h3>
+<div class="outline-text-3" id="text-orgcd964a4">
 <p>
 Um tipo definido pelo usuário é algo parecido com <i>structs</i> de C ou <i>classes</i> de C++/Java, etc.
 </p>
@@ -1227,9 +1232,9 @@ Não é possível <i>alterar</i> o conteúdo de campos em instâncias já criada
 </div>
 </div>
 
-<div id="outline-container-org31ee7ee" class="outline-3">
-<h3 id="org31ee7ee">Aritmética de Tipos na linguagem \(\mu\)mML</h3>
-<div class="outline-text-3" id="text-org31ee7ee">
+<div id="outline-container-org47812e3" class="outline-3">
+<h3 id="org47812e3">Aritmética de Tipos na linguagem \(\mu\)mML</h3>
+<div class="outline-text-3" id="text-org47812e3">
 <p>
 Na linguagem \(\mu\)mML, tipos são definidos explicitamente
 </p>
@@ -1554,9 +1559,9 @@ Em uma expressão booleana, pode-se considerar que qualquer símbolo que armazen
 </p>
 </div>
 
-<div id="outline-container-org777844c" class="outline-4">
-<h4 id="org777844c">Coerção de Tipos</h4>
-<div class="outline-text-4" id="text-org777844c">
+<div id="outline-container-orgd735e82" class="outline-4">
+<h4 id="orgd735e82">Coerção de Tipos</h4>
+<div class="outline-text-4" id="text-orgd735e82">
 <p>
 Quando um tipo inteiro for passado como parâmetro para uma função que espera um <i>float</i>, este tipo pode ser convertido automaticamente para float, sem que o usuário do compilador solicite explicitamente o <i>cast</i>. Isso se chama <i>coerção de tipos</i>.
 </p>
@@ -1686,9 +1691,9 @@ A coerção de tipos também deve acontecer durante o "retorno" de if's, para qu
 </div>
 </div>
 
-<div id="outline-container-org056a61a" class="outline-3">
-<h3 id="org056a61a">Um Programa em \(\mu\)mML</h3>
-<div class="outline-text-3" id="text-org056a61a">
+<div id="outline-container-orgec3facc" class="outline-3">
+<h3 id="orgec3facc">Um Programa em \(\mu\)mML</h3>
+<div class="outline-text-3" id="text-orgec3facc">
 <p>
 Um programa em \(\mu\)mML deve possuir uma função chamada <i>main</i> que não recebe nenhum parâmetro. A execução do programa se inicia por esta função:
 </p>
@@ -1713,9 +1718,9 @@ def main =
 </div>
 </div>
 
-<div id="outline-container-orge3c2305" class="outline-2">
-<h2 id="orge3c2305">Entradas e Árvores de Análise</h2>
-<div class="outline-text-2" id="text-orge3c2305">
+<div id="outline-container-org40722cd" class="outline-2">
+<h2 id="org40722cd">Entradas e Árvores de Análise</h2>
+<div class="outline-text-2" id="text-org40722cd">
 <ul class="org-ul">
 <li><p>
 Exemplo 1
@@ -1973,7 +1978,7 @@ def main = 1
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Prof. Rodrigo Kassick</p>
-<p class="date">Created: 2017-10-11 qua 02:40</p>
+<p class="date">Created: 2017-10-11 qua 03:34</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

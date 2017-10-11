@@ -79,11 +79,16 @@ fi
 
 * Entrada                                                            :ignore:
 
-*Entrada:*
+*Código Fonte:*
 
 #+BEGIN_EXPORT html
 <textarea name="source" id="esource" rows="10" cols="70">
-(a b)
+def main =
+let i = read_int _,
+    s = str i,
+    msg = "voce digitou: " :: s :: ['\n']
+in
+    print msg
 </textarea>
 
 <p>
