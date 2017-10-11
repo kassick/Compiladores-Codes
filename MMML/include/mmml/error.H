@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Tue Oct  3 16:34:31 2017"
- *         Updated: "2017-10-10 20:36:31 kassick"
+ *         Updated: "2017-10-10 23:26:14 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -139,6 +139,7 @@ struct ErrorListener : public antlr4::BaseErrorListener {
             << " at line" << line << ", column" << charPositionInLine
             << " : " << msg
             << std::endl;
+        Report::nerrors++;
     }
 
     // virtual void reportAmbiguity(Parser *recognizer, const dfa::DFA &dfa, size_t startIndex, size_t stopIndex, bool exact,

@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-10-10 22:38:31 kassick"
+ *         Updated: "2017-10-10 23:08:28 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -377,10 +377,24 @@ antlrcpp::Any MetaExprVisitor::visitMe_boolneg_rule(MMMLParser::Me_boolneg_ruleC
 
 antlrcpp::Any MetaExprVisitor::visitMe_boolnegparens_rule(MMMLParser::Me_boolnegparens_ruleContext *ctx)
 {
+    string _ltrue, _lfalse, _lout, _lend;
+
+    bool boolean_ctx = this->ltrue.length() > 0;
+
+    if (boolean_ctx) {
+        _lfalse = this->lfalse;
+        _ltrue = this->ltrue;
+    } else {
+        _lend = LabelFactory::make();
+        _lout = LabelFactory::make();
+        _lfalse = LabelFactory::make();
+        _ltrue = LabelFactory::make();
+    }
+
     FuncbodyVisitor fbvisitor(code_ctx->create_block());
-    fbvisitor.ltrue = this->lfalse;
-    fbvisitor.lfalse = this->ltrue;
-    // DO NOT SET LOUT
+    fbvisitor.ltrue = _lfalse;
+    fbvisitor.lfalse = _ltrue;
+    fbvisitor.lout = _lout;
 
     Type::const_pointer ftype = fbvisitor.visit(ctx->funcbody());
 
@@ -390,26 +404,9 @@ antlrcpp::Any MetaExprVisitor::visitMe_boolnegparens_rule(MMMLParser::Me_boolneg
     }
 
     cerr << "result funcbody in neg is " << ftype->name() << endl;
-    bool boolean_ctx = this->ltrue.length() > 0;
 
-    if (boolean_ctx)
-    {
-        // Boolean context
-        // Is the returned type branch code?
-        if (!ftype->as<BooleanBranchCode>())
-        {
-            gen_cast_code(ctx,
-                          ftype, /*->*/ Types::bool_type,
-                          fbvisitor.code_ctx,
-                          false);
-
-            *fbvisitor.code_ctx
-                    << Instruction("bz", {this->ltrue}).with_annot("AAA")
-                    << Instruction("jump", {this->lfalse});
-        }
-    } else {
-        // Not boolean context
-        // Cast to bool and invert value
+    // May need to cast to bool
+    if (!ftype->as<BooleanBranchCode>()) {
         auto cast_type =
                 gen_cast_code(ctx,
                               ftype, /*->*/ Types::bool_type,
@@ -422,19 +419,39 @@ antlrcpp::Any MetaExprVisitor::visitMe_boolnegparens_rule(MMMLParser::Me_boolneg
             return Types::bool_type;
         }
 
-        auto _lout = LabelFactory::make();
-        auto _ltrue = LabelFactory::make();
+        ftype = cast_type;
+    }
+
+    Type::const_pointer ret_type;
+
+    if (boolean_ctx)
+    {
+        // If it's not branch code, it's a boolean, but we already have our targets
+        if (!ftype->as<BooleanBranchCode>())
+        {
+            *fbvisitor.code_ctx
+                    << Instruction("bz", {_ltrue}).with_annot("!false => true")
+                    << Instruction("jump", {_lfalse}).with_annot("!true => false");
+        }
+
+        ret_type = Types::boolean_branch;
+
+    } else {
+        // Not boolean context
+
         *fbvisitor.code_ctx
-                << Instruction("bz", {_ltrue}).with_annot("BBB")
-                << Instruction("push", {0}).with_annot("CCC")
-                << Instruction("jump", {_lout})
+                << Instruction("bz", {_ltrue}).with_annot("BBB").with_label(_lout)
+                << Instruction("push", {0}).with_label(_lfalse)
+                << Instruction("jump", {_lend})
                 << Instruction("push", {1}).with_label(_ltrue)
-                << Instruction().with_label(_lout);
+                << Instruction().with_label(_lend);
+
+        ret_type = Types::bool_type;
     }
 
     *code_ctx << std::move(*fbvisitor.code_ctx);
 
-    return ftype;
+    return ret_type;
 }
 
 antlrcpp::Any MetaExprVisitor::visitMe_listconcat_rule(MMMLParser::Me_listconcat_ruleContext *ctx)
