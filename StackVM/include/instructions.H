@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 14:14:39 2017"
- *         Updated: "2017-10-11 01:51:50 kassick"
+ *         Updated: "2017-10-11 02:17:11 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -209,6 +209,13 @@ struct ArrayCreateInstr: public Instruction {
                 throw logic_error("Did not find array len on top");
 
             rl = len_itm.as<int>();
+        }
+
+        if (rl < 0 || rl > vm.size())
+        {
+            vm.out << "ERROR: Not enough data to array creation" << endl;
+            vm.ok_to_go = false;
+            return vm;
         }
 
         std::vector<DataItem> arr(rl);
