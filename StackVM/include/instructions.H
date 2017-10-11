@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 14:14:39 2017"
- *         Updated: "2017-09-29 23:50:17 kassick"
+ *         Updated: "2017-10-11 01:20:25 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -632,12 +632,17 @@ struct PrintInstr : public Instruction {
 
     virtual VM& run(VM & vm) const override {
         DataItem val = vm.pop();
+        stringstream sout;
+        sout << val.value_to_string();
+        string s = sout.str();
 
         if (vm.interactive)
             vm.out << "Output : ";
-        vm.out << val.value_to_string();
+        vm.out << s;
         if (vm.interactive)
             vm.out << endl;
+
+        vm.push((int)s.length());
 
         return vm;
     }
@@ -674,6 +679,8 @@ struct PrintStringInstr : public Instruction {
             vm.out << "Output : ";
 
         vm.out << s;
+
+        vm.push((int)s.length());
 
         if (vm.interactive)
             vm.out << endl;

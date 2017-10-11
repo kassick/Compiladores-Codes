@@ -55,8 +55,10 @@ push 2.0
 div
 swap
 print
+pop
 push " dividido por 2.0 eh "
 prints
+pop
 print
 </textarea>
 
@@ -341,8 +343,8 @@ As seguintes instruções lêem da entrada padrão e colocam o resultado no topo
 - =reads= : lê uma string (tamanho + dados na pilha)
 
 As seguintes instruções imprimem o conteúdo da pilha na saída padrão:
-- =print= : Coloca o elemento do topo da pilha na saída padrão
-- =prints= : Imprime a string no topo da pilha (tamanho + conteúdo)
+- =print= : Remove o elemento do topo da pilha e o coloca na saída padrão. Coloca no topo da pilha o número de bytes/caracteres apresentados.
+- =prints= : Imprime a string no topo da pilha (tamanho + conteúdo). Coloca o no topo da pilha o número de bytes/caracteres apresentados.
 
 #+BEGIN_SRC sh :eval never
 readc
@@ -838,14 +840,18 @@ As seguintes instruções de controle de fluxo são suportadas:
   push 2
   bor
   print
+  pop
   print
+  pop
   # print 1 & 3   = 1
   push 3
   push 1
   band
   print
+  pop
   push '\n'
   print
+  pop
   # !(~1)        = 0
   push 1
   bnot
@@ -910,14 +916,18 @@ reads
 acreate
 aload
 prints
+pop
 push '\n'
 print
+pop
 cast_s
 acreate
 aload
 prints
+pop
 cast_s
 prints
+pop
 cast_s
 acreate
 #+END_SRC

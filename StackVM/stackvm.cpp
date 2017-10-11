@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Sep 13 11:00:28 2017"
- *         Updated: "2017-10-11 00:46:35 kassick"
+ *         Updated: "2017-10-11 00:48:35 kassick"
  *
  *          Author:
  *
@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
         fstream * fh = new fstream(args["FILE"].asString(), ios_base::in);
         if (!fh->is_open()) {
             cerr << "Could not open input file ``"
-                 << argv[1]
+                 << args["FILE"].asString()
                  << "''"
                  << endl;
             return 1;
