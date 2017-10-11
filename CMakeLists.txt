@@ -26,7 +26,7 @@ ExternalProject_Add(ex_docopt
   PREFIX ${DOCOPT_PREFIX}
   BINARY_DIR ${DOCOPT_PREFIX}/build
   INSTALL_DIR ${DOCOPT_PREFIX}/install
-  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${DOCOPT_PREFIX}/install
+  CMAKE_ARGS -DCMAKE_CXX_FLAGS=-std=c++11 -DCMAKE_INSTALL_PREFIX=${DOCOPT_PREFIX}/install
 )
 
 ExternalProject_Get_Property(ex_docopt install_dir)

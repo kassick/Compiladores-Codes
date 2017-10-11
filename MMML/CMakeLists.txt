@@ -33,6 +33,6 @@ add_executable(mmmlc
   casts.cpp
   ${mmml_parser_GENERATED_SRC})
 add_dependencies(mmmlc mmmlc_html generate_mmml_parser)
-target_link_libraries(mmmlc antlr4static)
+target_link_libraries(mmmlc antlr4static docopt)
 
 add_subdirectory(tests/)

@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-10-10 23:08:28 kassick"
+ *         Updated: "2017-10-11 02:22:48 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -1009,6 +1009,120 @@ antlrcpp::Any MetaExprVisitor::visitTuple_ctor(MMMLParser::Tuple_ctorContext *ct
 antlrcpp::Any
 MetaExprVisitor::visitFuncall_rule(MMMLParser::Funcall_ruleContext *ctx)
 {
+    FunctionCallArgListVisitor fcvisitor(this->code_ctx);
+
+    int nargs = fcvisitor.visit(ctx->funcall_params());
+
+    const string fname = ctx->symbol()->getText();
+
+    if (nargs == 0)
+    {
+        // MMML does not support 0-args functions, EXCEPT THE SPECIAL ONES
+        if (fname == "read_char")
+        {
+            *code_ctx << Instruction("readc");
+            return Types::char_type;
+        }
+        else if (fname == "read_int")
+        {
+            *code_ctx << Instruction("readi");
+            return Types::int_type;
+        }
+        else if (fname == "read_float")
+        {
+            *code_ctx << Instruction("readd");
+            return Types::float_type;
+        }
+        else if (fname == "read_string")
+        {
+            *code_ctx << Instruction("reads")
+                      << Instruction("acreate");
+            auto strtype = make_shared<SequenceType>(Types::char_type);
+            return type_registry.add(strtype);
+        }
+
+        // else
+        Report::err(ctx) << "Calling invalid 0-sized function ``"
+                             << fname
+                             << "´´"
+                             << endl;
+        return Types::int_type;
+    }
+
+    if (fname == "print") {
+        // Special function print
+        if (nargs != 1)
+        {
+            Report::err(ctx) << "Call to function ``print´´ must always have 1 parameter" << endl;
+            return Types::int_type;
+        }
+
+        SequenceType::const_pointer seq = fcvisitor.args[0].first->as<SequenceType>();
+        if (seq) {
+            auto base_ptr = seq->base_type.lock();
+            if (base_ptr && base_ptr->equals(Types::char_type) && seq->dim == 1)
+            {
+                *code_ctx << std::move(*fcvisitor.args[0].second)
+                          << Instruction("aload")
+                          << Instruction("prints");
+
+            } else {
+                Report::err(ctx) << "Function print can not print sequence type" << endl;
+            }
+
+        } else if (fcvisitor.args[0].first->is_basic()) {
+            *code_ctx << std::move(*fcvisitor.args[0].second)
+                      << Instruction("print");
+        } else {
+            Report::err(ctx) << "Function print can not print type " << fcvisitor.args[0].first->name()
+                             << endl;
+        }
+
+        return Types::int_type;
+    }
+
+    if (fname == "str") {
+        SequenceType::const_pointer seq = fcvisitor.args[0].first->as<SequenceType>();
+        if (seq) {
+            auto base_ptr = seq->base_type.lock();
+            if (base_ptr && base_ptr->equals(Types::char_type) && seq->dim == 1)
+            {
+                *code_ctx << std::move(*fcvisitor.args[0].second)
+                          << Instruction("nop");
+            } else {
+                Report::err(ctx) << "Function str can not convert sequence type" << endl;
+            }
+        } else if (fcvisitor.args[0].first->is_basic()) {
+            *code_ctx << std::move(*fcvisitor.args[0].second)
+                      << Instruction("cast_s")
+                      << Instruction("acreate");
+        } else {
+            Report::err(ctx) << "Function str can not convert type " << fcvisitor.args[0].first->name();
+        }
+
+        auto strtype = make_shared<SequenceType>(Types::char_type);
+        return type_registry.add(strtype);
+    }
+
+    if (fname == "length")
+    {
+        if (nargs != 1)
+        {
+            Report::err(ctx) << "Call to function ``length'' must always have 1 parameter" << endl;
+            return Types::int_type;
+        }
+
+        SequenceType::const_pointer seq = fcvisitor.args[0].first->as<SequenceType>();
+        if (seq) {
+            *code_ctx << std::move(*fcvisitor.args[0].second)
+                      << Instruction("alen");
+        } else {
+            Report::err(ctx) << "Function ``length'' expects a sequence type" << endl;
+        }
+
+        return Types::int_type;
+    }
+
     auto function = function_registry.find(ctx->symbol()->getText());
     if (!function)
     {
@@ -1019,16 +1133,14 @@ MetaExprVisitor::visitFuncall_rule(MMMLParser::Funcall_ruleContext *ctx)
         return Types::int_type;
     }
 
-    FunctionCallArgListVisitor fcvisitor(this->code_ctx);
-
-    int nargs = fcvisitor.visit(ctx->funcall_params());
 
     if (nargs != function->args.size())
     {
         Report::err(ctx) << "Invalid number of arguments for function ``"
                          << function->name
                          << "´´. Got " << nargs
-                         << ", expected " << function->args.size();
+                         << ", expected " << function->args.size()
+                         << endl;
         return function->rtype;
     }
 
@@ -1047,7 +1159,8 @@ MetaExprVisitor::visitFuncall_rule(MMMLParser::Funcall_ruleContext *ctx)
             Report::err(ctx) << "Could not coerce type "
                              << fcvisitor.args[i].first->name()
                              << " to " << function->args[i]->type()->name()
-                             << " in function call";
+                             << " in function call"
+                             << endl;
             return function->rtype;
         }
 

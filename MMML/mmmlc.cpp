@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep  8 19:36:14 2017"
- *         Updated: "2017-10-10 23:25:28 kassick"
+ *         Updated: "2017-10-11 00:57:17 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -15,7 +15,6 @@
 #include <iostream>
 #include <cstdio>
 #include <unistd.h>
-#include <execinfo.h>
 
 #include "mmml/NestedSymbolTable.H"
 #include "mmml/TypeRegistry.H"
@@ -31,10 +30,23 @@
 #include "antlr4-runtime.h"
 #include "MMMLLexer.h"
 
+#include "docopt/docopt.h"
+
 using namespace std;
 using namespace mmml;
 using namespace antlr4;
 
+static const char USAGE[] =
+        R"(MMML Compiler
+
+    Usage:
+      mmmlc [-O N] [-o OUTPUT] [FILE]
+
+    Options:
+      -h --help         Show this screen.
+      -o OUTPUT         Write output to file
+      -O N              Optimization Level [default: 1]
+)";
 
 void parse_stream(istream& text_stream, ostream& err_stream, ostream& out_stream, ostream& code_stream)
 {
@@ -68,18 +80,57 @@ void parse_stream(istream& text_stream, ostream& err_stream, ostream& out_stream
 
 int main(int argc, char *argv[])
 {
+    std::map<std::string, docopt::value> args =
+            docopt::docopt(USAGE,
+                           { argv + 1, argv + argc },
+                           true,               // show help if requested
+                           "MMML 1.0");     // version string
+
+    ostream* out = &cout;
+    istream* in = &cin;
+
+    if (args["FILE"])
+    {
+        fstream * fh = new fstream(args["FILE"].asString(), ios_base::in);
+        if (!fh->is_open()) {
+            cerr << "Could not open input file ``"
+                 << args["FILE"].asString()
+                 << "''"
+                 << endl;
+            return 1;
+        }
+
+        in = fh;
+    }
+
+    if (args["-o"])
+    {
+        fstream * fh = new fstream(args["-o"].asString(), ios_base::out);
+        if (!fh->is_open()) {
+            cerr << "Could not open output file ``"
+                 << args["-o"].asString()
+                 << "''"
+                 << endl;
+            return 1;
+        }
+
+        out = fh;
+    }
+
     try {
-        parse_stream(cin, cerr, cout, cout);
+        parse_stream(/*text=*/ *in,
+                     cerr, cout,
+                     /*code_out=*/ *out);
     } catch (const std::exception &e) {
-        void *array[50];
-        size_t size;
+        // void *array[50];
+        // size_t size;
 
         cerr << "Got " << e.what();
-        // get void*'s for all entries on the stack
-        size = backtrace(array, 50);
+        // // get void*'s for all entries on the stack
+        // size = backtrace(array, 50);
 
-        backtrace_symbols_fd(array, size,
-                             STDERR_FILENO);
+        // backtrace_symbols_fd(array, size,
+        //                      STDERR_FILENO);
         exit(1);
     }
 
