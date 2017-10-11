@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-10-10 20:42:41 kassick"
+ *         Updated: "2017-10-10 22:38:31 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -101,16 +101,18 @@ antlrcpp::Any MetaExprVisitor::visitMe_bool_and_rule(MMMLParser::Me_bool_and_rul
     MetaExprVisitor leftvisitor(code_ctx->create_block());
     MetaExprVisitor rightvisitor(code_ctx->create_block());
 
+    string _lout;
     string _ltrue = this->ltrue;
     string _lfalse = this->lfalse;
+    string lnext = LabelFactory::make();
 
     if (_ltrue.length() == 0) {
         // we are not in a boolean context, we must leave the result on the top of the stack
-        _ltrue = LabelFactory::make();
+        _lout = LabelFactory::make();
         _lfalse = LabelFactory::make();
+        _ltrue = LabelFactory::make();
     }
 
-    string lnext = LabelFactory::make();
 
     // Visit Left
     leftvisitor.lfalse = _lfalse;
@@ -148,15 +150,15 @@ antlrcpp::Any MetaExprVisitor::visitMe_bool_and_rule(MMMLParser::Me_bool_and_rul
                 << Instruction("bz", {rightvisitor.lfalse});
     }
 
-    *code_ctx << *leftvisitor.code_ctx
-              << Instruction().with_label(lnext)
-              << *rightvisitor.code_ctx;
+    *code_ctx
+            << std::move(*leftvisitor.code_ctx)
+            << Instruction().with_label(lnext).with_annot("and: next test")
+            << std::move(*rightvisitor.code_ctx);
 
     if (!rt->as<BooleanBranchCode>())
         *code_ctx << Instruction("jump", {_ltrue}).with_annot("AND JUMP TRUE");
 
     if (this->ltrue.length() == 0) {
-        auto _lout = LabelFactory::make();
         // not in boolean context, must push true or false
         *code_ctx << Instruction("push", {1}).with_label(_ltrue)
                   << Instruction("jump", {_lout}).with_annot("AND JUMP OUT")
@@ -175,16 +177,18 @@ antlrcpp::Any MetaExprVisitor::visitMe_bool_or_rule(MMMLParser::Me_bool_or_ruleC
     MetaExprVisitor leftvisitor(code_ctx->create_block());
     MetaExprVisitor rightvisitor(code_ctx->create_block());
 
+    string _lout;
     string _ltrue = this->ltrue;
     string _lfalse = this->lfalse;
+    string lnext = LabelFactory::make();
 
     if (_ltrue.length() == 0) {
         // we are not in a boolean context, we must leave the result on the top of the stack
+        _lout = LabelFactory::make();
         _ltrue = LabelFactory::make();
         _lfalse = LabelFactory::make();
     }
 
-    string lnext = LabelFactory::make();
 
     // Visit Left
     leftvisitor.lfalse = lnext; // if false, check next
@@ -218,15 +222,14 @@ antlrcpp::Any MetaExprVisitor::visitMe_bool_or_rule(MMMLParser::Me_bool_or_ruleC
     }
 
     // Synthetize return code
-    *code_ctx << *leftvisitor.code_ctx
-              << Instruction().with_label(lnext)
-              << *rightvisitor.code_ctx;
+    *code_ctx << std::move(*leftvisitor.code_ctx)
+              << Instruction().with_label(lnext).with_annot("or: test next")
+              << std::move(*rightvisitor.code_ctx);
 
     if (!rt->as<BooleanBranchCode>())
         *code_ctx << Instruction("jump", {_lfalse}).with_annot("OR JUMP FALSE");
 
     if (this->ltrue.length() == 0) {
-        auto _lout = LabelFactory::make();
         // not in boolean context, must push true or false
         *code_ctx << Instruction("push", {0}).with_label(_lfalse)
                   << Instruction("jump", {_lout}).with_annot("OR JUMP OUT")
@@ -360,8 +363,8 @@ antlrcpp::Any MetaExprVisitor::visitMe_boolneg_rule(MMMLParser::Me_boolneg_ruleC
 
     // 0 - 1    ->  -1  (true)
     // 1 - 1    ->   0 (false)
-    auto _lfalse = LabelFactory::make();
     auto _lout = LabelFactory::make();
+    auto _lfalse = LabelFactory::make();
 
     *code_ctx << Instruction("bz", {_lfalse}).with_annot("Convert to false")
               << Instruction("push", {0}).with_annot("type(bool)")
@@ -377,13 +380,56 @@ antlrcpp::Any MetaExprVisitor::visitMe_boolnegparens_rule(MMMLParser::Me_boolneg
     FuncbodyVisitor fbvisitor(code_ctx->create_block());
     fbvisitor.ltrue = this->lfalse;
     fbvisitor.lfalse = this->ltrue;
-    fbvisitor.lout = this->lout;
+    // DO NOT SET LOUT
 
     Type::const_pointer ftype = fbvisitor.visit(ctx->funcbody());
 
     if (!ftype) {
         Report::err(ctx, "IMPL ERROR ON BOOLNEGPARENS");
         return Types::bool_type;
+    }
+
+    cerr << "result funcbody in neg is " << ftype->name() << endl;
+    bool boolean_ctx = this->ltrue.length() > 0;
+
+    if (boolean_ctx)
+    {
+        // Boolean context
+        // Is the returned type branch code?
+        if (!ftype->as<BooleanBranchCode>())
+        {
+            gen_cast_code(ctx,
+                          ftype, /*->*/ Types::bool_type,
+                          fbvisitor.code_ctx,
+                          false);
+
+            *fbvisitor.code_ctx
+                    << Instruction("bz", {this->ltrue}).with_annot("AAA")
+                    << Instruction("jump", {this->lfalse});
+        }
+    } else {
+        // Not boolean context
+        // Cast to bool and invert value
+        auto cast_type =
+                gen_cast_code(ctx,
+                              ftype, /*->*/ Types::bool_type,
+                              fbvisitor.code_ctx,
+                              false);
+        if (!cast_type)
+        {
+            Report::err(ctx) << "Can't cast ``" << ftype->name() << "´´"
+                             << " to boolean";
+            return Types::bool_type;
+        }
+
+        auto _lout = LabelFactory::make();
+        auto _ltrue = LabelFactory::make();
+        *fbvisitor.code_ctx
+                << Instruction("bz", {_ltrue}).with_annot("BBB")
+                << Instruction("push", {0}).with_annot("CCC")
+                << Instruction("jump", {_lout})
+                << Instruction("push", {1}).with_label(_ltrue)
+                << Instruction().with_label(_lout);
     }
 
     *code_ctx << std::move(*fbvisitor.code_ctx);
@@ -483,16 +529,18 @@ MetaExprVisitor::visitMe_boolgtlt_rule(MMMLParser::Me_boolgtlt_ruleContext *ctx)
                                 });
 
     if (!rtype)
-        return Types::int_type;
+        return Types::bool_type;
 
-    string _ltrue, _lfalse;
     bool boolean_ctx = this->ltrue.length() > 0;
+
+    string _lout = LabelFactory::make();
+    string _ltrue, _lfalse;
     if (boolean_ctx) {
-        _ltrue = this->ltrue;
         _lfalse = this->lfalse;
+        _ltrue = this->ltrue;
     } else {
-        _ltrue = LabelFactory::make();
         _lfalse = LabelFactory::make();
+        _ltrue = LabelFactory::make();
     }
 
     // cmp_instr jumps to false or falls through
@@ -523,7 +571,6 @@ MetaExprVisitor::visitMe_boolgtlt_rule(MMMLParser::Me_boolgtlt_ruleContext *ctx)
     if (boolean_ctx)
         return Types::boolean_branch;
 
-    auto _lout = LabelFactory::make();
     *code_ctx << Instruction("push", {1}).with_label(_ltrue)
               << Instruction("jump", {_lout})
               << Instruction("push", {0}).with_label(_lfalse)
@@ -545,14 +592,17 @@ MetaExprVisitor::visitMe_booleqdiff_rule(MMMLParser::Me_booleqdiff_ruleContext *
     if (!rtype)
         return Types::int_type;
 
-    string _ltrue, _lfalse;
     bool boolean_ctx = this->ltrue.length() > 0;
+
+    string _lout = LabelFactory::make();
+    string _ltrue, _lfalse;
+
     if (boolean_ctx) {
         _ltrue = this->ltrue;
         _lfalse = this->lfalse;
     } else {
-        _ltrue = LabelFactory::make();
         _lfalse = LabelFactory::make();
+        _ltrue = LabelFactory::make();
     }
 
     // cmp_instr jumps to false or falls through
@@ -571,7 +621,6 @@ MetaExprVisitor::visitMe_booleqdiff_rule(MMMLParser::Me_booleqdiff_ruleContext *
     if (boolean_ctx)
         return Types::boolean_branch;
 
-    auto _lout = LabelFactory::make();
     *code_ctx << Instruction("push", {1}).with_label(_ltrue)
               << Instruction("jump", {_lout})
               << Instruction("push", {0}).with_label(_lfalse)
@@ -587,7 +636,8 @@ antlrcpp::Any MetaExprVisitor::visitMe_exprcast_rule(MMMLParser::Me_exprcast_rul
 
 antlrcpp::Any MetaExprVisitor::visitCast_rule(MMMLParser::Cast_ruleContext *ctx)
 {
-    auto source_type = visit(ctx->funcbody()).as<Type::const_pointer>();
+    FuncbodyVisitor fbvisitor(code_ctx);
+    auto source_type = fbvisitor.visit(ctx->funcbody()).as<Type::const_pointer>();
     auto dest_type = type_registry.find_by_name(ctx->c->getText());
 
     if (!source_type) {

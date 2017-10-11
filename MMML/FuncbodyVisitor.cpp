@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Oct  4 10:09:35 2017"
- *         Updated: "2017-10-10 20:41:25 kassick"
+ *         Updated: "2017-10-10 22:36:47 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -56,15 +56,16 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleConte
 
     Type::const_pointer cond_type, bodytrue_type, bodyfalse_type;
 
-    string _laftercond = LabelFactory::make();
-    string _ltrue  = LabelFactory::make();
-    string _lfalse = LabelFactory::make();
     string _lout;
 
     if (this->lout.length() > 0)
         _lout = this->lout;
     else
         _lout = LabelFactory::make();
+
+    string _lfalse = LabelFactory::make();
+    string _ltrue  = LabelFactory::make();
+    string _laftercond = LabelFactory::make();
 
     FuncbodyVisitor boolvisitor(this->code_ctx->create_block());
     boolvisitor.lout = _laftercond;
@@ -85,6 +86,11 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleConte
         // If it's bool, gen_cast_code just returns
 
         // Must cast
+        *boolvisitor.code_ctx
+                << Instruction()
+                .with_label(_laftercond)
+                .with_annot("cast cond to bool");
+
         auto new_cond_type =
                 gen_cast_code(ctx,
                               cond_type, Types::bool_type,
@@ -92,8 +98,7 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleConte
 
         *boolvisitor.code_ctx
                 << Instruction("bz", {_lfalse}).with_annot("branch if")
-                << Instruction("jump", {_ltrue}).with_label(_laftercond).with_annot("IF COND JUMP NOT BBRANCH");
-
+                << Instruction("jump", {_ltrue}).with_annot("IF COND JUMP NOT BBRANCH");
     }
 
     // visit true
@@ -150,25 +155,28 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleConte
         return Types::int_type;
     }
 
+    // Merge the codes
     *code_ctx
-            << *boolvisitor.code_ctx
-            << Instruction().with_label(_ltrue).with_annot("true branch")
-            << *truevisitor.code_ctx;
+            << std::move(*boolvisitor.code_ctx);
 
-    // If we are in boolean context, the bodies already do the jump
+    *code_ctx
+            << Instruction().with_label(_ltrue).with_annot("true branch")
+            << std::move( *truevisitor.code_ctx );
+
+    // If we are in boolean context, the bodies already do the jump. Otherwise,
+    // it's up to the if code to jump to out
     if (!rtype->as<BooleanBranchCode>())
         *code_ctx << Instruction("jump", {_lout}).with_annot("OUT OF TRUE BRANCH");
 
-    *code_ctx << Instruction().with_label(_lfalse).with_annot("false branch")
-              << *falsevisitor.code_ctx;
+    *code_ctx
+            << Instruction().with_label(_lfalse).with_annot("false branch")
+            << std::move(*falsevisitor.code_ctx);
 
     if (!rtype->as<BooleanBranchCode>())
         *code_ctx << Instruction("jump", {_lout}).with_annot("OUT OF FALSE BRANCH");
 
     if (this->lout.length() == 0)
-        *code_ctx << Instruction().with_label(_lout);
-    else
-        cerr << "Not adding out jump for if " << ctx->getText() << " it already has label at " << this->lout << endl;
+        *code_ctx << Instruction().with_label(_lout).with_annot("out point of if");
 
     return rtype;
 }
@@ -238,7 +246,7 @@ antlrcpp::Any FuncbodyVisitor::visitLetvarattr_rule(MMMLParser::Letvarattr_ruleC
     auto lcont = LabelFactory::make();
 
     FuncbodyVisitor fbvisitor(this->code_ctx->create_block());
-    //fbvisitor.lout = lcont;
+    fbvisitor.lout = lcont;
 
     // let x = funcbody
     Type::const_pointer symbol_type = fbvisitor.visit(ctx->funcbody());
@@ -266,7 +274,7 @@ antlrcpp::Any FuncbodyVisitor::visitLetvarattr_rule(MMMLParser::Letvarattr_ruleC
     code_ctx->symbol_table->add(sym);
 
     *code_ctx
-            << *fbvisitor.code_ctx
+            << std::move(*fbvisitor.code_ctx)
             << Instruction()
             .with_label(lcont)
             .with_annot("store at " + to_string(sym->pos) +
@@ -281,7 +289,7 @@ antlrcpp::Any FuncbodyVisitor::visitLetvarresult_ignore_rule(MMMLParser::Letvarr
     auto lcont = LabelFactory::make();
 
     FuncbodyVisitor fbvisitor(code_ctx->create_block());
-    //fbvisitor.lout = lcont;
+    fbvisitor.lout = lcont;
 
     Type::const_pointer symbol_type = fbvisitor.visit(ctx->funcbody());
 
@@ -320,7 +328,7 @@ antlrcpp::Any FuncbodyVisitor::visitLetunpack_rule(MMMLParser::Letunpack_ruleCon
     auto lcont = LabelFactory::make();
 
     FuncbodyVisitor fbvisitor(code_ctx->create_block());
-    //fbvisitor.lout = lcont;
+    fbvisitor.lout = lcont;
 
     Type::const_pointer list_type = fbvisitor.visit(ctx->funcbody());
 
