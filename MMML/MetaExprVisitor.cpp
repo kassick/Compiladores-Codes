@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-10-11 02:22:48 kassick"
+ *         Updated: "2017-10-11 18:18:03 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -84,7 +84,10 @@ Type::const_pointer generic_bin_op(
         // Required upcasting did not result in expected type
 
         Report::err(left) << "Could not coerce types "
-                                        << ltype->name() << " and " << rtype->name();
+                          << ltype->name()
+                          << " and "
+                          << rtype->name()
+                          << endl;
 
         return nullptr;
     }
@@ -129,7 +132,8 @@ antlrcpp::Any MetaExprVisitor::visitMe_bool_and_rule(MMMLParser::Me_bool_and_rul
 
         if (!lboolt)
             Report::err(ctx->l) << "Could not coerce type " << lt->name()
-                                << " to bool";
+                                << " to bool"
+                                << endl;
 
         *leftvisitor.code_ctx
                 << Instruction("bz", {leftvisitor.lfalse});
@@ -144,7 +148,8 @@ antlrcpp::Any MetaExprVisitor::visitMe_bool_and_rule(MMMLParser::Me_bool_and_rul
         auto rboolt = gen_cast_code(ctx->r, rt, Types::bool_type, rightvisitor.code_ctx, false);
         if (!rboolt)
             Report::err(ctx->l) << "Could not coerce type " << rt->name()
-                                << " to bool";
+                                << " to bool"
+                                << endl;
 
         *rightvisitor.code_ctx
                 << Instruction("bz", {rightvisitor.lfalse});
@@ -202,7 +207,8 @@ antlrcpp::Any MetaExprVisitor::visitMe_bool_or_rule(MMMLParser::Me_bool_or_ruleC
 
         if (!lboolt)
             Report::err(ctx->l) << "Could not coerce type " << lt->name()
-                                << " to bool";
+                                << " to bool"
+                                << endl;
 
         *leftvisitor.code_ctx << Instruction("bnz", {_ltrue});
     }
@@ -216,7 +222,8 @@ antlrcpp::Any MetaExprVisitor::visitMe_bool_or_rule(MMMLParser::Me_bool_or_ruleC
         auto rboolt = gen_cast_code(ctx->r, rt, Types::bool_type, rightvisitor.code_ctx, false);
         if (!rboolt)
             Report::err(ctx->l) << "Could not coerce type " << rt->name()
-                                << " to bool";
+                                << " to bool"
+                                << endl;
 
         *rightvisitor.code_ctx << Instruction("bnz", {_ltrue});
     }
@@ -322,6 +329,7 @@ antlrcpp::Any
 MetaExprVisitor::visitLiteralnil_rule(MMMLParser::Literalnil_ruleContext *ctx) {
 
   // *code_ctx << Instruction("push", {"null"}).with_annot("type(nil)");
+    *code_ctx << Instruction("acreate", {0}).with_annot("type(nil)");
 
     return Types::nil_type;
 }
@@ -348,7 +356,8 @@ antlrcpp::Any MetaExprVisitor::visitMe_boolneg_rule(MMMLParser::Me_boolneg_ruleC
     if (!coerced_bool_type || !coerced_bool_type->equals(Types::bool_type))
     {
         Report::err(ctx) << "Can not coerce type " << s->type()->name()
-                          << " to bool";
+                          << " to bool"
+                         << endl;
 
         return Types::bool_type;
     }
@@ -400,6 +409,7 @@ antlrcpp::Any MetaExprVisitor::visitMe_boolnegparens_rule(MMMLParser::Me_boolneg
 
     if (!ftype) {
         Report::err(ctx, "IMPL ERROR ON BOOLNEGPARENS");
+
         return Types::bool_type;
     }
 
@@ -415,7 +425,8 @@ antlrcpp::Any MetaExprVisitor::visitMe_boolnegparens_rule(MMMLParser::Me_boolneg
         if (!cast_type)
         {
             Report::err(ctx) << "Can't cast ``" << ftype->name() << "´´"
-                             << " to boolean";
+                             << " to boolean"
+                             << endl;
             return Types::bool_type;
         }
 
@@ -460,7 +471,7 @@ antlrcpp::Any MetaExprVisitor::visitMe_listconcat_rule(MMMLParser::Me_listconcat
                                 ctx->l, ctx->r,
                                 code_ctx,
                                 [](Type::const_pointer c) {
-                                    return c->as<SequenceType>();
+                                    return c->as<SequenceType>() || c->as<NilType>();
                                 });
 
 
@@ -721,7 +732,8 @@ MetaExprVisitor::visitClass_ctor(MMMLParser::Class_ctorContext *ctx)
     // Check if it's a known class
     if (!class_type) {
         Report::err(ctx) << "Trying to create unknown class "
-                         << ctx->name->getText();
+                         << ctx->name->getText()
+                         << endl;
 
         return Types::int_type;
 
@@ -981,7 +993,7 @@ antlrcpp::Any MetaExprVisitor::visitTuple_ctor(MMMLParser::Tuple_ctorContext *ct
         FuncbodyVisitor fbvisitor(this->code_ctx);
         Type::const_pointer type = fbvisitor.visit(funcbody);
         if (!type) {
-            Report::err(funcbody) << "IMPL ERROR: GOT NULL FROM TUPLE CTOR FUNCBODY #" << i;
+            Report::err(funcbody) << "IMPL ERROR: GOT NULL FROM TUPLE CTOR FUNCBODY #" << i << endl;
 
             return Types::int_type;
         }
@@ -993,7 +1005,8 @@ antlrcpp::Any MetaExprVisitor::visitTuple_ctor(MMMLParser::Tuple_ctorContext *ct
     tuple = type_registry.add(_tup)->as<TupleType>();
 
     if (!tuple) {
-        Report::err(ctx) << "Could not create tuple type";
+        Report::err(ctx) << "Could not create tuple type"
+                         << endl;
         return Types::int_type;
     }
 
@@ -1097,7 +1110,8 @@ MetaExprVisitor::visitFuncall_rule(MMMLParser::Funcall_ruleContext *ctx)
                       << Instruction("cast_s")
                       << Instruction("acreate");
         } else {
-            Report::err(ctx) << "Function str can not convert type " << fcvisitor.args[0].first->name();
+            Report::err(ctx) << "Function str can not convert type " << fcvisitor.args[0].first->name()
+                             << endl;
         }
 
         auto strtype = make_shared<SequenceType>(Types::char_type);

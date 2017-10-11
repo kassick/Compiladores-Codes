@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Oct  4 10:09:35 2017"
- *         Updated: "2017-10-11 03:52:42 kassick"
+ *         Updated: "2017-10-11 18:11:23 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -88,6 +88,10 @@ antlrcpp::Any ToplevelVisitor::visitFuncdef_impl(MMMLParser::Funcdef_implContext
         return f;
     }
 
+    // Make sure we have a label
+    if (f->label.length() == 0)
+        f->label = LabelFactory::make();
+
     if (f->implemented)
     {
         // oops, redefining previously defined function is an error
@@ -153,8 +157,13 @@ antlrcpp::Any ToplevelVisitor::visitFuncdef_impl(MMMLParser::Funcdef_implContext
     if (f->rtype->equals(Types::recursive_type))
     {
         Report::err(ctx) << "Function " << f->name
-                          << " always recurses into itself. Can not resolve recursion"
-                          << endl;
+                         << " always recurses into itself. Can not resolve recursion"
+                         << endl;
+        f->rtype = Types::int_type;
+    } else if (f->rtype->equals(Types::nil_type)) {
+        Report::err(ctx) << "Function " << f->name
+                         << " does not returns a value"
+                         << endl;
         f->rtype = Types::int_type;
     }
 

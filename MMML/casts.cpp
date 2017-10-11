@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Tue Oct  3 17:25:16 2017"
- *         Updated: "2017-10-10 20:39:49 kassick"
+ *         Updated: "2017-10-11 18:30:05 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -60,8 +60,12 @@ Type::const_pointer gen_coalesce_code(
 
     Type::const_pointer from;
     CodeContext::pointer code_ctx;
-    Type::const_pointer ret_ype;
+    Type::const_pointer ret_type;
     Type::const_pointer coalesced = ltype->id() > rtype->id() ? ltype : rtype ;
+
+    // cerr << "Coalescing types " << ltype->name() << " and " << rtype->name() << endl;
+    // cerr << "Coalescing types " << ltype->id() << " and " << rtype->id() << endl;
+    // cerr << "Coalesced: " << coalesced->name() << endl;
 
     if (coalesced == ltype) {
         from = rtype;
@@ -71,6 +75,10 @@ Type::const_pointer gen_coalesce_code(
         code_ctx = lcode;
     }
 
+    // Recursive vs Anything -- accept anything. On the second pass the casts will be called
+    if (from->equals(Types::recursive_type))
+        return coalesced;
+
     // Basic -> Nil :: ERROR
     if (coalesced->as<NilType>())
         return nullptr;
@@ -79,14 +87,14 @@ Type::const_pointer gen_coalesce_code(
     if (coalesced->as<SequenceType>() && from->as<NilType>()) {
 
         *code_ctx << Instruction("acreate", {0}).with_annot("type (" + coalesced->name() + ")");
-        rtype = coalesced;
+        ret_type = coalesced;
 
     } else if (coalesced->is_basic() && from->is_basic()) {
         auto r = gen_cast_code(ctx, from, coalesced, code_ctx);
         if (!r) // can't cast?
             return nullptr;
 
-        rtype = coalesced;
+        ret_type = coalesced;
 
     } else if (coalesced->as<BooleanBranchCode>()) {
 
@@ -96,14 +104,14 @@ Type::const_pointer gen_coalesce_code(
         if (!t) // can't cast to bool? bail!
             return nullptr;
 
-        rtype = coalesced;
+        ret_type = coalesced;
     }
 
-    if (rtype)
+    if (ret_type)
         for (const auto& instr : extra_instructions)
             *code_ctx << instr;
 
-    return rtype;
+    return ret_type;
 }
 
 Type::const_pointer gen_cast_code(
@@ -121,6 +129,11 @@ Type::const_pointer gen_cast_code(
         // float 1.5
         // Nothing to do
         return source_type;
+    }
+
+    // nil -> T[] , nil is already an empty sequence, just accept it
+    if (dest_type->as<SequenceType>() && source_type->equals(Types::nil_type)) {
+        return dest_type;
     }
 
     // ALMOST anything bool
