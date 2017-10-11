@@ -115,6 +115,54 @@ A gramática da linguagem é fornecida juntamente com este documento. A gramáti
 
 As próximas seções exemplificam os conceitos básicos da linguagem {{{mml}}}.
 
+** Exemplos Iniciais
+
+*** Hello World
+
+#+INCLUDE: "examples/01-hello_world.mmml" example
+
+*** Entrada/Saída
+
+- Funções de leitura =read_string=, =read_int=, =read_char= e =read_float= não recebem parâmetros. Apenas funções especiais em {{{mml}}} podem receber 0 parâmetros.
+- A função de saída =print= aceita como parâmetro qualquer tipo básico (bool, char, int, float), além do tipo especial /string/.
+- O operador =::= concatena sequências de mesmo tipo base.
+- O comando =let= declara símbolos que armazenam resultados de funções ou outras operações.
+- O símbolo especial =_= nunca é armazenado. No exemplo, o retorno da função print é descartado.
+
+#+INCLUDE: "examples/02-entrada-saida.mmml" example
+
+*** Tipos
+
+{{{mml}}} é uma linguagem fortemente tipada, porém não há a necessidade de declarar o /tipo/ dos símbolos explicitamente
+
+#+INCLUDE: "examples/03-tipos.mmml" example
+
+*** Controle de Fluxo
+
+O controle de fluxo é feito com a declaração =if=. Porém, um /if/ de {{{mml}}} retorna o valor que resulta da sua avaliação.
+
+#+INCLUDE: "examples/04-controle_de_fluxo.mmml" example
+
+*** Funções
+
+Funções não precisam declarar seu tipo de retorno, pois ele é *deduzido* a partir da expressão da função
+
+#+INCLUDE: examples/05-funcoes.mmml example
+
+Quando necessário, pode-se declarar o tipo de uma função antes de sua implementação
+
+#+INCLUDE: "examples/06-funcoes.mmml" example
+
+*** Operando com Sequências
+
+A maneira principal de operar com sequências em {{{mml}}} é através de recursão.
+
+#+INCLUDE: "examples/07-seq.mmml" example
+
+Tipos sequência possuem uma constante especial =nil= que representa uma sequência vazia de qualquer tipo.
+
+#+INCLUDE: "examples/08-seq-nil.mmml" example
+
 ** Tipos Básicos
 
 A linguagem possui os seguintes tipos básicos:

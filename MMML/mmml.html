@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="pt" xml:lang="pt">
 <head>
-<!-- 2017-10-11 qua 03:34 -->
+<!-- 2017-10-11 qua 18:37 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Linguagem MMML</title>
@@ -297,9 +297,9 @@ in
 
 <textarea id="result" rows="10" cols="70"></textarea>
 
-<div id="outline-container-orga4162f8" class="outline-2">
-<h2 id="orga4162f8">A Linguagem Micro Mini ML</h2>
-<div class="outline-text-2" id="text-orga4162f8">
+<div id="outline-container-orga74967f" class="outline-2">
+<h2 id="orga74967f">A Linguagem Micro Mini ML</h2>
+<div class="outline-text-2" id="text-orga74967f">
 <p>
 \(\mu\)mML é uma linguagem da família ML (F#, OCaML, Nemerle, dentre outras). Ela é uma linguagem funcional <i>pura</i> &#x2013; isto é, cada variável é atribuída uma única vez, não sendo permitidas alterações posteriores. Iterações devem ser feitas utilizando recursão.
 </p>
@@ -313,9 +313,196 @@ As próximas seções exemplificam os conceitos básicos da linguagem \(\mu\)mML
 </p>
 </div>
 
-<div id="outline-container-org9511241" class="outline-3">
-<h3 id="org9511241">Tipos Básicos</h3>
-<div class="outline-text-3" id="text-org9511241">
+<div id="outline-container-orgf07f51a" class="outline-3">
+<h3 id="orgf07f51a">Exemplos Iniciais</h3>
+<div class="outline-text-3" id="text-orgf07f51a">
+</div>
+<div id="outline-container-org319a480" class="outline-4">
+<h4 id="org319a480">Hello World</h4>
+<div class="outline-text-4" id="text-org319a480">
+<pre class="example">
+def main =
+    print "Ola Mundo!"
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org6e19cc6" class="outline-4">
+<h4 id="org6e19cc6">Entrada/Saída</h4>
+<div class="outline-text-4" id="text-org6e19cc6">
+<ul class="org-ul">
+<li>Funções de leitura <code>read_string</code>, <code>read_int</code>, <code>read_char</code> e <code>read_float</code> não recebem parâmetros. Apenas funções especiais em \(\mu\)mML podem receber 0 parâmetros.</li>
+<li>A função de saída <code>print</code> aceita como parâmetro qualquer tipo básico (bool, char, int, float), além do tipo especial <i>string</i>.</li>
+<li>O operador <code>::</code> concatena sequências de mesmo tipo base.</li>
+<li>O comando <code>let</code> declara símbolos que armazenam resultados de funções ou outras operações.</li>
+<li>O símbolo especial <code>_</code> nunca é armazenado. No exemplo, o retorno da função print é descartado.</li>
+</ul>
+
+<pre class="example">
+def main =
+let _ = print "Digite seu nome: ",
+    name = read_string _ ,
+    _ = print "Digite sua idade: ",
+    idade = read_int _
+in
+    print "Olá, " :: name :: ", voce tem " :: (str idade) :: " anos" :: ['\n']
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgb653a93" class="outline-4">
+<h4 id="orgb653a93">Tipos</h4>
+<div class="outline-text-4" id="text-orgb653a93">
+<p>
+\(\mu\)mML é uma linguagem fortemente tipada, porém não há a necessidade de declarar o <i>tipo</i> dos símbolos explicitamente
+</p>
+
+<pre class="example">
+def main =
+  let x = 1,              // x tem tipo int
+      y = 'c',            // y tem tipo char
+      z = 1.4,            // z tem tipo float
+      s = "abc",          // s tem tipo char[], sequencia
+      f1 = x + z,         // f1 tem tipo float
+      i1 = x + y,         // i1 tem tipo int
+      s2 = [y],           // s2 tem tipo char[]
+      s3 = [s2],          // s3 tem tipo char[][]
+      s4 = s2 :: s,       // s4 tem tipo char[]
+      b0 = true &amp;&amp; false, // b0 tem tipo bool
+      b1 = y || z,        // b1 tem tipo bool
+      b2 = s || s2,       // b2 tem tipo bool
+      f2 = float x,       // f2 tem tipo float
+      c1 = char z         // c1 tem tipo char
+in
+  print b1
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgac50482" class="outline-4">
+<h4 id="orgac50482">Controle de Fluxo</h4>
+<div class="outline-text-4" id="text-orgac50482">
+<p>
+O controle de fluxo é feito com a declaração <code>if</code>. Porém, um <i>if</i> de \(\mu\)mML retorna o valor que resulta da sua avaliação.
+</p>
+
+<pre class="example">
+def main =
+  let x = read_int _
+  in
+    let y = if x == 0
+            then 10
+            else 11
+    in
+      print y + 10
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org9de7930" class="outline-4">
+<h4 id="org9de7930">Funções</h4>
+<div class="outline-text-4" id="text-org9de7930">
+<p>
+Funções não precisam declarar seu tipo de retorno, pois ele é <b>deduzido</b> a partir da expressão da função
+</p>
+
+<pre class="example">
+// ping_ retorna int
+def ping_ cur : int, limit : int =
+   if cur &lt; limit
+   then let _ = print "Ping " :: (str cur) :: ['\n']
+        in
+          ping_ cur + 1 limit // Retorna o que ping_ retornar
+   else
+     limit                    // Retorna int
+
+// ping retorna o que ping_ retornar (int)
+def ping limit : int = ping_ 0 limit
+
+def main =
+let limit = read_int _
+in
+  ping limit
+</pre>
+
+<p>
+Quando necessário, pode-se declarar o tipo de uma função antes de sua implementação
+</p>
+
+<pre class="example">
+def ping_ cur : int, limit : int -&gt; int
+def pong_ cur : int, limit : int -&gt; int
+
+def ping_ cur : int, limit : int =
+if cur == limit
+then limit
+else let _ = print "Ping " :: (str cur) :: ['\n']
+     in pong_ cur limit
+
+def pong_ cur : int, limit : int =
+if cur == limit
+then limit
+else let _ = print "Pong " :: (str cur) :: ['\n']
+     in ping_ cur + 1 limit
+
+def main = ping_ 0 10
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgc5dbfaf" class="outline-4">
+<h4 id="orgc5dbfaf">Operando com Sequências</h4>
+<div class="outline-text-4" id="text-orgc5dbfaf">
+<p>
+A maneira principal de operar com sequências em \(\mu\)mML é através de recursão.
+</p>
+
+<pre class="example">
+def str_capitalize_ s : char[],
+                    r : char[] =
+if ! s                                               // Se vazia, retorna vazia
+then r
+else let // _ = print "s=" :: s :: ['\n'],           // Debug, descomentar
+         // _ = print "r=" :: r :: ['\n'],           // Debug, descomentar
+         h::t = s                                    // quebra em primeiro elemento e resto da lista
+     in let up = if h &gt;= 'a' &amp;&amp; h &lt;= 'z'
+                 then h - ('a' - 'A')
+                 else h
+        in str_capitalize_ t (r :: [up])
+
+def str_capitalize s : char[] = str_capitalize_ s ""
+
+def main =
+let sin = read_string _
+in
+  print (str_capitalize sin)
+</pre>
+
+<p>
+Tipos sequência possuem uma constante especial <code>nil</code> que representa uma sequência vazia de qualquer tipo.
+</p>
+
+<pre class="example">
+def filtra_positivos_menores_que n : int,
+                                 v : int[],
+                                 result : int[] =
+if ! v then result
+else let primeiro :: resto = v
+     in
+        if primeiro &lt; 0 || !(primeiro &lt; n)
+           then filtra_positivos_menores_que n resto result
+           else let result = result :: [primeiro]
+                in filtra_positivos_menores_que n resto result
+
+def main = filtra_positivos_menores_que 10 [1] :: [-2] :: [100] :: [9] :: [10] nil
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0c96405" class="outline-3">
+<h3 id="org0c96405">Tipos Básicos</h3>
+<div class="outline-text-3" id="text-org0c96405">
 <p>
 A linguagem possui os seguintes tipos básicos:
 </p>
@@ -334,9 +521,9 @@ A linguagem possui os seguintes tipos básicos:
 </div>
 </div>
 
-<div id="outline-container-org009e328" class="outline-3">
-<h3 id="org009e328">Literais</h3>
-<div class="outline-text-3" id="text-org009e328">
+<div id="outline-container-org112652e" class="outline-3">
+<h3 id="org112652e">Literais</h3>
+<div class="outline-text-3" id="text-org112652e">
 <p>
 A linguagem suporta os seguintes literais em seu código:
 </p>
@@ -374,9 +561,9 @@ A linguagem suporta os seguintes literais em seu código:
 </div>
 </div>
 
-<div id="outline-container-org63cc4a5" class="outline-3">
-<h3 id="org63cc4a5">Expressões Booleanas</h3>
-<div class="outline-text-3" id="text-org63cc4a5">
+<div id="outline-container-org0d7797e" class="outline-3">
+<h3 id="org0d7797e">Expressões Booleanas</h3>
+<div class="outline-text-3" id="text-org0d7797e">
 <p>
 As seguintes expressões booleanas são aceitas na linguagem:
 </p>
@@ -399,26 +586,26 @@ Exemplos:
 <div class="org-src-container">
 <pre class="src src-C">a || b
 
-<span style="color: #81b0e3;">(</span>a == b<span style="color: #81b0e3;">)</span> || c <span style="color: #656565;">// </span><span style="color: #757575;">parenteses desnecessario</span>
+<span style="color: #3a81c3;">(</span>a == b<span style="color: #3a81c3;">)</span> || c <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">parenteses desnecessario</span>
 
-a == <span style="color: #81b0e3;">(</span>b || c<span style="color: #81b0e3;">)</span> <span style="color: #656565;">// </span><span style="color: #757575;">parenteses necessario</span>
+a == <span style="color: #3a81c3;">(</span>b || c<span style="color: #3a81c3;">)</span> <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">parenteses necessario</span>
 
-!<span style="color: #81b0e3;">(</span>c == a<span style="color: #81b0e3;">)</span>
+<span style="color: #4e3163;">!</span><span style="color: #3a81c3;">(</span>c == a<span style="color: #3a81c3;">)</span>
 
-c <span style="color: #656565;">// </span><span style="color: #757575;">C, uma lista, &#233; nao vazio?</span>
+c <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">C, uma lista, &#233; nao vazio?</span>
 
-!c <span style="color: #656565;">// </span><span style="color: #757575;">C, uma lista, &#233; vazia?</span>
+<span style="color: #4e3163;">!</span>c <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">C, uma lista, &#233; vazia?</span>
 
-!<span style="color: #81b0e3;">(</span>a || b<span style="color: #81b0e3;">)</span>
+<span style="color: #4e3163;">!</span><span style="color: #3a81c3;">(</span>a || b<span style="color: #3a81c3;">)</span>
 
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org27e1f84" class="outline-3">
-<h3 id="org27e1f84">Operadores Relacionais</h3>
-<div class="outline-text-3" id="text-org27e1f84">
+<div id="outline-container-org61c753c" class="outline-3">
+<h3 id="org61c753c">Operadores Relacionais</h3>
+<div class="outline-text-3" id="text-org61c753c">
 <p>
 Os operadores relacionais comparam dois <b>tipos básicos</b> e retornam um valor booleano
 </p>
@@ -431,17 +618,17 @@ Os operadores relacionais comparam dois <b>tipos básicos</b> e retornam um valo
 </ul>
 
 <div class="org-src-container">
-<pre class="src src-fsharp">a == <span style="color: #ab75c3;">1</span>
+<pre class="src src-fsharp">a == <span style="color: #4e3163;">1</span>
 
-x &lt;= <span style="color: #ab75c3;">2</span> + <span style="color: #ab75c3;">1</span>
+x &lt;= <span style="color: #4e3163;">2</span> + <span style="color: #4e3163;">1</span>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org9793813" class="outline-3">
-<h3 id="org9793813">Expressões Aritméticas</h3>
-<div class="outline-text-3" id="text-org9793813">
+<div id="outline-container-org95a2ab9" class="outline-3">
+<h3 id="org95a2ab9">Expressões Aritméticas</h3>
+<div class="outline-text-3" id="text-org95a2ab9">
 <p>
 As expressões aritméticas são as operações aritméticas básicas de linguagens de programação:
 </p>
@@ -461,26 +648,26 @@ A precedência de operadores garante que Exponenciação tem prioridade sobre Mu
 Exemplos:
 </p>
 <div class="org-src-container">
-<pre class="src src-python">a + <span style="color: #ab75c3;">2</span>
+<pre class="src src-python">a + <span style="color: #4e3163;">2</span>
 
 a * b * c / d
 
-<span style="color: #81b0e3;">(</span>a + b<span style="color: #81b0e3;">)</span> * <span style="color: #ab75c3;">2</span>
+<span style="color: #3a81c3;">(</span>a + b<span style="color: #3a81c3;">)</span> * <span style="color: #4e3163;">2</span>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org7971007" class="outline-3">
-<h3 id="org7971007">Condicional <i>if</i></h3>
-<div class="outline-text-3" id="text-org7971007">
+<div id="outline-container-org24dc450" class="outline-3">
+<h3 id="org24dc450">Condicional <i>if</i></h3>
+<div class="outline-text-3" id="text-org24dc450">
 <p>
 A estrutura <i>if</i> da linguagem tem a seguinte forma:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">if</span> boolexpr
-<span style="color: #5180b3;">then</span> expr1
-<span style="color: #5180b3;">else</span> expr2
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">if</span> boolexpr
+<span style="color: #3a81c3; font-weight: bold;">then</span> expr1
+<span style="color: #3a81c3; font-weight: bold;">else</span> expr2
 </pre>
 </div>
 
@@ -492,9 +679,9 @@ O comportamento é como esperado: Se a espressão <i>boolexpr</i> for <i>verdade
 Uma diferença do <i>if</i> da \(\mu\)mML para o <i>if</i> de linguagens imperativas é que ele é uma <i>expressão</i>: o <i>if</i> <b>retorna</b> o resultado da expressão avaliada. Ou seja, o código
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">if</span> x == <span style="color: #ab75c3;">1</span>
-<span style="color: #5180b3;">then</span> <span style="color: #ab75c3;">10</span>
-<span style="color: #5180b3;">else</span> <span style="color: #ab75c3;">20</span>
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">if</span> x == <span style="color: #4e3163;">1</span>
+<span style="color: #3a81c3; font-weight: bold;">then</span> <span style="color: #4e3163;">10</span>
+<span style="color: #3a81c3; font-weight: bold;">else</span> <span style="color: #4e3163;">20</span>
 </pre>
 </div>
 
@@ -502,16 +689,16 @@ Uma diferença do <i>if</i> da \(\mu\)mML para o <i>if</i> de linguagens imperat
 seria equivalente ao seguinte código em C:
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #cd5542;">int</span> <span style="color: #6aaf50;">if_eval_1</span><span style="color: #81b0e3;">(</span><span style="color: #cd5542;">int</span> <span style="color: #baba36;">b</span>, <span style="color: #cd5542;">int</span> <span style="color: #baba36;">r1</span>, <span style="color: #cd5542;">int</span> <span style="color: #baba36;">r2</span><span style="color: #81b0e3;">)</span> <span style="color: #81b0e3;">{</span>
-    <span style="color: #5180b3;">if</span> <span style="color: #a5a5a5;">(</span>b<span style="color: #a5a5a5;">)</span>
-       <span style="color: #5180b3;">return</span> r1;
-    <span style="color: #5180b3;">else</span>
-       <span style="color: #5180b3;">return</span> r2;
-<span style="color: #81b0e3;">}</span>
+<pre class="src src-C"><span style="color: #ba2f59; font-weight: bold;">int</span> <span style="color: #6c3163; font-weight: bold;">if_eval_1</span><span style="color: #3a81c3;">(</span><span style="color: #ba2f59; font-weight: bold;">int</span> <span style="color: #715ab1;">b</span>, <span style="color: #ba2f59; font-weight: bold;">int</span> <span style="color: #715ab1;">r1</span>, <span style="color: #ba2f59; font-weight: bold;">int</span> <span style="color: #715ab1;">r2</span><span style="color: #3a81c3;">)</span> <span style="color: #3a81c3;">{</span>
+    <span style="color: #3a81c3; font-weight: bold;">if</span> <span style="color: #6c3163;">(</span>b<span style="color: #6c3163;">)</span>
+       <span style="color: #3a81c3; font-weight: bold;">return</span> r1;
+    <span style="color: #3a81c3; font-weight: bold;">else</span>
+       <span style="color: #3a81c3; font-weight: bold;">return</span> r2;
+<span style="color: #3a81c3;">}</span>
 
 ...
 
-r = if_eval_1<span style="color: #81b0e3;">(</span>x == <span style="color: #ab75c3;">1</span>, <span style="color: #ab75c3;">10</span>, <span style="color: #ab75c3;">20</span><span style="color: #81b0e3;">)</span>;
+r = if_eval_1<span style="color: #3a81c3;">(</span>x == <span style="color: #4e3163;">1</span>, <span style="color: #4e3163;">10</span>, <span style="color: #4e3163;">20</span><span style="color: #3a81c3;">)</span>;
 </pre>
 </div>
 
@@ -519,7 +706,7 @@ r = if_eval_1<span style="color: #81b0e3;">(</span>x == <span style="color: #ab7
 Uma vez que o <i>if</i> é, ele próprio, uma <i>expressão</i>, ele pode ser utilizado dentro de expressões booleanas ou aritméticas. A expresão:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #81b0e3;">(</span><span style="color: #5180b3;">if</span> x == <span style="color: #ab75c3;">0</span> <span style="color: #5180b3;">then</span> <span style="color: #ab75c3;">10</span> * x <span style="color: #5180b3;">else</span> <span style="color: #ab75c3;">20</span> / x<span style="color: #81b0e3;">)</span> * <span style="color: #ab75c3;">2</span>
+<pre class="src src-fsharp"><span style="color: #3a81c3;">(</span><span style="color: #3a81c3; font-weight: bold;">if</span> x == <span style="color: #4e3163;">0</span> <span style="color: #3a81c3; font-weight: bold;">then</span> <span style="color: #4e3163;">10</span> * x <span style="color: #3a81c3; font-weight: bold;">else</span> <span style="color: #4e3163;">20</span> / x<span style="color: #3a81c3;">)</span> * <span style="color: #4e3163;">2</span>
 </pre>
 </div>
 
@@ -531,11 +718,11 @@ retorna \(10 * x * 2\) quando <code>x</code> é zero e \((20 / x) * 2\) quando x
 Uma vez que a condição do if é uma <i>expressão</i>, podemos utilizar parênteses, igualdades, operadores lógicos, etc.
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">if</span> <span style="color: #81b0e3;">(</span>x == <span style="color: #ab75c3;">0</span> || z<span style="color: #81b0e3;">)</span>
-<span style="color: #5180b3;">then</span> <span style="color: #5180b3;">if</span> z
-     <span style="color: #5180b3;">then</span> <span style="color: #81b0e3;">(</span>z * <span style="color: #ab75c3;">10</span> + <span style="color: #ab75c3;">2</span><span style="color: #81b0e3;">)</span>
-     <span style="color: #5180b3;">else</span> <span style="color: #81b0e3;">(</span><span style="color: #ab75c3;">50</span><span style="color: #81b0e3;">)</span>
-<span style="color: #5180b3;">else</span> <span style="color: #ab75c3;">10</span>
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">if</span> <span style="color: #3a81c3;">(</span>x == <span style="color: #4e3163;">0</span> || z<span style="color: #3a81c3;">)</span>
+<span style="color: #3a81c3; font-weight: bold;">then</span> <span style="color: #3a81c3; font-weight: bold;">if</span> z
+     <span style="color: #3a81c3; font-weight: bold;">then</span> <span style="color: #3a81c3;">(</span>z * <span style="color: #4e3163;">10</span> + <span style="color: #4e3163;">2</span><span style="color: #3a81c3;">)</span>
+     <span style="color: #3a81c3; font-weight: bold;">else</span> <span style="color: #3a81c3;">(</span><span style="color: #4e3163;">50</span><span style="color: #3a81c3;">)</span>
+<span style="color: #3a81c3; font-weight: bold;">else</span> <span style="color: #4e3163;">10</span>
 </pre>
 </div>
 
@@ -543,17 +730,17 @@ Uma vez que a condição do if é uma <i>expressão</i>, podemos utilizar parên
 <b>Observação</b>: Em \(\mu\)mML, o <i>else</i> <b>não é opcional</b>. Se não há resultado a ser retornado quando a condição for <i>falsa</i>, então deve-se retornar um valor padrão.
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">if</span> x == <span style="color: #ab75c3;">0</span>
-<span style="color: #5180b3;">then</span> x * <span style="color: #ab75c3;">2</span>
-<span style="color: #5180b3;">else</span> -1
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">if</span> x == <span style="color: #4e3163;">0</span>
+<span style="color: #3a81c3; font-weight: bold;">then</span> x * <span style="color: #4e3163;">2</span>
+<span style="color: #3a81c3; font-weight: bold;">else</span> -1
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org981b9fd" class="outline-3">
-<h3 id="org981b9fd">Declarações de Símbolos</h3>
-<div class="outline-text-3" id="text-org981b9fd">
+<div id="outline-container-org6b811b2" class="outline-3">
+<h3 id="org6b811b2">Declarações de Símbolos</h3>
+<div class="outline-text-3" id="text-org6b811b2">
 <p>
 A linguagem é \(\mu\)mML é uma linguagem funcional <i>pura</i>: uma vez que um valor é atribuído a um <i>símbolo</i>, este símbolo não pode ser alterado. Uma ``variável'' em {{mml}}, portanto, não é <i>variável</i> &#x2013; é como uma declaração de constante.
 </p>
@@ -562,9 +749,9 @@ A linguagem é \(\mu\)mML é uma linguagem funcional <i>pura</i>: uma vez que um
 A declaração de símbolos é feita com a primitiva <i>let</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">let</span> <span style="color: #baba36;">x</span> = <span style="color: #ab75c3;">1</span> * <span style="color: #ab75c3;">2</span> + y
-<span style="color: #5180b3;">in</span>
-  x * <span style="color: #ab75c3;">2</span> / <span style="color: #ab75c3;">10</span>
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">x</span> = <span style="color: #4e3163;">1</span> * <span style="color: #4e3163;">2</span> + y
+<span style="color: #3a81c3; font-weight: bold;">in</span>
+  x * <span style="color: #4e3163;">2</span> / <span style="color: #4e3163;">10</span>
 </pre>
 </div>
 
@@ -572,11 +759,11 @@ A declaração de símbolos é feita com a primitiva <i>let</i>:
 A primitiva <i>let</i> pode declarar vários símbolos. Para isso, deve-se utilizar vírgula:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">let</span> <span style="color: #baba36;">x</span> = <span style="color: #ab75c3;">1</span>,
-    y = x + <span style="color: #ab75c3;">2</span>,
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">x</span> = <span style="color: #4e3163;">1</span>,
+    y = x + <span style="color: #4e3163;">2</span>,
     z = x * y
-<span style="color: #5180b3;">in</span>
-   y + <span style="color: #ab75c3;">1</span> + z
+<span style="color: #3a81c3; font-weight: bold;">in</span>
+   y + <span style="color: #4e3163;">1</span> + z
 </pre>
 </div>
 
@@ -584,15 +771,15 @@ A primitiva <i>let</i> pode declarar vários símbolos. Para isso, deve-se utili
 Um símbolo declarado <b>sempre</b> deve receber um valor resultante de uma <b>expressão</b>. Uma vez que um <i>if</i> é uma expressão, ele pode ser utilizado no lado direito da igualdade durante um <i>let</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">let</span> <span style="color: #baba36;">x</span> = <span style="color: #5180b3;">if</span> z &amp;&amp; t
-        <span style="color: #5180b3;">then</span> z * t             <span style="color: #656565;">// </span><span style="color: #757575;">ambos verdade, pode multiplicar</span>
-        <span style="color: #5180b3;">else</span> <span style="color: #5180b3;">if</span> z <span style="color: #5180b3;">then</span> z * <span style="color: #ab75c3;">10</span>  <span style="color: #656565;">// </span><span style="color: #757575;">apenas z</span>
-        <span style="color: #5180b3;">else</span> <span style="color: #5180b3;">if</span> t <span style="color: #5180b3;">then</span> t * <span style="color: #ab75c3;">10</span>  <span style="color: #656565;">// </span><span style="color: #757575;">apenas t</span>
-        <span style="color: #5180b3;">else</span> -1                <span style="color: #656565;">// </span><span style="color: #757575;">nenhum</span>
-<span style="color: #5180b3;">in</span>
-   <span style="color: #5180b3;">if</span> x
-   <span style="color: #5180b3;">then</span> x * <span style="color: #ab75c3;">100</span>                <span style="color: #656565;">// </span><span style="color: #757575;">x nao recebeu nil</span>
-   <span style="color: #5180b3;">else</span> <span style="color: #ab75c3;">0</span>                      <span style="color: #656565;">// </span><span style="color: #757575;">x recebeu 0</span>
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">x</span> = <span style="color: #3a81c3; font-weight: bold;">if</span> z &amp;&amp; t
+        <span style="color: #3a81c3; font-weight: bold;">then</span> z * t             <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">ambos verdade, pode multiplicar</span>
+        <span style="color: #3a81c3; font-weight: bold;">else</span> <span style="color: #3a81c3; font-weight: bold;">if</span> z <span style="color: #3a81c3; font-weight: bold;">then</span> z * <span style="color: #4e3163;">10</span>  <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">apenas z</span>
+        <span style="color: #3a81c3; font-weight: bold;">else</span> <span style="color: #3a81c3; font-weight: bold;">if</span> t <span style="color: #3a81c3; font-weight: bold;">then</span> t * <span style="color: #4e3163;">10</span>  <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">apenas t</span>
+        <span style="color: #3a81c3; font-weight: bold;">else</span> -1                <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">nenhum</span>
+<span style="color: #3a81c3; font-weight: bold;">in</span>
+   <span style="color: #3a81c3; font-weight: bold;">if</span> x
+   <span style="color: #3a81c3; font-weight: bold;">then</span> x * <span style="color: #4e3163;">100</span>                <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">x nao recebeu nil</span>
+   <span style="color: #3a81c3; font-weight: bold;">else</span> <span style="color: #4e3163;">0</span>                      <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">x recebeu 0</span>
 </pre>
 </div>
 
@@ -600,9 +787,9 @@ Um símbolo declarado <b>sempre</b> deve receber um valor resultante de uma <b>e
 Assim como o <i>if</i>, o <i>let</i> é, também, uma <b>expressão</b> e, portanto, retorna valor:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">if</span> <span style="color: #81b0e3;">(</span><span style="color: #5180b3;">let</span> x = <span style="color: #ab75c3;">100</span> <span style="color: #5180b3;">in</span> x * x * x * x<span style="color: #81b0e3;">)</span> == <span style="color: #ab75c3;">100</span>
-<span style="color: #5180b3;">then</span> <span style="color: #5180b3;">false</span>  <span style="color: #656565;">// </span><span style="color: #757575;">100^4 eh 100 ?! nunca deveria retornar false</span>
-<span style="color: #5180b3;">else</span> <span style="color: #5180b3;">true</span>   <span style="color: #656565;">// </span><span style="color: #757575;">sempre deveria retrnar true</span>
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">if</span> <span style="color: #3a81c3;">(</span><span style="color: #3a81c3; font-weight: bold;">let</span> x = <span style="color: #4e3163;">100</span> <span style="color: #3a81c3; font-weight: bold;">in</span> x * x * x * x<span style="color: #3a81c3;">)</span> == <span style="color: #4e3163;">100</span>
+<span style="color: #3a81c3; font-weight: bold;">then</span> <span style="color: #3a81c3; font-weight: bold;">false</span>  <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">100^4 eh 100 ?! nunca deveria retornar false</span>
+<span style="color: #3a81c3; font-weight: bold;">else</span> <span style="color: #3a81c3; font-weight: bold;">true</span>   <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">sempre deveria retrnar true</span>
 </pre>
 </div>
 
@@ -610,13 +797,13 @@ Assim como o <i>if</i>, o <i>let</i> é, também, uma <b>expressão</b> e, porta
 O <b>escopo</b> de qualquer símbolo está restrito à expressão associada ao <i>in</i> do <i>let</i>. O seguinte trecho de código deveria retornar \(38\):
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">let</span> <span style="color: #baba36;">x</span> = <span style="color: #ab75c3;">10</span>
-<span style="color: #5180b3;">in</span> <span style="color: #656565;">// </span><span style="color: #757575;">na proxima expressao, x eh 10</span>
-   x + <span style="color: #81b0e3;">(</span><span style="color: #5180b3;">let</span> x = <span style="color: #ab75c3;">20</span>
-        <span style="color: #5180b3;">in</span>  <span style="color: #656565;">// </span><span style="color: #757575;">na proxima expressao, x eh 20</span>
-          x - <span style="color: #ab75c3;">2</span> <span style="color: #656565;">// </span><span style="color: #757575;">Aqui x vale 20, 20 - 2 = 18</span>
-       <span style="color: #81b0e3;">)</span>
-     + x <span style="color: #656565;">// </span><span style="color: #757575;">aqui x ainda eh 10</span>
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">x</span> = <span style="color: #4e3163;">10</span>
+<span style="color: #3a81c3; font-weight: bold;">in</span> <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">na proxima expressao, x eh 10</span>
+   x + <span style="color: #3a81c3;">(</span><span style="color: #3a81c3; font-weight: bold;">let</span> x = <span style="color: #4e3163;">20</span>
+        <span style="color: #3a81c3; font-weight: bold;">in</span>  <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">na proxima expressao, x eh 20</span>
+          x - <span style="color: #4e3163;">2</span> <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">Aqui x vale 20, 20 - 2 = 18</span>
+       <span style="color: #3a81c3;">)</span>
+     + x <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">aqui x ainda eh 10</span>
 </pre>
 </div>
 
@@ -624,19 +811,19 @@ O <b>escopo</b> de qualquer símbolo está restrito à expressão associada ao <
 A seguinte expressão retorna 20:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">let</span> <span style="color: #baba36;">x</span> = <span style="color: #ab75c3;">10</span>
-<span style="color: #5180b3;">in</span>
-  <span style="color: #5180b3;">let</span> <span style="color: #baba36;">x</span> = <span style="color: #ab75c3;">20</span>
-  <span style="color: #5180b3;">in</span>
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">x</span> = <span style="color: #4e3163;">10</span>
+<span style="color: #3a81c3; font-weight: bold;">in</span>
+  <span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">x</span> = <span style="color: #4e3163;">20</span>
+  <span style="color: #3a81c3; font-weight: bold;">in</span>
     x
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgefe74f0" class="outline-3">
-<h3 id="orgefe74f0">Chamadas de Função</h3>
-<div class="outline-text-3" id="text-orgefe74f0">
+<div id="outline-container-org85854e9" class="outline-3">
+<h3 id="org85854e9">Chamadas de Função</h3>
+<div class="outline-text-3" id="text-org85854e9">
 <p>
 Para invocar uma função em \(\mu\)mML, deve-se utilizar o nome da função seguido de seus parâmetros. O código a seguir chama a função <code>funct</code> com os parâmetros <code>a</code>, <code>b</code> e <code>c</code>.
 </p>
@@ -649,7 +836,7 @@ Para invocar uma função em \(\mu\)mML, deve-se utilizar o nome da função seg
 Parâmetros de uma função podem ser resultado de expressões. O seguinte código chama a função <code>funct</code> com os parâmetros \(x + 1\), \(x - 2\) e \(x * 2\):
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp">funct x + <span style="color: #ab75c3;">1</span> x - <span style="color: #ab75c3;">2</span> x * <span style="color: #ab75c3;">2</span>
+<pre class="src src-fsharp">funct x + <span style="color: #4e3163;">1</span> x - <span style="color: #4e3163;">2</span> x * <span style="color: #4e3163;">2</span>
 </pre>
 </div>
 
@@ -657,7 +844,7 @@ Parâmetros de uma função podem ser resultado de expressões. O seguinte códi
 Uma vez que os parâmetros são expressões, pode-se utilizar parênteses para isolá-los no código:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp">funct <span style="color: #81b0e3;">(</span> x + <span style="color: #ab75c3;">1</span> <span style="color: #81b0e3;">)</span> <span style="color: #81b0e3;">(</span> x - <span style="color: #ab75c3;">2</span> <span style="color: #81b0e3;">)</span> <span style="color: #81b0e3;">(</span> x * <span style="color: #ab75c3;">2</span> <span style="color: #81b0e3;">)</span>
+<pre class="src src-fsharp">funct <span style="color: #3a81c3;">(</span> x + <span style="color: #4e3163;">1</span> <span style="color: #3a81c3;">)</span> <span style="color: #3a81c3;">(</span> x - <span style="color: #4e3163;">2</span> <span style="color: #3a81c3;">)</span> <span style="color: #3a81c3;">(</span> x * <span style="color: #4e3163;">2</span> <span style="color: #3a81c3;">)</span>
 </pre>
 </div>
 
@@ -665,11 +852,11 @@ Uma vez que os parâmetros são expressões, pode-se utilizar parênteses para i
 Esta sintáxe de chamada de função pode introduzir ambiguidades: O seguinte código poderia ser interpretado como a chamada da função <code>print_results</code> com 3 parâmetros ou como a chamada da função <code>print_results</code> com 2 parâmetros, um deles o resultado da função <code>funct</code> ou com apenas um resultado.
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp">print_results funct <span style="color: #ab75c3;">1</span> <span style="color: #ab75c3;">2</span> <span style="color: #656565;">//</span><span style="color: #757575;">[1] print_results (funct) (1) (2)</span>
-                        <span style="color: #656565;">// </span><span style="color: #757575;">ou</span>
-                        <span style="color: #656565;">//</span><span style="color: #757575;">[2] print_results (funct 1)  (2)</span>
-                        <span style="color: #656565;">// </span><span style="color: #757575;">ou</span>
-                        <span style="color: #656565;">//</span><span style="color: #757575;">[3] print_results (funct 1 2)</span>
+<pre class="src src-fsharp">print_results funct <span style="color: #4e3163;">1</span> <span style="color: #4e3163;">2</span> <span style="color: #2aa1ae; background-color: #ecf3ec;">//</span><span style="color: #2aa1ae; background-color: #ecf3ec;">[1] print_results (funct) (1) (2)</span>
+                        <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">ou</span>
+                        <span style="color: #2aa1ae; background-color: #ecf3ec;">//</span><span style="color: #2aa1ae; background-color: #ecf3ec;">[2] print_results (funct 1)  (2)</span>
+                        <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">ou</span>
+                        <span style="color: #2aa1ae; background-color: #ecf3ec;">//</span><span style="color: #2aa1ae; background-color: #ecf3ec;">[3] print_results (funct 1 2)</span>
 </pre>
 </div>
 
@@ -689,31 +876,31 @@ A sintaxe da chamada de função também fica ambígua no caso de funções que 
 A chamada de uma função também é uma <i>expressão</i>. Assim, podemos atribuir os resultados de uma função a símbolos e utilizar os resultados dentro de expressões:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">let</span> <span style="color: #baba36;">x</span> = read_int _,
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">x</span> = read_int _,
     y = funct x
-<span style="color: #5180b3;">in</span>
-  print_results y + <span style="color: #81b0e3;">(</span>do_something x<span style="color: #81b0e3;">)</span>
+<span style="color: #3a81c3; font-weight: bold;">in</span>
+  print_results y + <span style="color: #3a81c3;">(</span>do_something x<span style="color: #3a81c3;">)</span>
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">if</span> funct <span style="color: #81b0e3;">(</span><span style="color: #5180b3;">if</span> x == <span style="color: #ab75c3;">0</span> <span style="color: #5180b3;">then</span> <span style="color: #ab75c3;">10</span> <span style="color: #5180b3;">else</span> <span style="color: #ab75c3;">20</span><span style="color: #81b0e3;">)</span>
-<span style="color: #5180b3;">then</span> <span style="color: #ab75c3;">10</span>
-<span style="color: #5180b3;">else</span> <span style="color: #ab75c3;">20</span>
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">if</span> funct <span style="color: #3a81c3;">(</span><span style="color: #3a81c3; font-weight: bold;">if</span> x == <span style="color: #4e3163;">0</span> <span style="color: #3a81c3; font-weight: bold;">then</span> <span style="color: #4e3163;">10</span> <span style="color: #3a81c3; font-weight: bold;">else</span> <span style="color: #4e3163;">20</span><span style="color: #3a81c3;">)</span>
+<span style="color: #3a81c3; font-weight: bold;">then</span> <span style="color: #4e3163;">10</span>
+<span style="color: #3a81c3; font-weight: bold;">else</span> <span style="color: #4e3163;">20</span>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgdfae999" class="outline-3">
-<h3 id="orgdfae999">Declaração de Funções</h3>
-<div class="outline-text-3" id="text-orgdfae999">
+<div id="outline-container-org8e12825" class="outline-3">
+<h3 id="org8e12825">Declaração de Funções</h3>
+<div class="outline-text-3" id="text-org8e12825">
 <p>
 Uma função na linguagem \(\mu\)mML é declarada com a primitiva <code>def</code>:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp">def print_results r : <span style="color: #cd5542;">int</span> =
-   print <span style="color: #81b0e3;">(</span>concat <span style="color: #bdbc61;">"Resultado: "</span> <span style="color: #a5a5a5;">(</span>str r<span style="color: #a5a5a5;">)</span><span style="color: #81b0e3;">)</span>
+<pre class="src src-fsharp">def print_results r : <span style="color: #ba2f59; font-weight: bold;">int</span> =
+   print <span style="color: #3a81c3;">(</span>concat <span style="color: #2d9574;">"Resultado: "</span> <span style="color: #6c3163;">(</span>str r<span style="color: #6c3163;">)</span><span style="color: #3a81c3;">)</span>
 </pre>
 </div>
 
@@ -733,17 +920,17 @@ Pode-se declarar um cabeçalho para a função para definir claramente qual o ti
 A declaração de tipos de retorno, no entanto, é necessária para deduzir o tipo de funções <i>mutuamente recursivas</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp">def f1 a : <span style="color: #cd5542;">int</span>, b : <span style="color: #cd5542;">float</span> -&gt; float
-def f2 a : <span style="color: #cd5542;">int</span>, b : <span style="color: #cd5542;">float</span> -&gt; float
+<pre class="src src-fsharp">def f1 a : <span style="color: #ba2f59; font-weight: bold;">int</span>, b : <span style="color: #ba2f59; font-weight: bold;">float</span> -&gt; float
+def f2 a : <span style="color: #ba2f59; font-weight: bold;">int</span>, b : <span style="color: #ba2f59; font-weight: bold;">float</span> -&gt; float
 
-def f1 a : <span style="color: #cd5542;">int</span>, b : <span style="color: #cd5542;">float</span> =
-    <span style="color: #5180b3;">if</span> a == <span style="color: #ab75c3;">0</span>
-    <span style="color: #5180b3;">then</span> f2 a
+def f1 a : <span style="color: #ba2f59; font-weight: bold;">int</span>, b : <span style="color: #ba2f59; font-weight: bold;">float</span> =
+    <span style="color: #3a81c3; font-weight: bold;">if</span> a == <span style="color: #4e3163;">0</span>
+    <span style="color: #3a81c3; font-weight: bold;">then</span> f2 a
             b + b
-    <span style="color: #5180b3;">else</span> b
+    <span style="color: #3a81c3; font-weight: bold;">else</span> b
 
-def f2 a : <span style="color: #cd5542;">int</span>, b : <span style="color: #cd5542;">float</span> =
-    f1 <span style="color: #81b0e3;">(</span>a - <span style="color: #ab75c3;">1</span><span style="color: #81b0e3;">)</span>, b
+def f2 a : <span style="color: #ba2f59; font-weight: bold;">int</span>, b : <span style="color: #ba2f59; font-weight: bold;">float</span> =
+    f1 <span style="color: #3a81c3;">(</span>a - <span style="color: #4e3163;">1</span><span style="color: #3a81c3;">)</span>, b
 </pre>
 </div>
 
@@ -751,20 +938,20 @@ def f2 a : <span style="color: #cd5542;">int</span>, b : <span style="color: #cd
 Uma função não possui a palavra chave <b>returns</b>. O retorno é sempre o resultado de uma <b>expressão</b> &#x2013; e o tipo de retorno de uma função é definido pelo resultado da expressão.
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #656565;">// </span><span style="color: #757575;">media 1 devolve a media de 3. O tipo de retorno eh int</span>
-def media1 a : <span style="color: #cd5542;">int</span>,
-           b : <span style="color: #cd5542;">int</span>,
-           c : <span style="color: #cd5542;">int</span> =
-    <span style="color: #81b0e3;">(</span>a + b + c<span style="color: #81b0e3;">)</span> / <span style="color: #ab75c3;">3</span>
+<pre class="src src-fsharp"><span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">media 1 devolve a media de 3. O tipo de retorno eh int</span>
+def media1 a : <span style="color: #ba2f59; font-weight: bold;">int</span>,
+           b : <span style="color: #ba2f59; font-weight: bold;">int</span>,
+           c : <span style="color: #ba2f59; font-weight: bold;">int</span> =
+    <span style="color: #3a81c3;">(</span>a + b + c<span style="color: #3a81c3;">)</span> / <span style="color: #4e3163;">3</span>
 
-<span style="color: #656565;">// </span><span style="color: #757575;">resultado da divisao eh float, entao media2 devolve float</span>
-def media2 a : <span style="color: #cd5542;">int</span>,
-           b : <span style="color: #cd5542;">int</span>,
-           c : <span style="color: #cd5542;">int</span> =
-    <span style="color: #81b0e3;">(</span>a + b + c<span style="color: #81b0e3;">)</span> / <span style="color: #ab75c3;">3</span>.<span style="color: #ab75c3;">0</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">resultado da divisao eh float, entao media2 devolve float</span>
+def media2 a : <span style="color: #ba2f59; font-weight: bold;">int</span>,
+           b : <span style="color: #ba2f59; font-weight: bold;">int</span>,
+           c : <span style="color: #ba2f59; font-weight: bold;">int</span> =
+    <span style="color: #3a81c3;">(</span>a + b + c<span style="color: #3a81c3;">)</span> / <span style="color: #4e3163;">3</span>.<span style="color: #4e3163;">0</span>
 
-<span style="color: #656565;">// </span><span style="color: #757575;">express&#227;o booleana, resultado &#233; bool</span>
-def andPred a : <span style="color: #cd5542;">bool</span>, b : <span style="color: #cd5542;">bool</span> = a &amp;&amp; b
+<span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">express&#227;o booleana, resultado &#233; bool</span>
+def andPred a : <span style="color: #ba2f59; font-weight: bold;">bool</span>, b : <span style="color: #ba2f59; font-weight: bold;">bool</span> = a &amp;&amp; b
 </pre>
 </div>
 
@@ -772,11 +959,11 @@ def andPred a : <span style="color: #cd5542;">bool</span>, b : <span style="colo
 O <i>corpo</i> de uma função é sempre uma expressão. Assim, pode-se utilizar <i>if</i> e <i>let</i> dentro de uma função:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp">def max2int a : <span style="color: #cd5542;">int</span>,
-            b : <span style="color: #cd5542;">int</span> =
-    <span style="color: #5180b3;">if</span> <span style="color: #81b0e3;">(</span>a &gt; b<span style="color: #81b0e3;">)</span>
-    <span style="color: #5180b3;">then</span> a
-    <span style="color: #5180b3;">else</span> b
+<pre class="src src-fsharp">def max2int a : <span style="color: #ba2f59; font-weight: bold;">int</span>,
+            b : <span style="color: #ba2f59; font-weight: bold;">int</span> =
+    <span style="color: #3a81c3; font-weight: bold;">if</span> <span style="color: #3a81c3;">(</span>a &gt; b<span style="color: #3a81c3;">)</span>
+    <span style="color: #3a81c3; font-weight: bold;">then</span> a
+    <span style="color: #3a81c3; font-weight: bold;">else</span> b
 </pre>
 </div>
 
@@ -788,18 +975,18 @@ Toda função retorna algum valor. Uma função de nome <code>print</code>, por 
 Quando o valor de uma função não necessitar ser armazenado, pode-se, no <code>let</code>, utilizar o símbolo especial <code>_</code>:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">let</span> <span style="color: #baba36;">x</span> = read_int _,
-    _ = print_int x + <span style="color: #ab75c3;">1</span> <span style="color: #656565;">// </span><span style="color: #757575;">ignora o resultado de print</span>
-<span style="color: #5180b3;">in</span>
-  x * <span style="color: #ab75c3;">10</span>
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">x</span> = read_int _,
+    _ = print_int x + <span style="color: #4e3163;">1</span> <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">ignora o resultado de print</span>
+<span style="color: #3a81c3; font-weight: bold;">in</span>
+  x * <span style="color: #4e3163;">10</span>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgc887a0c" class="outline-3">
-<h3 id="orgc887a0c">Funções Especiais</h3>
-<div class="outline-text-3" id="text-orgc887a0c">
+<div id="outline-container-org7404c09" class="outline-3">
+<h3 id="org7404c09">Funções Especiais</h3>
+<div class="outline-text-3" id="text-org7404c09">
 <p>
 Algumas funções são consideradas especiais da linguagem e devem estar disponíveis para o usuário nativamente:
 </p>
@@ -823,9 +1010,9 @@ Algumas funções são consideradas especiais da linguagem e devem estar dispon�
 </div>
 </div>
 
-<div id="outline-container-org6a32c43" class="outline-3">
-<h3 id="org6a32c43">Tipos Sequência</h3>
-<div class="outline-text-3" id="text-org6a32c43">
+<div id="outline-container-org8baf4a6" class="outline-3">
+<h3 id="org8baf4a6">Tipos Sequência</h3>
+<div class="outline-text-3" id="text-org8baf4a6">
 <p>
 Um tipo sequência em \(\mu\)mML é equivalente a um vetor ou uma lista em outras linguagens. Toda sequência possui tamanho definido. Uma função especial chamada <code>length</code> é responsável por indicar quantos elementos existem na sequência.
 </p>
@@ -834,12 +1021,12 @@ Um tipo sequência em \(\mu\)mML é equivalente a um vetor ou uma lista em outra
 Uma sequência é criada utilizando o operador <code>[]</code>:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">let</span> <span style="color: #baba36;">s1</span> = <span style="color: #81b0e3;">[</span><span style="color: #ab75c3;">1</span><span style="color: #81b0e3;">]</span>,            <span style="color: #656565;">// </span><span style="color: #757575;">sequencia de 1 elemento</span>
-    s2 = <span style="color: #81b0e3;">[</span> read_int _ <span style="color: #81b0e3;">]</span>, <span style="color: #656565;">// </span><span style="color: #757575;">1 elemento, lido da entrada</span>
-    s3 = nil             <span style="color: #656565;">// </span><span style="color: #757575;">lista vazia</span>
-<span style="color: #5180b3;">in</span> <span style="color: #81b0e3;">(</span>length s1<span style="color: #81b0e3;">)</span> +         <span style="color: #656565;">// </span><span style="color: #757575;">retorna 1 +</span>
-   <span style="color: #81b0e3;">(</span>length s2<span style="color: #81b0e3;">)</span> +         <span style="color: #656565;">//            </span><span style="color: #757575;">1 +</span>
-   <span style="color: #81b0e3;">(</span>length s3<span style="color: #81b0e3;">)</span>           <span style="color: #656565;">//                </span><span style="color: #757575;">0</span>
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">s1</span> = <span style="color: #3a81c3;">[</span><span style="color: #4e3163;">1</span><span style="color: #3a81c3;">]</span>,            <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">sequencia de 1 elemento</span>
+    s2 = <span style="color: #3a81c3;">[</span> read_int _ <span style="color: #3a81c3;">]</span>, <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">1 elemento, lido da entrada</span>
+    s3 = nil             <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">lista vazia</span>
+<span style="color: #3a81c3; font-weight: bold;">in</span> <span style="color: #3a81c3;">(</span>length s1<span style="color: #3a81c3;">)</span> +         <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">retorna 1 +</span>
+   <span style="color: #3a81c3;">(</span>length s2<span style="color: #3a81c3;">)</span> +         <span style="color: #2aa1ae; background-color: #ecf3ec;">//            </span><span style="color: #2aa1ae; background-color: #ecf3ec;">1 +</span>
+   <span style="color: #3a81c3;">(</span>length s3<span style="color: #3a81c3;">)</span>           <span style="color: #2aa1ae; background-color: #ecf3ec;">//                </span><span style="color: #2aa1ae; background-color: #ecf3ec;">0</span>
 </pre>
 </div>
 
@@ -847,15 +1034,15 @@ Uma sequência é criada utilizando o operador <code>[]</code>:
 Sequências podem ser concatenadas utilizando o operador <code>::</code>
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">let</span> <span style="color: #baba36;">s1</span> = <span style="color: #81b0e3;">[</span><span style="color: #ab75c3;">1</span><span style="color: #81b0e3;">]</span>,
-    s2 = <span style="color: #81b0e3;">[</span><span style="color: #ab75c3;">2</span><span style="color: #81b0e3;">]</span>,
-    s3 = <span style="color: #81b0e3;">[</span><span style="color: #ab75c3;">3</span><span style="color: #81b0e3;">]</span>,
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">s1</span> = <span style="color: #3a81c3;">[</span><span style="color: #4e3163;">1</span><span style="color: #3a81c3;">]</span>,
+    s2 = <span style="color: #3a81c3;">[</span><span style="color: #4e3163;">2</span><span style="color: #3a81c3;">]</span>,
+    s3 = <span style="color: #3a81c3;">[</span><span style="color: #4e3163;">3</span><span style="color: #3a81c3;">]</span>,
     s4 = nil,
-    c1 = s1 :: s2,   <span style="color: #656565;">// </span><span style="color: #757575;">[1, 2]</span>
-    c2 = s3 :: s4,   <span style="color: #656565;">// </span><span style="color: #757575;">[3] :: nil = [3]</span>
-    c3 = c1 :: c2    <span style="color: #656565;">// </span><span style="color: #757575;">[1, 2] :: [3] = [1, 2, 3]</span>
-<span style="color: #5180b3;">in</span>
-   length c3 <span style="color: #656565;">// </span><span style="color: #757575;">retorna 3</span>
+    c1 = s1 :: s2,   <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">[1, 2]</span>
+    c2 = s3 :: s4,   <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">[3] :: nil = [3]</span>
+    c3 = c1 :: c2    <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">[1, 2] :: [3] = [1, 2, 3]</span>
+<span style="color: #3a81c3; font-weight: bold;">in</span>
+   length c3 <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">retorna 3</span>
 </pre>
 </div>
 
@@ -863,11 +1050,11 @@ Sequências podem ser concatenadas utilizando o operador <code>::</code>
 Uma sequência sempre pode ser quebrada em um <i>início</i>, seguido do <i>resto</i> da lista. A sequência [1, 2, 3] pode ser considerada como o início \(1\), seguido da lista [2, 3]. Uma expressão <i>let</i> permite quebrar a lista em seu início e seu resto com o operador <code>::</code>
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">let</span> <span style="color: #baba36;">seq</span> = <span style="color: #81b0e3;">[</span><span style="color: #ab75c3;">1</span><span style="color: #81b0e3;">]</span> :: <span style="color: #81b0e3;">[</span><span style="color: #ab75c3;">2</span><span style="color: #81b0e3;">]</span> :: <span style="color: #81b0e3;">[</span><span style="color: #ab75c3;">3</span><span style="color: #81b0e3;">]</span>,
-    h::rest = seq <span style="color: #656565;">// </span><span style="color: #757575;">quebra seq em um inicio chamado h</span>
-                  <span style="color: #656565;">// </span><span style="color: #757575;">e uma continuacao chamada rest</span>
-<span style="color: #5180b3;">in</span>
-   h == <span style="color: #ab75c3;">1</span> &amp;&amp; <span style="color: #81b0e3;">(</span>length rest<span style="color: #81b0e3;">)</span> == <span style="color: #ab75c3;">2</span> <span style="color: #656565;">// </span><span style="color: #757575;">sempre devolve true</span>
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">seq</span> = <span style="color: #3a81c3;">[</span><span style="color: #4e3163;">1</span><span style="color: #3a81c3;">]</span> :: <span style="color: #3a81c3;">[</span><span style="color: #4e3163;">2</span><span style="color: #3a81c3;">]</span> :: <span style="color: #3a81c3;">[</span><span style="color: #4e3163;">3</span><span style="color: #3a81c3;">]</span>,
+    h::rest = seq <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">quebra seq em um inicio chamado h</span>
+                  <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">e uma continuacao chamada rest</span>
+<span style="color: #3a81c3; font-weight: bold;">in</span>
+   h == <span style="color: #4e3163;">1</span> &amp;&amp; <span style="color: #3a81c3;">(</span>length rest<span style="color: #3a81c3;">)</span> == <span style="color: #4e3163;">2</span> <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">sempre devolve true</span>
 </pre>
 </div>
 
@@ -875,15 +1062,15 @@ Uma sequência sempre pode ser quebrada em um <i>início</i>, seguido do <i>rest
 Uma lista de de um ou menos elementos sempre produzirá um <i>resto</i> <b>nulo</b>. A função abaixo utiliza isso para calcular o tamanho de uma sequência de inteiros:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp">def len_int_seq__ count : <span style="color: #cd5542;">int</span>, s : <span style="color: #cd5542;">int</span><span style="color: #81b0e3;">[</span><span style="color: #81b0e3;">]</span> =
-   <span style="color: #5180b3;">if</span> !s       <span style="color: #656565;">// </span><span style="color: #757575;">! ( s != nil )</span>
-   <span style="color: #5180b3;">then</span> count <span style="color: #656565;">// </span><span style="color: #757575;">nada mais para contar</span>
-   <span style="color: #5180b3;">else</span> <span style="color: #5180b3;">let</span> h::t = s
-        <span style="color: #5180b3;">in</span>
-          len_int_seq__ <span style="color: #81b0e3;">(</span>count + <span style="color: #ab75c3;">1</span><span style="color: #81b0e3;">)</span> t
+<pre class="src src-fsharp">def len_int_seq__ count : <span style="color: #ba2f59; font-weight: bold;">int</span>, s : <span style="color: #ba2f59; font-weight: bold;">int</span><span style="color: #3a81c3; font-weight: bold;">[</span><span style="color: #3a81c3;">]</span> =
+   <span style="color: #3a81c3; font-weight: bold;">if</span> !s       <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">! ( s != nil )</span>
+   <span style="color: #3a81c3; font-weight: bold;">then</span> count <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">nada mais para contar</span>
+   <span style="color: #3a81c3; font-weight: bold;">else</span> <span style="color: #3a81c3; font-weight: bold;">let</span> h::t = s
+        <span style="color: #3a81c3; font-weight: bold;">in</span>
+          len_int_seq__ <span style="color: #3a81c3;">(</span>count + <span style="color: #4e3163;">1</span><span style="color: #3a81c3;">)</span> t
 
-def len_int_seq s : <span style="color: #cd5542;">int</span><span style="color: #81b0e3;">[</span><span style="color: #81b0e3;">]</span> =
-    len_int_seq__ <span style="color: #ab75c3;">0</span> s
+def len_int_seq s : <span style="color: #ba2f59; font-weight: bold;">int</span><span style="color: #3a81c3; font-weight: bold;">[</span><span style="color: #3a81c3;">]</span> =
+    len_int_seq__ <span style="color: #4e3163;">0</span> s
 </pre>
 </div>
 
@@ -891,27 +1078,27 @@ def len_int_seq s : <span style="color: #cd5542;">int</span><span style="color: 
 O seguinte código retorna uma lista com todos os elementos da sequencia maiores que 10:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp">def filter_gt_10__ ret : <span style="color: #cd5542;">int</span><span style="color: #81b0e3;">[</span><span style="color: #81b0e3;">]</span>, s : <span style="color: #cd5542;">int </span><span style="color: #81b0e3;">[</span><span style="color: #81b0e3;">]</span> =
-    <span style="color: #5180b3;">if</span> !s
-    <span style="color: #5180b3;">then</span> ret                                   <span style="color: #656565;">// </span><span style="color: #757575;">nada mais, retorna ret</span>
-    <span style="color: #5180b3;">else</span> <span style="color: #5180b3;">let</span> h::t = s                          <span style="color: #656565;">// </span><span style="color: #757575;">quebra em inicio e resto</span>
-         <span style="color: #5180b3;">in</span>
-           <span style="color: #5180b3;">if</span> h &gt; <span style="color: #ab75c3;">10</span>                           <span style="color: #656565;">// </span><span style="color: #757575;">maior que 10?</span>
-           <span style="color: #5180b3;">then</span> filter_gt_10__ <span style="color: #81b0e3;">(</span>ret :: <span style="color: #a5a5a5;">[</span>h<span style="color: #a5a5a5;">]</span> <span style="color: #81b0e3;">)</span> t <span style="color: #656565;">// </span><span style="color: #757575;">chama recursivo, incluindo o</span>
-                                               <span style="color: #656565;">//          </span><span style="color: #757575;">inicio no resultado</span>
-           <span style="color: #5180b3;">else</span> filter_gt_10__ ret t           <span style="color: #656565;">// </span><span style="color: #757575;">chama recursivo, ignora o inicio</span>
+<pre class="src src-fsharp">def filter_gt_10__ ret : <span style="color: #ba2f59; font-weight: bold;">int</span><span style="color: #3a81c3; font-weight: bold;">[</span><span style="color: #3a81c3;">]</span>, s : <span style="color: #ba2f59; font-weight: bold;">int </span><span style="color: #3a81c3; font-weight: bold;">[</span><span style="color: #3a81c3;">]</span> =
+    <span style="color: #3a81c3; font-weight: bold;">if</span> !s
+    <span style="color: #3a81c3; font-weight: bold;">then</span> ret                                   <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">nada mais, retorna ret</span>
+    <span style="color: #3a81c3; font-weight: bold;">else</span> <span style="color: #3a81c3; font-weight: bold;">let</span> h::t = s                          <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">quebra em inicio e resto</span>
+         <span style="color: #3a81c3; font-weight: bold;">in</span>
+           <span style="color: #3a81c3; font-weight: bold;">if</span> h &gt; <span style="color: #4e3163;">10</span>                           <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">maior que 10?</span>
+           <span style="color: #3a81c3; font-weight: bold;">then</span> filter_gt_10__ <span style="color: #3a81c3;">(</span>ret :: <span style="color: #6c3163;">[</span>h<span style="color: #6c3163;">]</span> <span style="color: #3a81c3;">)</span> t <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">chama recursivo, incluindo o</span>
+                                               <span style="color: #2aa1ae; background-color: #ecf3ec;">//          </span><span style="color: #2aa1ae; background-color: #ecf3ec;">inicio no resultado</span>
+           <span style="color: #3a81c3; font-weight: bold;">else</span> filter_gt_10__ ret t           <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">chama recursivo, ignora o inicio</span>
 
-def filter_gt_10 s : <span style="color: #cd5542;">int</span><span style="color: #81b0e3;">[</span><span style="color: #81b0e3;">]</span> =
-   filter_gt_10__ <span style="color: #81b0e3;">[]</span> s
+def filter_gt_10 s : <span style="color: #ba2f59; font-weight: bold;">int</span><span style="color: #3a81c3; font-weight: bold;">[</span><span style="color: #3a81c3;">]</span> =
+   filter_gt_10__ <span style="color: #3a81c3;">[]</span> s
 </pre>
 </div>
 
 <p>
-<b>Observação</b>: Uma <i>string</i> na linguagem \(\mu\)mML é uma sequência de caracteres. Por exemplo, a seguinte função possui tipo de retorno <code class="src src-fsharp">char<span style="color: #81b0e3;">[]</span></code> :
+<b>Observação</b>: Uma <i>string</i> na linguagem \(\mu\)mML é uma sequência de caracteres. Por exemplo, a seguinte função possui tipo de retorno <code class="src src-fsharp">char<span style="color: #3a81c3;">[]</span></code> :
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp">def stringConstante n : <span style="color: #cd5542;">int</span> =
-   <span style="color: #bdbc61;">"string"</span>
+<pre class="src src-fsharp">def stringConstante n : <span style="color: #ba2f59; font-weight: bold;">int</span> =
+   <span style="color: #2d9574;">"string"</span>
 </pre>
 </div>
 
@@ -919,30 +1106,30 @@ def filter_gt_10 s : <span style="color: #cd5542;">int</span><span style="color:
 O mesmo vale para as operações de desempacotamento de lista, concatenação e criação:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp">def retString n : <span style="color: #cd5542;">int</span> =
-  <span style="color: #5180b3;">let</span> <span style="color: #baba36;">a</span> = <span style="color: #81b0e3;">[</span><span style="color: #bdbc61;">'a'</span><span style="color: #81b0e3;">]</span>,     <span style="color: #656565;">// </span><span style="color: #757575;">a eh tipo char[]</span>
-      b = <span style="color: #bdbc61;">"bbb"</span>,     <span style="color: #656565;">// </span><span style="color: #757575;">b eh tipo char[]</span>
-      c::d2 = <span style="color: #bdbc61;">"cdd"</span>  <span style="color: #656565;">// </span><span style="color: #757575;">c eh tipo char, d2 eh tipo char[]</span>
-  <span style="color: #5180b3;">in</span>
-    a :: b :: <span style="color: #81b0e3;">[</span>c<span style="color: #81b0e3;">]</span> :: d2 <span style="color: #656565;">// </span><span style="color: #757575;">retorna ['a', 'b', 'b', 'b', 'c', 'd', 'd']</span>
-                        <span style="color: #656565;">// </span><span style="color: #757575;">ou "abbbcdd"</span>
+<pre class="src src-fsharp">def retString n : <span style="color: #ba2f59; font-weight: bold;">int</span> =
+  <span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">a</span> = <span style="color: #3a81c3;">[</span><span style="color: #2d9574;">'a'</span><span style="color: #3a81c3;">]</span>,     <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">a eh tipo char[]</span>
+      b = <span style="color: #2d9574;">"bbb"</span>,     <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">b eh tipo char[]</span>
+      c::d2 = <span style="color: #2d9574;">"cdd"</span>  <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">c eh tipo char, d2 eh tipo char[]</span>
+  <span style="color: #3a81c3; font-weight: bold;">in</span>
+    a :: b :: <span style="color: #3a81c3;">[</span>c<span style="color: #3a81c3;">]</span> :: d2 <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">retorna ['a', 'b', 'b', 'b', 'c', 'd', 'd']</span>
+                        <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">ou "abbbcdd"</span>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org90ea440" class="outline-3">
-<h3 id="org90ea440">Conversão entre Tipos</h3>
-<div class="outline-text-3" id="text-org90ea440">
+<div id="outline-container-orgd329165" class="outline-3">
+<h3 id="orgd329165">Conversão entre Tipos</h3>
+<div class="outline-text-3" id="text-orgd329165">
 <p>
-Quando for necessário converter um tipo primitivo para outro tipo primitivo, devemos usar uma operação de <i>cast</i>. Em \(\mu\)mML, um cast funciona como uma chamada de função cujo nome é o tipo destino. <code class="src src-fsharp">int <span style="color: #ab75c3;">0</span>.<span style="color: #ab75c3;">2</span></code> converte para inteiro o valor em ponto flutuante 0.2 .
+Quando for necessário converter um tipo primitivo para outro tipo primitivo, devemos usar uma operação de <i>cast</i>. Em \(\mu\)mML, um cast funciona como uma chamada de função cujo nome é o tipo destino. <code class="src src-fsharp">int <span style="color: #4e3163;">0</span>.<span style="color: #4e3163;">2</span></code> converte para inteiro o valor em ponto flutuante 0.2 .
 </p>
 
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">let</span> <span style="color: #baba36;">y</span> = <span style="color: #ab75c3;">2</span>.<span style="color: #ab75c3;">2</span>,
-    x = int y <span style="color: #656565;">// </span><span style="color: #757575;">x = 2</span>
-<span style="color: #5180b3;">in</span>
-   x * <span style="color: #ab75c3;">10</span>
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">y</span> = <span style="color: #4e3163;">2</span>.<span style="color: #4e3163;">2</span>,
+    x = int y <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">x = 2</span>
+<span style="color: #3a81c3; font-weight: bold;">in</span>
+   x * <span style="color: #4e3163;">10</span>
 </pre>
 </div>
 
@@ -950,32 +1137,32 @@ Quando for necessário converter um tipo primitivo para outro tipo primitivo, de
 A conversão de tipos pode ser útil quando queremos forçar um retorno de função para um tipo específico:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp">def avg2 a : <span style="color: #cd5542;">int</span>, b : <span style="color: #cd5542;">int</span>, round : <span style="color: #cd5542;">bool</span> =
-   <span style="color: #5180b3;">if</span> round
-   <span style="color: #5180b3;">then</span>
-      float <span style="color: #81b0e3;">(</span><span style="color: #a5a5a5;">(</span>a + b<span style="color: #a5a5a5;">)</span> / <span style="color: #ab75c3;">2</span><span style="color: #81b0e3;">)</span> <span style="color: #656565;">// </span><span style="color: #757575;">calcula (a+b)/2, que eh int, mas devolve como float</span>
-   <span style="color: #5180b3;">else</span>
-      <span style="color: #81b0e3;">(</span>a + b<span style="color: #81b0e3;">)</span> / <span style="color: #ab75c3;">2</span>.<span style="color: #ab75c3;">0</span>       <span style="color: #656565;">// </span><span style="color: #757575;">calcula (a+b)/2.0, float</span>
+<pre class="src src-fsharp">def avg2 a : <span style="color: #ba2f59; font-weight: bold;">int</span>, b : <span style="color: #ba2f59; font-weight: bold;">int</span>, round : <span style="color: #ba2f59; font-weight: bold;">bool</span> =
+   <span style="color: #3a81c3; font-weight: bold;">if</span> round
+   <span style="color: #3a81c3; font-weight: bold;">then</span>
+      float <span style="color: #3a81c3;">(</span><span style="color: #6c3163;">(</span>a + b<span style="color: #6c3163;">)</span> / <span style="color: #4e3163;">2</span><span style="color: #3a81c3;">)</span> <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">calcula (a+b)/2, que eh int, mas devolve como float</span>
+   <span style="color: #3a81c3; font-weight: bold;">else</span>
+      <span style="color: #3a81c3;">(</span>a + b<span style="color: #3a81c3;">)</span> / <span style="color: #4e3163;">2</span>.<span style="color: #4e3163;">0</span>       <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">calcula (a+b)/2.0, float</span>
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-fsharp">def sum__ res : <span style="color: #cd5542;">int</span> , seq : <span style="color: #cd5542;">int</span><span style="color: #81b0e3;">[</span><span style="color: #81b0e3;">]</span> =
-    <span style="color: #5180b3;">if</span> !seq
-    <span style="color: #5180b3;">then</span> res
-    <span style="color: #5180b3;">else</span> <span style="color: #5180b3;">let</span> h::t = seq
-         <span style="color: #5180b3;">in</span> sum__ <span style="color: #81b0e3;">(</span>res + h<span style="color: #81b0e3;">)</span> t
+<pre class="src src-fsharp">def sum__ res : <span style="color: #ba2f59; font-weight: bold;">int</span> , seq : <span style="color: #ba2f59; font-weight: bold;">int</span><span style="color: #3a81c3; font-weight: bold;">[</span><span style="color: #3a81c3;">]</span> =
+    <span style="color: #3a81c3; font-weight: bold;">if</span> !seq
+    <span style="color: #3a81c3; font-weight: bold;">then</span> res
+    <span style="color: #3a81c3; font-weight: bold;">else</span> <span style="color: #3a81c3; font-weight: bold;">let</span> h::t = seq
+         <span style="color: #3a81c3; font-weight: bold;">in</span> sum__ <span style="color: #3a81c3;">(</span>res + h<span style="color: #3a81c3;">)</span> t
 
-def sum seq : <span style="color: #cd5542;">int </span><span style="color: #81b0e3;">[</span><span style="color: #81b0e3;">]</span> =
-    sum__ <span style="color: #ab75c3;">0</span> seq
+def sum seq : <span style="color: #ba2f59; font-weight: bold;">int </span><span style="color: #3a81c3; font-weight: bold;">[</span><span style="color: #3a81c3;">]</span> =
+    sum__ <span style="color: #4e3163;">0</span> seq
 
-def avg_seq seq : <span style="color: #cd5542;">int</span><span style="color: #81b0e3;">[</span><span style="color: #81b0e3;">]</span> =
-   <span style="color: #5180b3;">let</span> <span style="color: #baba36;">n</span> = length seq, <span style="color: #656565;">// </span><span style="color: #757575;">int</span>
-       s = sum seq     <span style="color: #656565;">// </span><span style="color: #757575;">int</span>
-   <span style="color: #5180b3;">in</span>
-      s / <span style="color: #81b0e3;">(</span>float n<span style="color: #81b0e3;">)</span> <span style="color: #656565;">// </span><span style="color: #757575;">devolve uma soma inteira</span>
-                    <span style="color: #656565;">// </span><span style="color: #757575;">dividida por um float</span>
-                    <span style="color: #656565;">// </span><span style="color: #757575;">-&gt; retorna float</span>
+def avg_seq seq : <span style="color: #ba2f59; font-weight: bold;">int</span><span style="color: #3a81c3; font-weight: bold;">[</span><span style="color: #3a81c3;">]</span> =
+   <span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">n</span> = length seq, <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">int</span>
+       s = sum seq     <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">int</span>
+   <span style="color: #3a81c3; font-weight: bold;">in</span>
+      s / <span style="color: #3a81c3;">(</span>float n<span style="color: #3a81c3;">)</span> <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">devolve uma soma inteira</span>
+                    <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">dividida por um float</span>
+                    <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">-&gt; retorna float</span>
 </pre>
 </div>
 
@@ -1114,49 +1301,49 @@ As seguintes conversões de tipos são aceitas na linguagem \(\mu\)mML:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #656565;">// </span><span style="color: #757575;">intToString__ 512 10 "" -&gt;</span>
-<span style="color: #656565;">//     </span><span style="color: #757575;">intToString__ 51 10 "2" -&gt;</span>
-<span style="color: #656565;">//         </span><span style="color: #757575;">intToString__ 5 10 "12" -&gt;</span>
-<span style="color: #656565;">//           </span><span style="color: #757575;">intToString__ 0 10 "512" -&gt;</span>
-<span style="color: #656565;">//             </span><span style="color: #757575;">"512"</span>
+<pre class="src src-fsharp"><span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">intToString__ 512 10 "" -&gt;</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;">//     </span><span style="color: #2aa1ae; background-color: #ecf3ec;">intToString__ 51 10 "2" -&gt;</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;">//         </span><span style="color: #2aa1ae; background-color: #ecf3ec;">intToString__ 5 10 "12" -&gt;</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;">//           </span><span style="color: #2aa1ae; background-color: #ecf3ec;">intToString__ 0 10 "512" -&gt;</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;">//             </span><span style="color: #2aa1ae; background-color: #ecf3ec;">"512"</span>
 
-def intToString__ x : <span style="color: #cd5542;">int</span>,
-                  b : <span style="color: #cd5542;">int</span>,
-                  r : <span style="color: #cd5542;">char </span><span style="color: #81b0e3;">[</span><span style="color: #81b0e3;">]</span> =
-  <span style="color: #5180b3;">let</span> <span style="color: #baba36;">lastDigit</span> = x % b,            <span style="color: #656565;">// </span><span style="color: #757575;">x = 51, lastDigit = 1</span>
-      rest = x / b                  <span style="color: #656565;">//         </span><span style="color: #757575;">rest = 5</span>
-      r1 = <span style="color: #81b0e3;">[</span> <span style="color: #bdbc61;">'0'</span> + lastDigit <span style="color: #81b0e3;">]</span> :: r <span style="color: #656565;">// </span><span style="color: #757575;">r1 = "2", ['1'] :: ['2'] = "12"</span>
-  <span style="color: #5180b3;">in</span>
-    <span style="color: #5180b3;">if</span> rest == <span style="color: #ab75c3;">0</span>
-    <span style="color: #5180b3;">then</span> r1
-    <span style="color: #5180b3;">else</span> intToString__ rest b r1
+def intToString__ x : <span style="color: #ba2f59; font-weight: bold;">int</span>,
+                  b : <span style="color: #ba2f59; font-weight: bold;">int</span>,
+                  r : <span style="color: #ba2f59; font-weight: bold;">char </span><span style="color: #3a81c3; font-weight: bold;">[</span><span style="color: #3a81c3;">]</span> =
+  <span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">lastDigit</span> = x % b,            <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">x = 51, lastDigit = 1</span>
+      rest = x / b                  <span style="color: #2aa1ae; background-color: #ecf3ec;">//         </span><span style="color: #2aa1ae; background-color: #ecf3ec;">rest = 5</span>
+      r1 = <span style="color: #3a81c3;">[</span> <span style="color: #2d9574;">'0'</span> + lastDigit <span style="color: #3a81c3;">]</span> :: r <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">r1 = "2", ['1'] :: ['2'] = "12"</span>
+  <span style="color: #3a81c3; font-weight: bold;">in</span>
+    <span style="color: #3a81c3; font-weight: bold;">if</span> rest == <span style="color: #4e3163;">0</span>
+    <span style="color: #3a81c3; font-weight: bold;">then</span> r1
+    <span style="color: #3a81c3; font-weight: bold;">else</span> intToString__ rest b r1
 
-<span style="color: #656565;">// </span><span style="color: #757575;">funciona para base &lt; 10</span>
-def intToStringBase x : <span style="color: #cd5542;">int</span>, b : <span style="color: #cd5542;">int</span> -&gt; char<span style="color: #81b0e3;">[]</span> = intToString__ x b <span style="color: #bdbc61;">""</span>
+<span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">funciona para base &lt; 10</span>
+def intToStringBase x : <span style="color: #ba2f59; font-weight: bold;">int</span>, b : <span style="color: #ba2f59; font-weight: bold;">int</span> -&gt; char<span style="color: #3a81c3;">[]</span> = intToString__ x b <span style="color: #2d9574;">""</span>
 
-def intToString x : <span style="color: #cd5542;">int</span> -&gt; char<span style="color: #81b0e3;">[]</span> = intToStringBase x <span style="color: #ab75c3;">10</span>
+def intToString x : <span style="color: #ba2f59; font-weight: bold;">int</span> -&gt; char<span style="color: #3a81c3;">[]</span> = intToStringBase x <span style="color: #4e3163;">10</span>
 
-def charToString c : <span style="color: #cd5542;">char</span> = <span style="color: #81b0e3;">[</span>c<span style="color: #81b0e3;">]</span>
+def charToString c : <span style="color: #ba2f59; font-weight: bold;">char</span> = <span style="color: #3a81c3;">[</span>c<span style="color: #3a81c3;">]</span>
 
-<span style="color: #5180b3;">let</span> <span style="color: #baba36;">s</span> = <span style="color: #bdbc61;">"101010"</span>,
-    c = <span style="color: #bdbc61;">'a'</span>,
-    c_ascii = int c, <span style="color: #656565;">// </span><span style="color: #757575;">97</span>
-    c2 = char <span style="color: #ab75c3;">98</span>     <span style="color: #656565;">// </span><span style="color: #757575;">'b'</span>
-<span style="color: #5180b3;">in</span>
-   <span style="color: #81b0e3;">(</span> intToString  i <span style="color: #81b0e3;">)</span> :: <span style="color: #81b0e3;">(</span>charToString  c2<span style="color: #81b0e3;">)</span> <span style="color: #656565;">// </span><span style="color: #757575;">"101010" :: "b" -&gt; "101010b"</span>
+<span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">s</span> = <span style="color: #2d9574;">"101010"</span>,
+    c = <span style="color: #2d9574;">'a'</span>,
+    c_ascii = int c, <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">97</span>
+    c2 = char <span style="color: #4e3163;">98</span>     <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">'b'</span>
+<span style="color: #3a81c3; font-weight: bold;">in</span>
+   <span style="color: #3a81c3;">(</span> intToString  i <span style="color: #3a81c3;">)</span> :: <span style="color: #3a81c3;">(</span>charToString  c2<span style="color: #3a81c3;">)</span> <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">"101010" :: "b" -&gt; "101010b"</span>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org19dadae" class="outline-3">
-<h3 id="org19dadae">Tipos Tupla</h3>
-<div class="outline-text-3" id="text-org19dadae">
+<div id="outline-container-orgd8d0249" class="outline-3">
+<h3 id="orgd8d0249">Tipos Tupla</h3>
+<div class="outline-text-3" id="text-orgd8d0249">
 <p>
 Uma <i>tupla</i> é como um vetor que suporta tipos distintos em cada posição. Tuplas são úteis para retornar mais de um valor em uma função.
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp">def doisRetornos x : <span style="color: #cd5542;">int</span> = <span style="color: #81b0e3;">{</span>x, x + <span style="color: #ab75c3;">1</span><span style="color: #81b0e3;">}</span>
+<pre class="src src-fsharp">def doisRetornos x : <span style="color: #ba2f59; font-weight: bold;">int</span> = <span style="color: #3a81c3;">{</span>x, x + <span style="color: #4e3163;">1</span><span style="color: #3a81c3;">}</span>
 </pre>
 </div>
 
@@ -1165,15 +1352,15 @@ Diferente de um tipo sequência, que pode conter de 0 a n valores, um tipo tupla
 </p>
 
 <div class="org-src-container">
-<pre class="src src-fsharp">def doisRetornos x : <span style="color: #cd5542;">int</span> -&gt; <span style="color: #81b0e3;">{</span>int, int<span style="color: #81b0e3;">}</span>
+<pre class="src src-fsharp">def doisRetornos x : <span style="color: #ba2f59; font-weight: bold;">int</span> -&gt; <span style="color: #3a81c3;">{</span>int, int<span style="color: #3a81c3;">}</span>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgcd964a4" class="outline-3">
-<h3 id="orgcd964a4">Tipos Definidos pelo Usuário</h3>
-<div class="outline-text-3" id="text-orgcd964a4">
+<div id="outline-container-orgaa641c8" class="outline-3">
+<h3 id="orgaa641c8">Tipos Definidos pelo Usuário</h3>
+<div class="outline-text-3" id="text-orgaa641c8">
 <p>
 Um tipo definido pelo usuário é algo parecido com <i>structs</i> de C ou <i>classes</i> de C++/Java, etc.
 </p>
@@ -1182,10 +1369,10 @@ Um tipo definido pelo usuário é algo parecido com <i>structs</i> de C ou <i>cl
 A declaração de tipo de usuário é feita com a palavra-chave <code>class</code>:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">class</span> MeuTipo =
-  campo1 : <span style="color: #cd5542;">int</span>,
-  campo2 : <span style="color: #81b0e3;">{</span>char<span style="color: #a5a5a5;">[]</span>, int<span style="color: #81b0e3;">}</span>
-  <span style="color: #656565;">// </span><span style="color: #757575;">, outros : campos</span>
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">class</span> MeuTipo =
+  campo1 : <span style="color: #ba2f59; font-weight: bold;">int</span>,
+  campo2 : <span style="color: #3a81c3;">{</span>char<span style="color: #6c3163;">[]</span>, int<span style="color: #3a81c3;">}</span>
+  <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">, outros : campos</span>
 </pre>
 </div>
 
@@ -1193,9 +1380,9 @@ A declaração de tipo de usuário é feita com a palavra-chave <code>class</cod
 Para construir uma "instância" de um tipo definido pelo usuário, deve-se usar a palavra chave <code>make</code> em uma expressão. É obrigatório fornecer valor para <b>todos os campos da instância</b>:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">let</span> <span style="color: #baba36;">x</span> = make MeuTipo <span style="color: #81b0e3;">{</span><span style="color: #ab75c3;">1</span>, <span style="color: #a5a5a5;">{</span><span style="color: #bdbc61;">"string"</span>, length <span style="color: #bdbc61;">"string"</span><span style="color: #a5a5a5;">}</span><span style="color: #81b0e3;">}</span>
-<span style="color: #5180b3;">in</span>
-   <span style="color: #656565;">// </span><span style="color: #757575;">...</span>
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">x</span> = make MeuTipo <span style="color: #3a81c3;">{</span><span style="color: #4e3163;">1</span>, <span style="color: #6c3163;">{</span><span style="color: #2d9574;">"string"</span>, length <span style="color: #2d9574;">"string"</span><span style="color: #6c3163;">}</span><span style="color: #3a81c3;">}</span>
+<span style="color: #3a81c3; font-weight: bold;">in</span>
+   <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">...</span>
 </pre>
 </div>
 
@@ -1203,8 +1390,8 @@ Para construir uma "instância" de um tipo definido pelo usuário, deve-se usar 
 Pode-se, no entanto, criar uma função "construtora" para um tipo:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp">def construct_MeuTipo a : <span style="color: #cd5542;">int</span> =
-  make MeuTipo<span style="color: #81b0e3;">{</span><span style="color: #ab75c3;">1</span>, <span style="color: #a5a5a5;">{</span><span style="color: #bdbc61;">"default"</span>, length <span style="color: #bdbc61;">"default"</span><span style="color: #a5a5a5;">}</span><span style="color: #81b0e3;">}</span>
+<pre class="src src-fsharp">def construct_MeuTipo a : <span style="color: #ba2f59; font-weight: bold;">int</span> =
+  make MeuTipo<span style="color: #3a81c3;">{</span><span style="color: #4e3163;">1</span>, <span style="color: #6c3163;">{</span><span style="color: #2d9574;">"default"</span>, length <span style="color: #2d9574;">"default"</span><span style="color: #6c3163;">}</span><span style="color: #3a81c3;">}</span>
 </pre>
 </div>
 
@@ -1212,10 +1399,10 @@ Pode-se, no entanto, criar uma função "construtora" para um tipo:
 O acesso a campos de um tipo definido pelo usuário se faz com a palavra chave <code>get</code>:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">let</span> <span style="color: #baba36;">x</span> = make MeuTipo <span style="color: #81b0e3;">{</span><span style="color: #ab75c3;">1</span>, <span style="color: #a5a5a5;">{</span><span style="color: #bdbc61;">"string"</span>, length <span style="color: #bdbc61;">"string"</span><span style="color: #a5a5a5;">}</span><span style="color: #81b0e3;">}</span> ,
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">x</span> = make MeuTipo <span style="color: #3a81c3;">{</span><span style="color: #4e3163;">1</span>, <span style="color: #6c3163;">{</span><span style="color: #2d9574;">"string"</span>, length <span style="color: #2d9574;">"string"</span><span style="color: #6c3163;">}</span><span style="color: #3a81c3;">}</span> ,
     f1 = get campo1 x
-<span style="color: #5180b3;">in</span>
-   <span style="color: #656565;">// </span><span style="color: #757575;">...</span>
+<span style="color: #3a81c3; font-weight: bold;">in</span>
+   <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">...</span>
 </pre>
 </div>
 
@@ -1223,18 +1410,18 @@ O acesso a campos de um tipo definido pelo usuário se faz com a palavra chave <
 Não é possível <i>alterar</i> o conteúdo de campos em instâncias já criadas. No entanto, é possível criar uma nova instância de um tipo definido pelo usuário, alterando apenas um dos campos:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">let</span> <span style="color: #baba36;">x</span> = make MeuTipo <span style="color: #81b0e3;">{</span><span style="color: #ab75c3;">1</span>, <span style="color: #a5a5a5;">{</span><span style="color: #bdbc61;">"string"</span>, length <span style="color: #bdbc61;">"string"</span><span style="color: #a5a5a5;">}</span><span style="color: #81b0e3;">}</span> ,
-    x1 = set campo1 x <span style="color: #ab75c3;">2</span> <span style="color: #656565;">// </span><span style="color: #757575;">constroi MeuTipo {2, {"string", 7}}</span>
-<span style="color: #5180b3;">in</span>
-   <span style="color: #656565;">// </span><span style="color: #757575;">...</span>
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">x</span> = make MeuTipo <span style="color: #3a81c3;">{</span><span style="color: #4e3163;">1</span>, <span style="color: #6c3163;">{</span><span style="color: #2d9574;">"string"</span>, length <span style="color: #2d9574;">"string"</span><span style="color: #6c3163;">}</span><span style="color: #3a81c3;">}</span> ,
+    x1 = set campo1 x <span style="color: #4e3163;">2</span> <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">constroi MeuTipo {2, {"string", 7}}</span>
+<span style="color: #3a81c3; font-weight: bold;">in</span>
+   <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">...</span>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org47812e3" class="outline-3">
-<h3 id="org47812e3">Aritmética de Tipos na linguagem \(\mu\)mML</h3>
-<div class="outline-text-3" id="text-org47812e3">
+<div id="outline-container-org632bfd3" class="outline-3">
+<h3 id="org632bfd3">Aritmética de Tipos na linguagem \(\mu\)mML</h3>
+<div class="outline-text-3" id="text-org632bfd3">
 <p>
 Na linguagem \(\mu\)mML, tipos são definidos explicitamente
 </p>
@@ -1248,8 +1435,8 @@ Na linguagem \(\mu\)mML, tipos são definidos explicitamente
 Já os tipos de símbolos (equivalenes a variáveis) em {{mml}} são sempre <i>derivados</i> da expressão, em função dos <i>tipos</i> nos parâmetros de uma função.
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">let</span> <span style="color: #baba36;">x</span> = read_int _ <span style="color: #656565;">// </span><span style="color: #757575;">tipo de x eh derivado do retorno de read_int</span>
-<span style="color: #5180b3;">in</span> <span style="color: #656565;">// </span><span style="color: #757575;">...</span>
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">x</span> = read_int _ <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">tipo de x eh derivado do retorno de read_int</span>
+<span style="color: #3a81c3; font-weight: bold;">in</span> <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">...</span>
 </pre>
 </div>
 
@@ -1559,9 +1746,9 @@ Em uma expressão booleana, pode-se considerar que qualquer símbolo que armazen
 </p>
 </div>
 
-<div id="outline-container-orgd735e82" class="outline-4">
-<h4 id="orgd735e82">Coerção de Tipos</h4>
-<div class="outline-text-4" id="text-orgd735e82">
+<div id="outline-container-orgae7d7d7" class="outline-4">
+<h4 id="orgae7d7d7">Coerção de Tipos</h4>
+<div class="outline-text-4" id="text-orgae7d7d7">
 <p>
 Quando um tipo inteiro for passado como parâmetro para uma função que espera um <i>float</i>, este tipo pode ser convertido automaticamente para float, sem que o usuário do compilador solicite explicitamente o <i>cast</i>. Isso se chama <i>coerção de tipos</i>.
 </p>
@@ -1644,14 +1831,14 @@ No caso da coerção para <i>booleano</i>, o <i>valor</i> obtido será equivalen
 O seguinte código deve, portanto, funcionar corretamente:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp">def media a : <span style="color: #cd5542;">float</span>, b : <span style="color: #cd5542;">float</span> =
-    <span style="color: #81b0e3;">(</span>a + b<span style="color: #81b0e3;">)</span> / <span style="color: #ab75c3;">2</span> <span style="color: #656565;">// </span><span style="color: #757575;">(float + float) / int = float / int = float</span>
+<pre class="src src-fsharp">def media a : <span style="color: #ba2f59; font-weight: bold;">float</span>, b : <span style="color: #ba2f59; font-weight: bold;">float</span> =
+    <span style="color: #3a81c3;">(</span>a + b<span style="color: #3a81c3;">)</span> / <span style="color: #4e3163;">2</span> <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">(float + float) / int = float / int = float</span>
 
 def funct =
-    <span style="color: #5180b3;">let</span> <span style="color: #baba36;">x</span> = read_int _,
-        y = <span style="color: #bdbc61;">'z'</span>
-    <span style="color: #5180b3;">in</span>
-      media x y <span style="color: #656565;">// </span><span style="color: #757575;">x eh coagido para float , y eh coagido para float</span>
+    <span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">x</span> = read_int _,
+        y = <span style="color: #2d9574;">'z'</span>
+    <span style="color: #3a81c3; font-weight: bold;">in</span>
+      media x y <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">x eh coagido para float , y eh coagido para float</span>
 </pre>
 </div>
 
@@ -1659,13 +1846,13 @@ def funct =
 Uma coerção especial é a da constante nula <code>nil</code> para algum tipo sequência. A constante <code>nil</code> pode ser coagida para qualquer tipo sequência durante chamadas de função ou concatenação de sequências:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp">def concat a : <span style="color: #cd5542;">int</span><span style="color: #81b0e3;">[</span><span style="color: #81b0e3;">]</span> , b : <span style="color: #cd5542;">int</span><span style="color: #81b0e3;">[</span><span style="color: #81b0e3;">]</span> = a :: b
+<pre class="src src-fsharp">def concat a : <span style="color: #ba2f59; font-weight: bold;">int</span><span style="color: #3a81c3; font-weight: bold;">[</span><span style="color: #3a81c3;">]</span> , b : <span style="color: #ba2f59; font-weight: bold;">int</span><span style="color: #3a81c3; font-weight: bold;">[</span><span style="color: #3a81c3;">]</span> = a :: b
 
 def main =
-    <span style="color: #5180b3;">let</span> <span style="color: #baba36;">tmp</span> = <span style="color: #81b0e3;">[</span><span style="color: #ab75c3;">1</span><span style="color: #81b0e3;">]</span> :: <span style="color: #81b0e3;">[</span><span style="color: #ab75c3;">2</span><span style="color: #81b0e3;">]</span> :: nil  <span style="color: #656565;">// </span><span style="color: #757575;">Coage para int[] por que</span>
-                                 <span style="color: #656565;">// </span><span style="color: #757575;">[1] :: [1] &#233; int</span>
-    <span style="color: #5180b3;">in</span> concat tmp nil            <span style="color: #656565;">// </span><span style="color: #757575;">Coage para int[] por que eh o</span>
-                                 <span style="color: #656565;">// </span><span style="color: #757575;">que o parametro 2 de concat espera</span>
+    <span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">tmp</span> = <span style="color: #3a81c3;">[</span><span style="color: #4e3163;">1</span><span style="color: #3a81c3;">]</span> :: <span style="color: #3a81c3;">[</span><span style="color: #4e3163;">2</span><span style="color: #3a81c3;">]</span> :: nil  <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">Coage para int[] por que</span>
+                                 <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">[1] :: [1] &#233; int</span>
+    <span style="color: #3a81c3; font-weight: bold;">in</span> concat tmp nil            <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">Coage para int[] por que eh o</span>
+                                 <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">que o parametro 2 de concat espera</span>
 </pre>
 </div>
 
@@ -1673,54 +1860,54 @@ def main =
 A coerção de tipos também deve acontecer durante o "retorno" de if's, para que o retorno seja de algum tipo abrangente o sufuciente para armazenar tanto o retorno do lado <i>verdadeiro</i> quando o do lado <i>falso</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">let</span> <span style="color: #baba36;">x</span> = <span style="color: #5180b3;">if</span> a
-        <span style="color: #5180b3;">then</span> <span style="color: #ab75c3;">5</span>.<span style="color: #ab75c3;">2</span>   <span style="color: #656565;">// </span><span style="color: #757575;">float</span>
-        <span style="color: #5180b3;">else</span> <span style="color: #ab75c3;">7</span>     <span style="color: #656565;">// </span><span style="color: #757575;">int</span>
-<span style="color: #5180b3;">in</span> x          <span style="color: #656565;">// </span><span style="color: #757575;">&lt;-- x &#233; do tipo float</span>
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">x</span> = <span style="color: #3a81c3; font-weight: bold;">if</span> a
+        <span style="color: #3a81c3; font-weight: bold;">then</span> <span style="color: #4e3163;">5</span>.<span style="color: #4e3163;">2</span>   <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">float</span>
+        <span style="color: #3a81c3; font-weight: bold;">else</span> <span style="color: #4e3163;">7</span>     <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">int</span>
+<span style="color: #3a81c3; font-weight: bold;">in</span> x          <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">&lt;-- x &#233; do tipo float</span>
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-fsharp"><span style="color: #5180b3;">let</span> <span style="color: #baba36;">l</span> = <span style="color: #5180b3;">if</span> a
-        <span style="color: #5180b3;">then</span> <span style="color: #81b0e3;">[</span><span style="color: #ab75c3;">1</span><span style="color: #81b0e3;">]</span>   <span style="color: #656565;">// </span><span style="color: #757575;">tipo int[]</span>
-        <span style="color: #5180b3;">else</span> nil   <span style="color: #656565;">// </span><span style="color: #757575;">tipo QUALQUER[]</span>
-<span style="color: #5180b3;">in</span> l       <span style="color: #656565;">// </span><span style="color: #757575;">&lt;-- x &#233; do tipo int[]</span>
+<pre class="src src-fsharp"><span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">l</span> = <span style="color: #3a81c3; font-weight: bold;">if</span> a
+        <span style="color: #3a81c3; font-weight: bold;">then</span> <span style="color: #3a81c3;">[</span><span style="color: #4e3163;">1</span><span style="color: #3a81c3;">]</span>   <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">tipo int[]</span>
+        <span style="color: #3a81c3; font-weight: bold;">else</span> nil   <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">tipo QUALQUER[]</span>
+<span style="color: #3a81c3; font-weight: bold;">in</span> l       <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">&lt;-- x &#233; do tipo int[]</span>
 </pre>
 </div>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgec3facc" class="outline-3">
-<h3 id="orgec3facc">Um Programa em \(\mu\)mML</h3>
-<div class="outline-text-3" id="text-orgec3facc">
+<div id="outline-container-orgfb8e182" class="outline-3">
+<h3 id="orgfb8e182">Um Programa em \(\mu\)mML</h3>
+<div class="outline-text-3" id="text-orgfb8e182">
 <p>
 Um programa em \(\mu\)mML deve possuir uma função chamada <i>main</i> que não recebe nenhum parâmetro. A execução do programa se inicia por esta função:
 </p>
 <div class="org-src-container">
-<pre class="src src-fsharp">def fib x : <span style="color: #cd5542;">int</span> =
-    <span style="color: #5180b3;">if</span> x &lt;= <span style="color: #ab75c3;">0</span> <span style="color: #5180b3;">then</span> -1 <span style="color: #656565;">// </span><span style="color: #757575;">0 nao eh valido</span>
-    <span style="color: #5180b3;">else</span> <span style="color: #5180b3;">if</span> x == <span style="color: #ab75c3;">1</span> <span style="color: #5180b3;">then</span> <span style="color: #ab75c3;">1</span>
-    <span style="color: #5180b3;">else</span> <span style="color: #5180b3;">if</span> x == <span style="color: #ab75c3;">2</span> <span style="color: #5180b3;">then</span> <span style="color: #ab75c3;">1</span>
-    <span style="color: #5180b3;">else</span> <span style="color: #81b0e3;">(</span>fib x - <span style="color: #ab75c3;">1</span><span style="color: #81b0e3;">)</span> + <span style="color: #81b0e3;">(</span>fib x - <span style="color: #ab75c3;">2</span><span style="color: #81b0e3;">)</span>
+<pre class="src src-fsharp">def fib x : <span style="color: #ba2f59; font-weight: bold;">int</span> =
+    <span style="color: #3a81c3; font-weight: bold;">if</span> x &lt;= <span style="color: #4e3163;">0</span> <span style="color: #3a81c3; font-weight: bold;">then</span> -1 <span style="color: #2aa1ae; background-color: #ecf3ec;">// </span><span style="color: #2aa1ae; background-color: #ecf3ec;">0 nao eh valido</span>
+    <span style="color: #3a81c3; font-weight: bold;">else</span> <span style="color: #3a81c3; font-weight: bold;">if</span> x == <span style="color: #4e3163;">1</span> <span style="color: #3a81c3; font-weight: bold;">then</span> <span style="color: #4e3163;">1</span>
+    <span style="color: #3a81c3; font-weight: bold;">else</span> <span style="color: #3a81c3; font-weight: bold;">if</span> x == <span style="color: #4e3163;">2</span> <span style="color: #3a81c3; font-weight: bold;">then</span> <span style="color: #4e3163;">1</span>
+    <span style="color: #3a81c3; font-weight: bold;">else</span> <span style="color: #3a81c3;">(</span>fib x - <span style="color: #4e3163;">1</span><span style="color: #3a81c3;">)</span> + <span style="color: #3a81c3;">(</span>fib x - <span style="color: #4e3163;">2</span><span style="color: #3a81c3;">)</span>
 
 def main =
-    <span style="color: #5180b3;">let</span> <span style="color: #baba36;">_</span> = print <span style="color: #bdbc61;">"Digite um numero : "</span>,
+    <span style="color: #3a81c3; font-weight: bold;">let</span> <span style="color: #715ab1;">_</span> = print <span style="color: #2d9574;">"Digite um numero : "</span>,
         n = read_int _ ,
         fib_n = fib n
-    <span style="color: #5180b3;">in</span>
-       <span style="color: #5180b3;">if</span> !fib_n
-       <span style="color: #5180b3;">then</span> <span style="color: #5180b3;">let</span> _ = print <span style="color: #bdbc61;">"Numero invalido para fibbonaci\n"</span> <span style="color: #5180b3;">in</span> nil
-       <span style="color: #5180b3;">else</span> <span style="color: #5180b3;">let</span> _ = print <span style="color: #81b0e3;">(</span><span style="color: #bdbc61;">"Fib de "</span> :: <span style="color: #a5a5a5;">(</span>str n<span style="color: #a5a5a5;">)</span> :: <span style="color: #bdbc61;">" eh "</span> :: <span style="color: #a5a5a5;">(</span>str fib_n<span style="color: #a5a5a5;">)</span> <span style="color: #5180b3;">in</span> nil
+    <span style="color: #3a81c3; font-weight: bold;">in</span>
+       <span style="color: #3a81c3; font-weight: bold;">if</span> !fib_n
+       <span style="color: #3a81c3; font-weight: bold;">then</span> <span style="color: #3a81c3; font-weight: bold;">let</span> _ = print <span style="color: #2d9574;">"Numero invalido para fibbonaci\n"</span> <span style="color: #3a81c3; font-weight: bold;">in</span> nil
+       <span style="color: #3a81c3; font-weight: bold;">else</span> <span style="color: #3a81c3; font-weight: bold;">let</span> _ = print <span style="color: #3a81c3;">(</span><span style="color: #2d9574;">"Fib de "</span> :: <span style="color: #6c3163;">(</span>str n<span style="color: #6c3163;">)</span> :: <span style="color: #2d9574;">" eh "</span> :: <span style="color: #6c3163;">(</span>str fib_n<span style="color: #6c3163;">)</span> <span style="color: #3a81c3; font-weight: bold;">in</span> nil
 </pre>
 </div>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org40722cd" class="outline-2">
-<h2 id="org40722cd">Entradas e Árvores de Análise</h2>
-<div class="outline-text-2" id="text-org40722cd">
+<div id="outline-container-orgf85fdf4" class="outline-2">
+<h2 id="orgf85fdf4">Entradas e Árvores de Análise</h2>
+<div class="outline-text-2" id="text-orgf85fdf4">
 <ul class="org-ul">
 <li><p>
 Exemplo 1
@@ -1978,7 +2165,7 @@ def main = 1
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Prof. Rodrigo Kassick</p>
-<p class="date">Created: 2017-10-11 qua 03:34</p>
+<p class="date">Created: 2017-10-11 qua 18:37</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
