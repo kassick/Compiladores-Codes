@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Oct  4 10:09:35 2017"
- *         Updated: "2017-10-10 20:34:13 kassick"
+ *         Updated: "2017-10-11 03:52:42 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -109,7 +109,7 @@ antlrcpp::Any ToplevelVisitor::visitFuncdef_impl(MMMLParser::Funcdef_implContext
 
     // Set implemented BEFORE, so we know that the function is implemented if called recursively
     f->set_implemented(
-        LabelFactory::make(),
+        f->label,
         fbody_start->getLine(),
         fbody_start->getCharPositionInLine());
 
@@ -268,6 +268,9 @@ antlrcpp::Any ToplevelVisitor::visitFuncdef_header(MMMLParser::Funcdef_headerCon
     Report::info(ctx) << "Function ``" << f->name << "´´"
                       << " defined here"
                       << endl;
+
+    f->label = LabelFactory::make();
+
     return f;
 }
 
