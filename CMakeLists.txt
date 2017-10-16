@@ -165,6 +165,7 @@ function(AntlrGenerateParseTreePng grammar_jar grammar_name start_rule input out
 endfunction()
 
 add_subdirectory(./SExpr/Antlr/)
+add_subdirectory(./SExpr/Antlr-Attributes/)
 add_subdirectory(./SExpr/AntlrListener/)
 add_subdirectory(./SExpr/AntlrVisitor/)
 add_subdirectory(./SExpr/LL1/)
