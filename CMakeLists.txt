@@ -32,7 +32,7 @@ ExternalProject_Add(ex_docopt
 include_directories(${DOCOPT_PREFIX}/install/include)
 
 # if x86_64 (linux), it's target is likely to end up in lib64
-if (${CMAKE_SYSTEM_PROCESSOR} matches "x86_64")
+if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
   set(DOCOPT_LIB ${DOCOPT_PREFIX}/install/lib64/libdocopt.so)
 else()
   set(DOCOPT_LIB ${DOCOPT_PREFIX}/install/lib/libdocopt.so)
