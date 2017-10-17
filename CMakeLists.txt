@@ -29,25 +29,33 @@ ExternalProject_Add(ex_docopt
   CMAKE_ARGS -DCMAKE_CXX_FLAGS=-std=c++11 -DCMAKE_INSTALL_PREFIX=${DOCOPT_PREFIX}/install
 )
 
-ExternalProject_Get_Property(ex_docopt install_dir)
-message(STATUS Docopt compiled into ${install_dir})
-SET(docopt_install_dir ${install_dir})
 include_directories(${DOCOPT_PREFIX}/install/include)
 
-# for some reason, find_file and find_library both fail under emscripten
-if (EXISTS ${DOCOPT_PREFIX}/install/lib/libdocopt.so)
-  set(DOCOPT_LIB ${DOCOPT_PREFIX}/install/lib/libdocopt.so)
-else()
-if (EXISTS ${DOCOPT_PREFIX}/install/lib64/libdocopt.so)
+# if x86_64 (linux), it's target is likely to end up in lib64
+if (${CMAKE_SYSTEM_PROCESSOR} matches "x86_64")
   set(DOCOPT_LIB ${DOCOPT_PREFIX}/install/lib64/libdocopt.so)
 else()
-  set(DOCOPT_PREFIX DOCOPT-NOTFOUND)
+  set(DOCOPT_LIB ${DOCOPT_PREFIX}/install/lib/libdocopt.so)
 endif()
-endif()
+
+
+# for some reason, find_file and find_library both fail under emscripten
+# if (EXISTS ${DOCOPT_PREFIX}/install/lib/libdocopt.so)
+#   set(DOCOPT_LIB ${DOCOPT_PREFIX}/install/lib/libdocopt.so)
+# else()
+# if (EXISTS ${DOCOPT_PREFIX}/install/lib64/libdocopt.so)
+#   set(DOCOPT_LIB ${DOCOPT_PREFIX}/install/lib64/libdocopt.so)
+# else()
+#   set(DOCOPT_LIB DOCOPT-NOTFOUND1)
+# endif()
+# endif()
 
 add_library(docopt UNKNOWN IMPORTED)
 set_property(TARGET docopt PROPERTY IMPORTED_LOCATION
-  ${DOCOPT_LIB})
+  #"${DOCOPT_PREFIX}/install/lib*/libdocopt.so"
+  ${DOCOPT_LIB}
+  )
+add_dependencies(docopt ex_docopt)
 
 
 ###################################################
@@ -71,6 +79,7 @@ include_directories(
 add_library(antlr4static STATIC IMPORTED)
 set_property(TARGET antlr4static PROPERTY IMPORTED_LOCATION
   ${antlr_install_dir}/lib/libantlr4-runtime.a)
+add_dependencies(antlr4static antlrruntime)
 
 SET(ANTLR_JAR_LOCATION ${CMAKE_CURRENT_LIST_DIR}/deps/antlr-4.7-complete.jar)
 
