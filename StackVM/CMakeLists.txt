@@ -1,6 +1,8 @@
  add_custom_target(StackVM_html
    ALL
    COMMAND cp ${CMAKE_CURRENT_LIST_DIR}/StackVM.html ${CMAKE_CURRENT_BINARY_DIR}/index.html
+   COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/tests || true
+   COMMAND cp ${CMAKE_CURRENT_LIST_DIR}/tests/* ${CMAKE_CURRENT_BINARY_DIR}/tests
    BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/index.html
    DEPENDS ${CMAKE_CURRENT_LIST_DIR}/StackVM.html
    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -23,3 +25,17 @@ add_dependencies(stackvm
   generate_stackvm_antlr
   )
 target_link_libraries(stackvm antlr4static docopt)
+
+# ZIP the HTML and all the playground only if we are compiling in emscripten
+if(${CMAKE_CXX_COMPILER} MATCHES "em\\+\\+")
+add_custom_target(stackvm.zip
+  ${CMAKE_COMMAND} -E tar "cfv" "stackvm.zip" --format=zip
+  ${CMAKE_CURRENT_BINARY_DIR}/index.html
+  ${CMAKE_CURRENT_BINARY_DIR}/stackvm.js
+  ${CMAKE_CURRENT_BINARY_DIR}/tests/*
+  ${CMAKE_CURRENT_SOURCE_DIR}/
+  )
+
+add_dependencies(stackvm.zip stackvm StackVM_html)
+
+endif()

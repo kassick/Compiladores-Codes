@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 11:35:28 2017"
- *         Updated: "2017-09-19 16:05:00 kassick"
+ *         Updated: "2017-10-18 17:43:04 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -16,6 +16,7 @@
 #pragma once
 
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <sstream>
 #include <cstring>
@@ -47,9 +48,56 @@ const string char_escape(const char c) {
         case '\t': return "\\t";
         case '\r': return "\\r";
         case '\b': return "\\b";
+        case '\'': return "\\'" ;
         default:
             return string({c});
     }
+}
+
+const string str_escape(const string & s)
+{
+    stringstream sout;
+    for (int i = 0 ; i < s.length() ; i++)
+    {
+        switch(s[i]) {
+            case '\n': sout << "\\n"; break;
+            case '\t': sout << "\\t"; break;
+            case '\r': sout << "\\r"; break;
+            case '\b': sout << "\\b"; break;
+            case '"': sout <<  "\\\"" ; break;
+            default:
+                sout << s[i];
+        }
+    }
+
+    return sout.str();
+}
+
+const string str_unescape(const string & s)
+{
+    stringstream sout;
+    for (int i = 0 ; i < s.length() ; i++)
+    {
+        if (s[i] == '\\') {
+            // escape!
+            if (i + 1 < s.length()) {
+                switch(s[i + 1]) {
+                    case 'n': sout << '\n'; break;
+                    case 't': sout << '\t'; break;
+                    case 'r': sout << '\r'; break;
+                    case 'b': sout << '\b'; break;
+                    case '"': sout << '"' ; break;
+                    default:
+                        // oops, unknown escape
+                        sout << "(UNKNOWN ESCAPE " << s[i+1] << ")";
+                }
+                i++;
+            }
+        } else {
+            sout << s[i];
+        }
+    }
+    return sout.str();
 }
 
 struct DataItem {
@@ -260,22 +308,28 @@ struct DataItem {
     string to_string() const {
         stringstream ss;
 
-        ss << "("
-           << dataTypeNameStr(this->type)
-           << " ";
+        //ss << "("
+        //   << dataTypeNameStr(this->type)
+        //   << " ";
         switch (this->type) {
             case Char: ss << "'" << char_escape(as<char>()) << "'"; break;
             case Int: ss << as<int>(); break;
-            case Double: ss << as<double>(); break;
+            case Double: ss << std::setprecision(10)
+                            << as<double>();
+                break;
             case Array:
                 {
                     // 0x8fafbd {3} [(int 1) (double 2) (null)]
-                    ss << (void*) data.data()
-                       << " {" << as<vector<DataItem>*>()->size() << "}"
-                       << " [ ";
+                    //ss //<< (void*) data.data()
+                            //<< " {" << as<vector<DataItem>*>()->size() << "}"
+
+                    ss << " [ ";
+
                     for (const DataItem& i : *as<vector<DataItem>*>())
                     {
-                        ss << i.to_string() << " ";
+                        ss << i.to_string()
+                           << ","
+                           << " ";
                     }
 
                     ss << "]";
@@ -283,7 +337,7 @@ struct DataItem {
                 break;
             default: ss << "null"; break;
         }
-        ss << ")";
+        //ss << ")";
 
         return ss.str();
     }

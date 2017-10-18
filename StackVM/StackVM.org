@@ -156,13 +156,13 @@ O arquivo [[/home/kassick/Sources/Compiladores/StackVM/StackVM.g4][StackVM.g4]] 
 push 1
 #+END_SRC
 
-Não são permitidos comentários ao lado das instruções
+São permitidos também comentários ao lado das instruções
 
 O arquivo deve conter uma ou mais *Linhas de Instrução*
 #+BEGIN_SRC sh :eval never
-push 1
-push 2
-push 3
+push 1   # poe inteiro 1
+push 2   # poe inteiro 3
+push 3.0 # poe double 3.0
 add
 div
 #+END_SRC
@@ -187,7 +187,7 @@ Cada posição da pilha possui um /item de dados/. Este item pode ser um dos tip
 
 1. *nop*
 
-   Não toma nenhuma ação
+   Não toma nenhuma ação.
 
 2. *exit*
 

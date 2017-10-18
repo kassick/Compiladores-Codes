@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 14:14:39 2017"
- *         Updated: "2017-10-11 02:17:11 kassick"
+ *         Updated: "2017-10-18 17:38:56 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -415,11 +415,11 @@ struct PushInstr<string> : public Instruction {
     PushInstr(string val_) : val(val_) {}
 
     virtual string to_string() const override {
-        return string("push \"") + val + string("\"");
+        return string("push \"") + str_escape(val) + string("\"");
     }
 
     virtual VM& run(VM& vm) const override {
-        for (const char c : val)
+        for (const char c : str_unescape(val))
             vm.push(c);
 
         vm.push((int)val.size());

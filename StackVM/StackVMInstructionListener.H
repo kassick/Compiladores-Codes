@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 18:08:15 2017"
- *         Updated: "2017-10-10 14:27:23 kassick"
+ *         Updated: "2017-10-18 17:41:13 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -546,7 +546,7 @@ struct InstructionListener : public StackVMBaseListener
     virtual void exitStrarg(StackVMParser::StrargContext * ctx)
         override
     {
-        this->strarg = ctx->getText().substr(1, ctx->getText().length() - 2);
+        this->strarg = str_unescape(ctx->getText().substr(1, ctx->getText().length() - 2));
     }
 
     virtual void exitCastAsChar(StackVMParser::CastAsCharContext * /*ctx*/)
