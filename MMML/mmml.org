@@ -1,4 +1,4 @@
-#+TITLE: Linguagem MMML
+#+TITLE: Linguagem @@latex:\ensuremath{\mu}mML@@@@html:\(\mu\)mML@@
 #+AUTHOR: Prof. Rodrigo Kassick
 #+LANGUAGE: pt
 #+TAGS: noexport(n) deprecated(d) success(s) failed(f) pending(p)
@@ -115,7 +115,11 @@ A gramática da linguagem é fornecida juntamente com este documento. A gramáti
 
 As próximas seções exemplificam os conceitos básicos da linguagem {{{mml}}}.
 
-** Exemplos Iniciais
+** Exemplos Básicos
+
+Exemplos podem ser encontrados na pasta [[./examples/][exemples]] e [[./inputs/][inputs]] .
+
+Exemplos de entradas *com erro* podem ser encontradas em [[./errors][errors]] .
 
 *** Hello World
 
@@ -131,17 +135,27 @@ As próximas seções exemplificam os conceitos básicos da linguagem {{{mml}}}.
 
 #+INCLUDE: "examples/02-entrada-saida.mmml" example
 
+*** Escopo
+
+- Um comando =let= cria um novo /escopo/ para símbolos. Símbolos podem ser redefinidos dentro de um novo escopo -- mas nunca no mesmo.
+
+#+INCLUDE: "examples/10-nested_envs.mmml" example
+
 *** Tipos
 
 {{{mml}}} é uma linguagem fortemente tipada, porém não há a necessidade de declarar o /tipo/ dos símbolos explicitamente
 
 #+INCLUDE: "examples/03-tipos.mmml" example
 
+#+INCLUDE: "examples/11-coercion.mmml" example
+
 *** Controle de Fluxo
 
 O controle de fluxo é feito com a declaração =if=. Porém, um /if/ de {{{mml}}} retorna o valor que resulta da sua avaliação.
 
 #+INCLUDE: "examples/04-controle_de_fluxo.mmml" example
+
+#+INCLUDE: "examples/11-coercion.mmml" example
 
 *** Funções
 
@@ -225,6 +239,10 @@ c // C, uma lista, é nao vazio?
 !(a || b)
 
 #+END_SRC
+
+Expressões booleanas podem ser utilizadas como condicional no comando =if=, mas também podem ter seu resultado "atribuído" a símbolos:
+
+#+INCLUDE: "examples/09-bool-coertion.mmml" example
 
 ** Operadores Relacionais
 
@@ -444,13 +462,13 @@ def f1 a : int, b : float -> float
 def f2 a : int, b : float -> float
 
 def f1 a : int, b : float =
-    if a == 0
+    if a != 0
     then f2 a
             b + b
     else b
 
 def f2 a : int, b : float =
-    f1 (a - 1), b
+    f1 (a - 1) b
 #+END_SRC
 
 Uma função não possui a palavra chave *returns*. O retorno é sempre o resultado de uma *expressão* -- e o tipo de retorno de uma função é definido pelo resultado da expressão.
@@ -499,8 +517,8 @@ Algumas funções são consideradas especiais da linguagem e devem estar dispon�
 - ~read_string _ -> char[]~ : Lê uma string da entrada
 - ~print a : T -> int~ : Coloca na tela o valor de ~a~. Aceita qualquer tipo primitivo (~char~, ~int~, ~float~) e strings (~char[]~)
 - ~str a : T -> char[]~ : Deve funcionar para um tipo T ~int~, ~char~, ~float~ e mesmo ~char[]~ . Converte o valor a para uma representação em string.
-- ~nth n : int, v : T[] -> T~ : Recebe como parâmetro uma posição ~n~ e uma sequência ~v~, retorna a ~n~-ésima posição do vetor
-- ~let_nth n : int, value : T, v : T[] -> T[]~ : Recebe como parâmetro uma sequência ~v~, uma posição ~n~ e um valor ~value~. Retorna uma nova sequência onde a posição ~n~ foi alterada para ~value~.
+- ~nth s : T[], i : int -> T~ : Recebe como parâmetro uma posição ~i~ e uma sequência ~s~, retorna a ~i~-ésima posição do vetor
+- ~let_nth s : T[], i : int, val : T -> T[]~ : Recebe como parâmetro uma sequência ~s~, uma posição ~i~ e um valor ~val~. Retorna uma nova sequência onde a posição ~i~ foi alterada para ~val~.
 - ~length v : T[] -> int~ : retorna a quantidade de elementos de uma sequência.
 
   *Obs.:* =length nil= sempre retorna 0.
@@ -544,7 +562,7 @@ in
 Uma lista de de um ou menos elementos sempre produzirá um /resto/ *nulo*. A função abaixo utiliza isso para calcular o tamanho de uma sequência de inteiros:
 #+BEGIN_SRC fsharp
 def len_int_seq__ count : int, s : int[] =
-   if !s       // ! ( s != nil )
+   if !s       // ! ( length s > 0 )
    then count // nada mais para contar
    else let h::t = s
         in
@@ -556,7 +574,6 @@ def len_int_seq s : int[] =
 
 O seguinte código retorna uma lista com todos os elementos da sequencia maiores que 10:
 #+BEGIN_SRC fsharp
-
 def filter_gt_10__ ret : int[], s : int [] =
     if !s
     then ret                                   // nada mais, retorna ret
@@ -568,7 +585,7 @@ def filter_gt_10__ ret : int[], s : int [] =
            else filter_gt_10__ ret t           // chama recursivo, ignora o inicio
 
 def filter_gt_10 s : int[] =
-   filter_gt_10__ [] s
+   filter_gt_10__ nil s
 #+END_SRC
 
 *Observação*: Uma /string/ na linguagem {{{mml}}} é uma sequência de caracteres. Por exemplo, a seguinte função possui tipo de retorno src_fsharp[:exports code]{char[]} :
@@ -630,31 +647,30 @@ def avg_seq seq : int[] =
 
 As seguintes conversões de tipos são aceitas na linguagem {{{mml}}}:
 #+ATTR_LaTeX: :align r|r|c|p{10cm}
-|   | Tipo Origem |    | Tipo Destino |    | Obs                            |
-| / | <>          | <> | <>           | <> | <>                             |
-|---+-------------+----+--------------+----+--------------------------------|
-|   |             |    |              |    | <30>                           |
-|   | Bool        | \to  | Char         | \check  | 0 se falso, 1 se verdadeiro    |
-|   | Bool        | \to  | Int          | \check  |                                |
-|   | Bool        | \to  | Float        | \check  |                                |
-|---+-------------+----+--------------+----+--------------------------------|
-|   | Char        | \to  | Int          | \check  | Devolve o número da tabela ASCII correspondente ao caractere |
-|   | Char        | \to  | Float        | \check  |                                |
-|---+-------------+----+--------------+----+--------------------------------|
-|   | Inteiro     | \to  | Float        | \check  | Número em ponto flutuante com 0s depois da vírgula (1 \to 1.0) |
-|---+-------------+----+--------------+----+--------------------------------|
-|---+-------------+----+--------------+----+--------------------------------|
-|   | Float       | \to  | Inteiro      | \check  | Número inteiro descartando a parte fracionária. Pode perder precisão (1.9 \to 1). Compilador deve alertar (/Warning/) |
-|   | Float       | \to  | Char         | \check  | Caractere, convertido da tabela ASCII a partir da parte inteira do número |
-|---+-------------+----+--------------+----+--------------------------------|
-|   | Int         | \to  | Char         | \check  | Devolve o caractere associado ao valor da tabela ASCII |
-|---+-------------+----+--------------+----+--------------------------------|
-|---+-------------+----+--------------+----+--------------------------------|
-|   | Sequência   | \to  | Booleano     | \check  | /true/ se não vazia. /false/ caso contrário |
-|   | Qualquer    | \to  | Booleano     | \check  | /false/ se nulo ou zero; /true/ caso contrário |
-|---+-------------+----+--------------+----+--------------------------------|
+|   | Tipo Origem |   | Tipo Destino |   | Obs                            |
+|---+-------------+---+--------------+---+--------------------------------|
+|   | Bool        | \to | Char         | \check | 0 se falso, 1 se verdadeiro    |
+|   | Bool        | \to | Int          | \check |                                |
+|   | Bool        | \to | Float        | \check |                                |
+|---+-------------+---+--------------+---+--------------------------------|
+|   | Char        | \to | Int          | \check | Devolve o número da tabela ASCII correspondente ao caractere |
+|   | Char        | \to | Float        | \check |                                |
+|---+-------------+---+--------------+---+--------------------------------|
+|   | Inteiro     | \to | Float        | \check | Número em ponto flutuante com 0s depois da vírgula (1 \to 1.0) |
+|---+-------------+---+--------------+---+--------------------------------|
+|---+-------------+---+--------------+---+--------------------------------|
+|   | Float       | \to | Inteiro      | \check | Número inteiro descartando a parte fracionária. Pode perder precisão (1.9 \to 1). Compilador deve alertar (/Warning/) |
+|   | Float       | \to | Char         | \check | Caractere, convertido da tabela ASCII a partir da parte inteira do número |
+|---+-------------+---+--------------+---+--------------------------------|
+|   | Int         | \to | Char         | \check | Devolve o caractere associado ao valor da tabela ASCII |
+|---+-------------+---+--------------+---+--------------------------------|
+|---+-------------+---+--------------+---+--------------------------------|
+|   | Sequência   | \to | Booleano     | \check | /true/ se não-vazia. /false/ caso contrário |
+|   | Qualquer    | \to | Booleano     | \check | /false/ se zero; /true/ caso contrário   |
+|---+-------------+---+--------------+---+--------------------------------|
+#+TBLFM:
 
-*Obs.:* Casts não são definidos para tipos sequência, apenas para tipos básicos.
+*Obs.:* Casts não são definidos para tipos sequência, tuplas ou classes, apenas para tipos básicos.
 
 #+BEGIN_SRC fsharp
 // intToString__ 512 10 "" ->
@@ -666,27 +682,28 @@ As seguintes conversões de tipos são aceitas na linguagem {{{mml}}}:
 def intToString__ x : int,
                   b : int,
                   r : char [] =
-  let lastDigit = x % b,            // x = 51, lastDigit = 1
-      rest = x / b                  //         rest = 5
-      r1 = [ '0' + lastDigit ] :: r // r1 = "2", ['1'] :: ['2'] = "12"
+  let lastDigit = x - (x / b) * b,        // x % b, x = 51, lastDigit = 1
+      rest = x / b,                       //         rest = 5
+      r1 = [ '0' + char lastDigit ] :: r  // r1 = "2", ['1'] :: ['2'] = "12"
   in
     if rest == 0
     then r1
     else intToString__ rest b r1
 
 // funciona para base < 10
-def intToStringBase x : int, b : int -> char[] = intToString__ x b ""
+def intToStringBase x : int, b : int = intToString__ x b ""
 
-def intToString x : int -> char[] = intToStringBase x 10
+def intToString x : int = intToStringBase x 10
 
 def charToString c : char = [c]
 
+def main =
 let s = "101010",
     c = 'a',
     c_ascii = int c, // 97
     c2 = char 98     // 'b'
 in
-   ( intToString  i ) :: (charToString  c2) // "101010" :: "b" -> "101010b"
+   ( intToString 101010 ) :: (charToString  c2) // "101010" :: "b" -> "101010b"
 #+END_SRC
 
 ** Tipos Tupla
@@ -738,8 +755,9 @@ in
 Não é possível /alterar/ o conteúdo de campos em instâncias já criadas. No entanto, é possível criar uma nova instância de um tipo definido pelo usuário, alterando apenas um dos campos:
 #+BEGIN_SRC fsharp
 let x = make MeuTipo {1, {"string", length "string"}} ,
-    x1 = set campo1 x 2 // constroi MeuTipo {2, {"string", 7}}
+    x1 = set campo1 x 2           // constroi MeuTipo {2, {"string", 7}}
 in
+   {get campo1 x, get campo1 x1}  // retorna {1, 2}
    // ...
 #+END_SRC
 
@@ -750,7 +768,7 @@ Na linguagem {{{mml}}}, tipos são definidos explicitamente
 - na declaração de tipo de retorno de uma função
 - na construção de tipos definidos pelo usuário.
 
-Já os tipos de símbolos (equivalenes a variáveis) em {{mml}} são sempre /derivados/ da expressão, em função dos /tipos/ nos parâmetros de uma função.
+Já os tipos de símbolos (equivalenes a variáveis) em {{{mml}}} são sempre /derivados/ da expressão, em função dos /tipos/ nos parâmetros de uma função.
 #+BEGIN_SRC fsharp
 let x = read_int _ // tipo de x eh derivado do retorno de read_int
 in // ...
@@ -763,9 +781,9 @@ Na linguagem {{{mml}}}, os operadores aritméticos devem respeitar a seguinte /a
 |   | Lado Esquerdo | (Operadores) | Lado Direito  |    | Resultado |
 | / | <>            | <>           | <>            | <> | <>        |
 |---+---------------+--------------+---------------+----+-----------|
-|   | Char          | + - / * %    | Char          | \to  | Char      |
-|   | Char          | + - / * %    | Inteiro       | \to  | Inteiro   |
-|   | Inteiro       | + - / * %    | Char/Inteiro  | \to  | Inteiro   |
+|   | Char          | + - / *      | Char          | \to  | Char      |
+|   | Char          | + - / *      | Inteiro       | \to  | Inteiro   |
+|   | Inteiro       | + - / *      | Char/Inteiro  | \to  | Inteiro   |
 |   | Inteiro       | + - / *      | Float         | \to  | Float     |
 |   | Float         | + - / *      | Inteiro/Float | \to  | Float     |
 
@@ -806,14 +824,17 @@ Quando um tipo inteiro for passado como parâmetro para uma função que espera 
 
 As seguintes coerções de tipos são válidas:
 
-| Char      | \to | Integer  |
-| Char      | \to | Float    |
-| Integer   | \to | Char     |
-| Integer   | \to | Float    |
-| Char      | \to | Booleano |
-| Inteiro   | \to | Booleano |
-| Float     | \to | Booleano |
-| Sequência | \to | Booleano |
+| Char      | \to | Integer          |                    |
+| Char      | \to | Float            |                    |
+| Integer   | \to | Char             |                    |
+| Integer   | \to | Float            |                    |
+| Float     | \to | Char             | *Deve gerar Warning* |
+| Float     | \to | Int              | *Deve gerar Warning* |
+| Char      | \to | Booleano         |                    |
+| Inteiro   | \to | Booleano         |                    |
+| Float     | \to | Booleano         |                    |
+| Sequência | \to | Booleano         |                    |
+| Booleano  | \to | Int, Char, Float |                    |
 
 No caso da coerção para /booleano/, o /valor/ obtido será equivalente a /false/ caso o valor coagido for:
 - sequência vazia
@@ -825,7 +846,7 @@ O seguinte código deve, portanto, funcionar corretamente:
 def media a : float, b : float =
     (a + b) / 2 // (float + float) / int = float / int = float
 
-def funct =
+def main =
     let x = read_int _,
         y = 'z'
     in
@@ -875,7 +896,7 @@ def main =
     in
        if !fib_n
        then let _ = print "Numero invalido para fibbonaci\n" in nil
-       else let _ = print ("Fib de " :: (str n) :: " eh " :: (str fib_n) in nil
+       else let _ = print ("Fib de " :: (str n) :: " eh " :: (str fib_n)) in nil
 #+END_SRC
 
 * Entradas e Árvores de Análise
