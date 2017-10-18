@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Tue Oct  3 16:34:31 2017"
- *         Updated: "2017-10-10 23:26:14 kassick"
+ *         Updated: "2017-10-18 14:27:47 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -113,16 +113,16 @@ struct Report
     ostream& info(antlr4::ParserRuleContext* ctx, const string message="")
     {
         if (!ctx)
-            return out();
+            return err();
 
-        out() << "Info: at line " << ctx->getStart()->getLine()
+        err() << "Info: at line " << ctx->getStart()->getLine()
               << ", column " << ctx->getStart()->getCharPositionInLine()
               << " : ";
 
         if (message.length() > 0)
             out() << message << endl;
 
-        return out();
+        return err();
     }
 };
 

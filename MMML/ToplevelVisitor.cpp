@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Oct  4 10:09:35 2017"
- *         Updated: "2017-10-11 18:11:23 kassick"
+ *         Updated: "2017-10-18 18:19:33 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -38,7 +38,11 @@ antlrcpp::Any ToplevelVisitor::visitProgrammain_rule(MMMLParser::Programmain_rul
     // Now merge the function call:
     *code_ctx << Instruction().with_label("start").with_annot("main function")
               << std::move(*funcvisitor.code_ctx)
-              << Instruction("print").with_label(ret_point)
+              << Instruction("push", {"\"\\nMain retornou : \""}).with_label(ret_point)
+              << Instruction("prints")
+              << Instruction("print")
+              << Instruction("push", {"'\\n'"})
+              << Instruction("print")
               << Instruction("exit");
 
 

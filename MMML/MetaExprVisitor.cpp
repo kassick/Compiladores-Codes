@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-10-18 00:19:51 kassick"
+ *         Updated: "2017-10-18 16:12:58 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -689,7 +689,14 @@ antlrcpp::Any MetaExprVisitor::visitCast_rule(MMMLParser::Cast_ruleContext *ctx)
         return Types::int_type;
     }
 
-    return gen_cast_code(ctx, source_type, dest_type, code_ctx);
+    auto ret = gen_cast_code(ctx, source_type, dest_type, code_ctx);
+    if (!ret) {
+        Report::err(ctx) << "Could not cast type ``" << source_type->name() << "''"
+                         << " to ``" << dest_type->name() << "''"
+                         << endl;
+    }
+
+    return  ret;
 }
 
 antlrcpp::Any
@@ -1035,6 +1042,8 @@ MetaExprVisitor::visitFuncall_rule(MMMLParser::Funcall_ruleContext *ctx)
 
     const string fname = ctx->symbol()->getText();
 
+    auto & args = fcvisitor.args;
+
     if (nargs == 0)
     {
         // MMML does not support 0-args functions, EXCEPT THE SPECIAL ONES
@@ -1133,15 +1142,146 @@ MetaExprVisitor::visitFuncall_rule(MMMLParser::Funcall_ruleContext *ctx)
             return Types::int_type;
         }
 
+        // Must be sequence or nil
         SequenceType::const_pointer seq = fcvisitor.args[0].first->as<SequenceType>();
-        if (seq) {
+        if (seq || args[0].first->as<NilType>()) {
             *code_ctx << std::move(*fcvisitor.args[0].second)
                       << Instruction("alen");
         } else {
-            Report::err(ctx) << "Function ``length'' expects a sequence type" << endl;
+            Report::err(ctx) << "Function ``length'' expects a sequence type, got "
+                             << "``" << args[0].first->name() << "''"
+                             << endl;
         }
 
         return Types::int_type;
+    }
+
+    if (fname == "nth")
+    {
+        if (nargs != 2) {
+            Report::err(ctx) << "Call to function ``nth'' must have two parameters: sequence and position"
+                             << endl;
+            return Types::int_type;
+        }
+
+        auto & arg_seq = args[0];
+        auto & arg_pos = args[1];
+
+        if (!arg_seq.first->as<SequenceType>()) {
+            Report::err(ctx) << "Arg 0 of nth expects sequence, got "
+                             << "``" << arg_seq.first->name() << "''"
+                             << endl;
+            return Types::int_type;
+        }
+
+        auto coerced_type = gen_cast_code(ctx,
+                                          arg_pos.first, /* -> */ Types::int_type,
+                                          /*code_ctx=*/ arg_pos.second,
+                                          false);
+
+        if (!coerced_type) {
+            Report::err(ctx) << "Can not coerce arg 1 of nth, type ``"
+                             << arg_pos.first->name()
+                             << "''"
+                             << " to int"
+                             << endl;
+            return Types::int_type;
+        }
+
+        auto base_type = arg_seq.first->as<SequenceType>()->decayed_type.lock();
+        if (!base_type)
+        {
+            Report::err(ctx) << "IMPL ERROR NULL DECAYED FOR TYPE " << arg_seq.first->name() << endl;
+            return Types::int_type;
+        }
+
+        // push 1
+        // push 2
+        // acreate    // top: {1 2}
+        // load 0
+        // push 1
+        // sub
+        // aget      // top: x-1 {1 2}
+        *code_ctx << std::move(*arg_seq.second)
+                  << std::move(*arg_pos.second)
+                  << Instruction("aget")
+                .with_annot("type(" + base_type->name() + ")");
+
+        return base_type;
+    }
+
+    if (fname == "let_nth")
+    {
+        if (nargs != 3) {
+            Report::err(ctx) << "Call to function ``nth'' must have three parameters: sequence, position and value"
+                             << endl;
+            return type_registry.add(make_shared<SequenceType>(Types::int_type));
+        }
+
+        auto & arg_seq = args[0];
+        auto & arg_pos = args[1];
+        auto & arg_value = args[2];
+
+        if (!arg_seq.first->as<SequenceType>()) {
+            Report::err(ctx) << "Arg 0 of let_nth expects sequence, got "
+                             << "``" << arg_seq.first->name() << "''"
+                             << endl;
+            return Types::int_type;
+        }
+
+        auto base_type = arg_seq.first->as<SequenceType>()->decayed_type.lock();
+        if (!base_type)
+        {
+            Report::err(ctx) << "IMPL ERROR NULL DECAYED FOR TYPE " << arg_seq.first->name() << endl;
+            return Types::int_type;
+        }
+
+        auto coerced_pos_type = gen_cast_code(ctx,
+                                              arg_pos.first, /* -> */ Types::int_type,
+                                              arg_pos.second, false);
+        if (!coerced_pos_type) {
+            Report::err(ctx) << "Can not coerce arg 1 of let_nth, type ``"
+                             << arg_pos.first->name()
+                             << "''"
+                             << " to int"
+                             << endl;
+            //return type_registry.add(make_shared<SequenceType>(Types::int_type));
+            return Types::int_type;
+        }
+
+        // Can coerce value to base type of sequence?
+        auto coerced_val_type = gen_cast_code(ctx,
+                                              arg_value.first, /* -> */ base_type,
+                                              arg_value.second);
+        if (!coerced_val_type)
+        {
+            Report::err(ctx) << "Could not coerce arg 2 of let_nth, type ``"
+                             << arg_value.first->name()
+                             << "''"
+                             << " to type ``"
+                             << base_type->name()
+                             << "''"
+                             << endl;
+            return arg_seq.first;
+        }
+
+
+
+        // push 1
+        // push 2
+        // acreate    // top: {1 2}
+        // load 0
+        // push 1
+        // sub       // top: x-1 {1 2}
+        // push 100  // top: 100 x-1 {1 2}
+        // aset      //
+        *code_ctx << std::move(*arg_seq.second)
+                  << std::move(*arg_pos.second)
+                  << std::move(*arg_value.second)
+                  << Instruction("aset")
+                .with_annot("type(" + arg_seq.first->name() + ")");
+
+        return arg_seq.first;
     }
 
     auto function = function_registry.find(ctx->symbol()->getText());

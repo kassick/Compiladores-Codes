@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Tue Oct  3 17:25:16 2017"
- *         Updated: "2017-10-11 18:30:05 kassick"
+ *         Updated: "2017-10-18 15:29:56 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -136,6 +136,13 @@ Type::const_pointer gen_cast_code(
         return dest_type;
     }
 
+    if (source_type->as<TupleType>() || source_type->as<ClassType>() ||
+        dest_type->as<TupleType>() || dest_type->as<ClassType>())
+    {
+        // These can't be cast to anything!
+        return nullptr;
+    }
+
     // ALMOST anything bool
     if (dest_type->equals(Types::bool_type)) {
         // Bool: Anything that ain't zero should be true
@@ -182,6 +189,9 @@ Type::const_pointer gen_cast_code(
         // Char -> Float
         // Bool -> Float (0 or 1)
 
+        if (!source_type->is_basic())
+            return nullptr;
+
         // anything to float, except nil, which is handled above
         *code_ctx << Instruction("cast_d").with_annot("type(float)");
 
@@ -193,6 +203,9 @@ Type::const_pointer gen_cast_code(
         // Int -> int : (handled above)
         // Char -> int : ok
         // Bool -> int : 0 or 1
+
+        if (!source_type->is_basic())
+            return nullptr;
 
         // Downcast Float -> Int:
         if (source_type->equals(Types::float_type)) {
@@ -211,6 +224,9 @@ Type::const_pointer gen_cast_code(
         // Char -> Char : Same
         // Bool -> Char : 0 or 1
 
+        if (!source_type->is_basic())
+            return nullptr;
+
         // Downcast:
         if (source_type->equals(Types::float_type)) {
             Report::warn(ctx) << "Casting from float may discard precision" << endl;
@@ -225,6 +241,9 @@ Type::const_pointer gen_cast_code(
         // convert top value to 0 or 1
         string lfalse = LabelFactory::make();
         string lcont = LabelFactory::make();
+
+        if (!source_type->is_basic())
+            return nullptr;
 
         *code_ctx << Instruction("bz", {lfalse}).with_annot("cast bool")
                   << Instruction("push", {1}).with_annot("type(bool)")
