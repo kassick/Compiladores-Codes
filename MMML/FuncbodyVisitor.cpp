@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Oct  4 10:09:35 2017"
- *         Updated: "2017-10-10 22:36:47 kassick"
+ *         Updated: "2017-10-17 23:31:56 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -25,6 +25,8 @@ namespace mmml
 
 antlrcpp::Any FuncbodyVisitor::visitFbody_expr_rule(MMMLParser::Fbody_expr_ruleContext *ctx)
 {
+    if (!ctx->metaexpr())
+        return Types::int_type;
     MetaExprVisitor mev(code_ctx->create_block());
     mev.lout = lout;
     mev.ltrue = ltrue;
@@ -39,6 +41,9 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_expr_rule(MMMLParser::Fbody_expr_ruleC
 
 antlrcpp::Any FuncbodyVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleContext *ctx)
 {
+    if (!ctx->cond || !ctx->bodytrue || !ctx->bodyfalse)
+        return Types::int_type;
+
     /*
                    load 0      # a
                    load 1      # b
@@ -96,9 +101,16 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleConte
                               cond_type, Types::bool_type,
                               boolvisitor.code_ctx, false);
 
-        *boolvisitor.code_ctx
-                << Instruction("bz", {_lfalse}).with_annot("branch if")
-                << Instruction("jump", {_ltrue}).with_annot("IF COND JUMP NOT BBRANCH");
+        if (!new_cond_type)
+        {
+            Report::err(ctx) << "Can not convert type "
+                             << cond_type->name()
+                             << " to bool"
+                             << endl;
+        } else
+            *boolvisitor.code_ctx
+                    << Instruction("bz", {_lfalse}).with_annot("branch if")
+                    << Instruction("jump", {_ltrue}).with_annot("IF COND JUMP NOT BBRANCH");
     }
 
     // visit true
@@ -147,10 +159,11 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_if_rule(MMMLParser::Fbody_if_ruleConte
                                   bodyfalse_type, falsevisitor.code_ctx);
 
     if (!rtype) {
-        Report::err(ctx) << "Could not coalesce types " << bodytrue_type
-                          << " and " << bodyfalse_type
-                          << " . Maybe a cast?"
-                          << endl;
+        Report::err(ctx) << "Could not coalesce types "
+                         << bodytrue_type->name()
+                         << " and " << bodyfalse_type->name()
+                         << " . Maybe a cast?"
+                         << endl;
 
         return Types::int_type;
     }
@@ -188,6 +201,9 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_let_rule(MMMLParser::Fbody_let_ruleCon
         in
             x + (get 1 y)
     */
+    if (!ctx->letlist() || !ctx->fnested)
+        // some parser error, just skip this
+        return Types::int_type;
 
     auto exe_label = LabelFactory::make();
 
@@ -243,6 +259,9 @@ antlrcpp::Any FuncbodyVisitor::visitFbody_let_rule(MMMLParser::Fbody_let_ruleCon
 
 antlrcpp::Any FuncbodyVisitor::visitLetvarattr_rule(MMMLParser::Letvarattr_ruleContext *ctx)
 {
+    if (!ctx->funcbody())
+        return Types::int_type;
+
     auto lcont = LabelFactory::make();
 
     FuncbodyVisitor fbvisitor(this->code_ctx->create_block());
@@ -285,6 +304,9 @@ antlrcpp::Any FuncbodyVisitor::visitLetvarattr_rule(MMMLParser::Letvarattr_ruleC
 
 antlrcpp::Any FuncbodyVisitor::visitLetvarresult_ignore_rule(MMMLParser::Letvarresult_ignore_ruleContext *ctx)
 {
+    if (!ctx->funcbody())
+        return Types::int_type;
+
     // let _  = funcbody
     auto lcont = LabelFactory::make();
 
@@ -311,6 +333,9 @@ antlrcpp::Any FuncbodyVisitor::visitLetvarresult_ignore_rule(MMMLParser::Letvarr
 
 antlrcpp::Any FuncbodyVisitor::visitLetunpack_rule(MMMLParser::Letunpack_ruleContext *ctx)
 {
+    if (!ctx->funcbody())
+        return Types::int_type;
+
     // let h :: t = funcbody
     /*
       aload "abc"

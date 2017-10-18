@@ -1,0 +1,10 @@
+class A = x : int
+
+def main =
+let x = if {1, 2} then 'a' else 'b' ,     // tupla -> bool -- nao
+    y = if make A {1} then 'a' else 'b',  // classe -> bool -- nao
+    z = if true then 'a' else make A {1}, // char vs classe
+    r = if false then "abc" else 10,
+    t = if true then ['a'] else [10],
+    s = if true then make A {1} else {1}
+in x

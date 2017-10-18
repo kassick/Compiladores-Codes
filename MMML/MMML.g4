@@ -14,7 +14,7 @@ def main =
 
 WS : [ \r\t\u000C\n]+ -> skip;
 
-COMMENT : '//' ~('\n'|'\r')* '\r'? '\n' -> channel(HIDDEN);
+COMMENT : '//' ~('\n'|'\r')* -> channel(HIDDEN);
 
 // Código de Programa µmML
 program

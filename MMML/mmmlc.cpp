@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep  8 19:36:14 2017"
- *         Updated: "2017-10-11 03:29:56 kassick"
+ *         Updated: "2017-10-17 22:13:33 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -71,7 +71,14 @@ void parse_stream(istream& text_stream, ostream& err_stream, ostream& out_stream
 
         tree::ParseTree * tree = parser.program();
 
+        if (Report::nerrors)
+        {
+            err_stream << "Aborting semantic check due to previous errors"
+                       << endl;
+            return;
+        }
 
+        // Semantic & code generation
         visitor.visit(tree);
     } catch (exception & e) {
         err_stream << "Pikachu! " << e.what() << endl;

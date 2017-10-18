@@ -1,0 +1,8 @@
+def main =
+let x = 1 :: nil,
+    y = 1 :: "lala",
+    z = 1 + "lala",
+    t = 1 + {1, 2},
+    r = {1, 2} :: {3, 4},
+    i1 = 1 + true          // podemos fazer cast pra int, mas coercao nao
+in x

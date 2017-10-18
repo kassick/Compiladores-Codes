@@ -1,0 +1,9 @@
+class Inteiro =
+   val : Lnt                    // Lnt nao eh tipo
+
+def fun1 x : Int = get val x    // Int nao eh conhecido, recuperacao vai dar
+                                // tipo int pra ele. get em cima de int eh erro
+
+// def fun2 x : int = make int {1} // erro de parse
+
+def main = fun1 make Int { 6 }  // Nao sabe criar Int, classe desconhecida

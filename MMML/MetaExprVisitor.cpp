@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-10-11 18:18:03 kassick"
+ *         Updated: "2017-10-18 00:19:51 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -49,6 +49,7 @@ MetaExprVisitor::visitMe_exprparens_rule(MMMLParser::Me_exprparens_ruleContext *
 
 template <class ValidTypePred>
 Type::const_pointer generic_bin_op(
+    const string& op,
     MetaExprVisitor* visitor,
     antlr4::ParserRuleContext* left,
     antlr4::ParserRuleContext* right,
@@ -87,6 +88,7 @@ Type::const_pointer generic_bin_op(
                           << ltype->name()
                           << " and "
                           << rtype->name()
+                          << " for operation ``" << op << "''"
                           << endl;
 
         return nullptr;
@@ -467,7 +469,8 @@ antlrcpp::Any MetaExprVisitor::visitMe_boolnegparens_rule(MMMLParser::Me_boolneg
 
 antlrcpp::Any MetaExprVisitor::visitMe_listconcat_rule(MMMLParser::Me_listconcat_ruleContext *ctx)
 {
-    auto rtype = generic_bin_op(this,
+    auto rtype = generic_bin_op("::",
+                                this,
                                 ctx->l, ctx->r,
                                 code_ctx,
                                 [](Type::const_pointer c) {
@@ -511,7 +514,8 @@ antlrcpp::Any MetaExprVisitor::visitMe_listconcat_rule(MMMLParser::Me_listconcat
 antlrcpp::Any MetaExprVisitor::visitMe_exprmuldiv_rule(MMMLParser::Me_exprmuldiv_ruleContext *ctx)
 {
     // Can multiply any basic type (char, int, float) with any other. Will accept recursive type as "valid" -- any type is higher than recursive, so rtype should be the non-recursive
-    auto rtype = generic_bin_op(this,
+    auto rtype = generic_bin_op(ctx->op->getText(),
+                                this,
                                 ctx->l, ctx->r,
                                 code_ctx,
                                 [](Type::const_pointer c) {
@@ -529,7 +533,8 @@ antlrcpp::Any MetaExprVisitor::visitMe_exprmuldiv_rule(MMMLParser::Me_exprmuldiv
 
 antlrcpp::Any MetaExprVisitor::visitMe_exprplusminus_rule(MMMLParser::Me_exprplusminus_ruleContext *ctx)
 {
-    auto rtype = generic_bin_op(this,
+    auto rtype = generic_bin_op(ctx->op->getText(),
+                                this,
                                 ctx->l, ctx->r,
                                 code_ctx,
                                 [](Type::const_pointer c) {
@@ -549,7 +554,8 @@ antlrcpp::Any MetaExprVisitor::visitMe_exprplusminus_rule(MMMLParser::Me_exprplu
 antlrcpp::Any
 MetaExprVisitor::visitMe_boolgtlt_rule(MMMLParser::Me_boolgtlt_ruleContext *ctx)
 {
-    auto rtype = generic_bin_op(this,
+    auto rtype = generic_bin_op(ctx->TOK_CMP_GT_LT()->getText(),
+                                this,
                                 ctx->l, ctx->r,
                                 code_ctx,
                                 [](Type::const_pointer c) {
@@ -610,7 +616,8 @@ MetaExprVisitor::visitMe_boolgtlt_rule(MMMLParser::Me_boolgtlt_ruleContext *ctx)
 antlrcpp::Any
 MetaExprVisitor::visitMe_booleqdiff_rule(MMMLParser::Me_booleqdiff_ruleContext *ctx)
 {
-    auto rtype = generic_bin_op(this,
+    auto rtype = generic_bin_op(ctx->TOK_CMP_EQ_DIFF()->getText(),
+                                this,
                                 ctx->l, ctx->r,
                                 code_ctx,
                                 [](Type::const_pointer c) {
@@ -831,7 +838,7 @@ antlrcpp::Any MetaExprVisitor::visitMe_class_set_rule(MMMLParser::Me_class_set_r
 
     class_type = cl_funcbody_type->as<ClassType>();
     if (!class_type) {
-        Report::err(ctx) << "Using tuple accessor method get on type ``"
+        Report::err(ctx) << "Using class accessor method set on type ``"
                           << cl_funcbody_type->name() << "''"
                           << endl;
         return Types::int_type;
