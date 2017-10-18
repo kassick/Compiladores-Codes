@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 11:35:28 2017"
- *         Updated: "2017-10-18 17:43:04 kassick"
+ *         Updated: "2017-10-18 17:50:26 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -315,6 +315,7 @@ struct DataItem {
             case Char: ss << "'" << char_escape(as<char>()) << "'"; break;
             case Int: ss << as<int>(); break;
             case Double: ss << std::setprecision(10)
+                            << std::fixed
                             << as<double>();
                 break;
             case Array:
