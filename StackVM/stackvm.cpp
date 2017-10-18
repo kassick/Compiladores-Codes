@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Sep 13 11:00:28 2017"
- *         Updated: "2017-10-11 00:48:35 kassick"
+ *         Updated: "2017-10-18 18:01:20 kassick"
  *
  *          Author:
  *
@@ -140,7 +140,13 @@ std::string parsestring(std::string s, std::string input) {
         out << vm.to_string();
         out << endl;
 
+        out << "Program output begins now:" << endl;
+        out << "------------------------------" << endl;
+
         vm.run();
+
+        out << endl;
+        out << "------------------------------" << endl;
 
         out << endl << endl
             << "Finished "

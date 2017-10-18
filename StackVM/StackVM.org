@@ -96,8 +96,8 @@ Máquina de pilha simples com suporte a vetores de tipos mistos.
 
 2. Em uma máquina /Linux/[fn:1], descompacte o código e entre no diretório
    #+BEGIN_SRC sh :eval never
-   unzip StackVM.zip
-   cd Compiladores
+   unzip StackVM.zip -d StackVM
+   cd StackVM
    #+END_SRC
 
 3. Em um diretório de Build, execute o CMake
@@ -105,13 +105,19 @@ Máquina de pilha simples com suporte a vetores de tipos mistos.
    mkdir Build
    cd Build
    cmake ..
-   cd ..
    #+END_SRC
 
 4. Ainda no diretório de build, construa o projeto
    #+BEGIN_SRC sh :eval never
    make
    #+END_SRC
+
+5. O executável gerado será chamado =stackvm=. Ele aceita as seguintes opções de linha de comando:
+   - =--help=          : Mostra a ajuda
+   - =--interactive=   : Executa de forma interativa: passo a passo, sempre apresentando onde está o =pc= e o estado da pilha
+   - =--quiet=         : Executa sem apresentar saídas que não sejam do programa.
+   - =--show-start=    : Apresenta o estado inicial da máquina virtual *antes* da execução do programa.
+   - =--show-end=      : Apresenta o estado final da máquina virtual, *depois* que o programa encerrou.
 
 ** Geração do Código ASM.js
 
@@ -122,6 +128,7 @@ pushd JS
 source PATH/TO/emsdk-portable/emsdk_env.sh
 emconfigure cmake ..
 emmake make
+make stackvm.zip
 #+END_SRC
 
 * Execução
@@ -131,7 +138,9 @@ Para executar a StackVM, entre no diretório =Build/StackVM= e execute (em um te
 ./stackvm
 #+END_SRC
 
-Para digitar as instruções diretamente para a máquina, use o redirecionamento de entrada:
+Digite instruções e, quando encerrar, digite o atalho =Ctrl-D= (Send EOF). [fn:2]
+
+Também é possível usar o redirecionamento de entrada (em Linux, Mac e outros Unix):
 #+BEGIN_SRC sh :eval never
 ./stackvm <<EOF
 push 1
@@ -140,7 +149,7 @@ add
 EOF
 #+END_SRC
 
-Pode-se também passar um nome de arquivo como parâmetro. O arquivo deve ser um arquivo texto padrão. Inspecione a pasta [[/home/kassick/Sources/Compiladores/StackVM/tests/.][tests]] para ver alguns exemplos.
+Pode-se também passar um nome de arquivo como parâmetro. O arquivo deve ser um arquivo texto padrão. Inspecione a pasta [[/home/kassick/Sources/Compiladores/StackVM/tests/.][tests]] para ver alguns exemplos. Nem todos eles estão *corretos*, eles apenas ilustram como deve funcionar a entrada de instruções para a máquina virtual.
 
 #+BEGIN_SRC sh :eval never
 ./stackvm arquivo.m
@@ -1219,8 +1228,6 @@ acreate
 
   #+END_SRC
 * Footnotes
-:LOGBOOK:
-- State "TODO"       from              [2017-09-19 ter 21:50]
-:END:
 
+[fn:2] Em plataforma Windows, o atalho para enviar EOF é =Ctrl-Z=
 [fn:1] A StackVM foi desenvolvida em C++ com o sistema de build CMake. Enquanto a plataforma Windows deve ser suportada, a instalação de ambiente e suporte a compilação com Windows não está no escopo desse documento. O ZIP contém um diretório com um projeto do CodeBlocks (CodeBlocks/Project.cbp). Este projeto não foi testado, porém deve ser suficiente para o CodeBlocks carregá-lo e compilá-lo.

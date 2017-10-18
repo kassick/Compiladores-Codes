@@ -33,7 +33,9 @@ add_custom_target(stackvm.zip
   ${CMAKE_CURRENT_BINARY_DIR}/index.html
   ${CMAKE_CURRENT_BINARY_DIR}/stackvm.js
   ${CMAKE_CURRENT_BINARY_DIR}/tests/*
-  ${CMAKE_CURRENT_SOURCE_DIR}/
+  ${CMAKE_SOURCE_DIR}/CMakeLists.txt
+  ${CMAKE_SOURCE_DIR}/deps/
+  ${CMAKE_SOURCE_DIR}/StackVM
   )
 
 add_dependencies(stackvm.zip stackvm StackVM_html)
