@@ -1,0 +1,9 @@
+def main =
+let s1 = [1] :: [2],
+    s2 = s1 :: [int 'a'],
+    c1 = char (nth s2 2),
+    s3 = let_nth s1 ( (length s1) - 1) 'b'
+in {
+     c1,
+     s3
+   }
