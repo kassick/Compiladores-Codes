@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-10-23 12:15:22 kassick"
+ *         Updated: "2017-10-23 15:25:38 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -414,8 +414,6 @@ antlrcpp::Any MetaExprVisitor::visitMe_boolnegparens_rule(MMMLParser::Me_boolneg
 
         return Types::bool_type;
     }
-
-    cerr << "result funcbody in neg is " << ftype->name() << endl;
 
     // May need to cast to bool
     if (!ftype->as<BooleanBranchCode>()) {
