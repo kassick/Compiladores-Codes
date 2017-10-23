@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-10-18 16:12:58 kassick"
+ *         Updated: "2017-10-23 11:14:28 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -513,6 +513,47 @@ antlrcpp::Any MetaExprVisitor::visitMe_listconcat_rule(MMMLParser::Me_listconcat
 
 antlrcpp::Any MetaExprVisitor::visitMe_exprmuldiv_rule(MMMLParser::Me_exprmuldiv_ruleContext *ctx)
 {
+    // corner case: mod must be int/int
+    if (ctx->op->getText() == "%")
+    {
+        Type::const_pointer left_type = this->visit(ctx->l);
+
+        if (!left_type) {
+            Report::err(ctx->l) << "IMPL ERROR GOT NIL ON MOD LEFT" << endl;
+            return Types::int_type ;
+        }
+
+        auto left_int_type = gen_cast_code (ctx->l, left_type, Types::int_type,
+                                            this->code_ctx);
+
+        if (!left_int_type) {
+            Report::err(ctx->l) << "Can not convert type ``" << left_type->name() << "''"
+                                << " to int in call to operator mod"
+                                << endl;
+            // fall through, let it try to find more errors
+        }
+
+        Type::const_pointer right_type = this->visit(ctx->r);
+
+        if (!right_type) {
+            Report::err(ctx->l) << "IMPL ERROR GOT NIL ON MOD RIGHT" << endl;
+            return Types::int_type ;
+        }
+
+        auto right_int_type = gen_cast_code (ctx->r, right_type, Types::int_type,
+                                             this->code_ctx);
+
+        if (!right_int_type) {
+            Report::err(ctx->l) << "Can not convert type ``" << right_type->name() << "''"
+                                << " to int in call to operator mod"
+                                << endl;
+        }
+
+        *code_ctx << Instruction("mod").with_annot("type(int)");
+
+        return Types::int_type;
+    }
+
     // Can multiply any basic type (char, int, float) with any other. Will accept recursive type as "valid" -- any type is higher than recursive, so rtype should be the non-recursive
     auto rtype = generic_bin_op(ctx->op->getText(),
                                 this,

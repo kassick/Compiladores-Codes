@@ -110,6 +110,8 @@ instruction
         #mult
     |  'div'
         #div
+    |  'mod'
+        #mod
     |  'and'
         #and
     |  'or'

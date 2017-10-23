@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 14:14:39 2017"
- *         Updated: "2017-10-18 17:38:56 kassick"
+ *         Updated: "2017-10-23 11:21:46 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -756,6 +756,28 @@ struct AddInstr : public Instruction {
     }
 };
 
+struct ModInstr : public Instruction {
+
+    virtual string to_string() const override {
+        return "mod";
+    }
+
+    virtual VM& run(VM & vm) const override {
+        DataItem rhs = vm.pop();
+        DataItem lhs = vm.pop();
+
+        if (lhs.type != Int || rhs.type != Int)
+        {
+            vm.out << "Wrong types for mod" << endl;
+            vm.ok_to_go = false;
+            return vm;
+        }
+
+        vm.push(lhs.as<int>() % rhs.as<int>());
+
+        return vm;
+    }
+};
 
 struct SubInstr : public Instruction {
 

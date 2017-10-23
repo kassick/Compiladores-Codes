@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 18:08:15 2017"
- *         Updated: "2017-10-18 17:41:13 kassick"
+ *         Updated: "2017-10-23 11:25:11 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -339,6 +339,12 @@ struct InstructionListener : public StackVMBaseListener
         override
     {
         instr = make_shared<AddInstr>();
+    }
+
+    virtual void exitMod(StackVMParser::ModContext * /*ctx*/)
+            override
+    {
+        instr = make_shared<ModInstr>();
     }
 
     virtual void exitSub(StackVMParser::SubContext * /*ctx*/)

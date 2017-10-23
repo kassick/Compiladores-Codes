@@ -188,7 +188,7 @@ metaexpr
     | TOK_NEG symbol                              #me_boolneg_rule        // Negate a variable
     | TOK_NEG '(' funcbody ')'                    #me_boolnegparens_rule  // or anything in between ( )
     | l=metaexpr op=TOK_CONCAT r=metaexpr         #me_listconcat_rule     // Sequence concatenation
-    | l=metaexpr op=TOK_DIV_OR_MUL r=metaexpr     #me_exprmuldiv_rule     // Div and Mult are equal
+    | l=metaexpr op=TOK_DIV_OR_MUL r=metaexpr     #me_exprmuldiv_rule     // Div, Mult and mod are equal
     | l=metaexpr op=TOK_PLUS_OR_MINUS r=metaexpr  #me_exprplusminus_rule  // Sum and Sub are equal
     | l=metaexpr TOK_CMP_GT_LT r=metaexpr         #me_boolgtlt_rule       // < <= >= > are equal
     | l=metaexpr TOK_CMP_EQ_DIFF r=metaexpr       #me_booleqdiff_rule     // == and != are egual
@@ -261,7 +261,7 @@ TOK_ID: [a-zA-Z]([a-zA-Z0-9_]*);
 TOK_CONCAT: '::' ;
 TOK_NEG: '!';
 TOK_POWER: '^' ;
-TOK_DIV_OR_MUL: ('/'|'*');
+TOK_DIV_OR_MUL: ('/'|'*'|'%');
 TOK_PLUS_OR_MINUS: ('+'|'-');
 TOK_CMP_GT_LT: ('<='|'>='|'<'|'>');
 TOK_CMP_EQ_DIFF: ('=='|'!=');
