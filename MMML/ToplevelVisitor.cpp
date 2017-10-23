@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Oct  4 10:09:35 2017"
- *         Updated: "2017-10-18 18:19:33 kassick"
+ *         Updated: "2017-10-23 11:38:59 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -40,6 +40,7 @@ antlrcpp::Any ToplevelVisitor::visitProgrammain_rule(MMMLParser::Programmain_rul
               << std::move(*funcvisitor.code_ctx)
               << Instruction("push", {"\"\\nMain retornou : \""}).with_label(ret_point)
               << Instruction("prints")
+              << Instruction("pop")
               << Instruction("print")
               << Instruction("push", {"'\\n'"})
               << Instruction("print")
