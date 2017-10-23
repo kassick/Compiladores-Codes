@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep  8 19:36:14 2017"
- *         Updated: "2017-10-17 22:13:33 kassick"
+ *         Updated: "2017-10-23 15:43:21 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -198,5 +198,5 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    return 0;
+    return Report::nerrors;
 }
