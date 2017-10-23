@@ -1,5 +1,4 @@
-def main =
-                                       // let declara simbolos
+def main =                             // let declara simbolos:
 let _ = print "Digite seu nome: ",     // _ descarta o valor do retorno
     name = read_string _ ,             // guarda a string em "nome"
     _ = print "Digite sua idade: ",    // descarta o retorno de print
