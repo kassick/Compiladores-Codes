@@ -5,11 +5,11 @@ let a = "abc" || nil,           // nil -> false, char[] -> bool
     a2 = "abc" && nil,
     b2 = "abc" && 1,
     c2 = 'a' && 9.5,
-    v2 = 1 + int true,           // coercao falha, mas cast funciona,
+    v2 = 1 + int false,           // coercao falha, mas cast funciona,
     v3 = (int (!v2 && c2)) * 10  // deve ser igual a 0
 in
    { a && b && c,      // Sempre verdadeiro
-     a2 && b2 && c2,   // Sempre falso
+     a2 || !b2 || c2,   // Sempre falso
      v2,               // deve ser 2,
      v3                // deve ser 10
    }

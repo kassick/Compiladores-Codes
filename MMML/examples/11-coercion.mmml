@@ -5,11 +5,3 @@ let a = if true then 'a' else 1,        // tipo int
     d = if false then nil else "a",     // tipo char[]
     e = char if false then 97 else 98   // tipo char
 in {a, b, c, d, e}
-
-def main =
-let a = if true then 'a' else 1,        // tipo int
-    b = if false then 1 else 1.2,       // tipo float
-    c = if true then true else 0,       // tipo bool
-    d = if false then nil else "a",     // tipo char[]
-    e = char if false then 97 else 98   // tipo char
-in {a, b, c, d, e}

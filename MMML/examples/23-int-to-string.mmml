@@ -26,6 +26,6 @@ def main =
 let s = "101010",
     c = 'a',
     c_ascii = int c, // 97
-    c2 = char 98     // 'b'
+    c2 = char '\n'     // 'b'
 in
-   ( intToString 101010 ) :: (charToString  c2) // "101010" :: "b" -> "101010b"
+   ( intToString 101090 ) :: (charToString  c2) // "101090" :: "\n" -> "101010\n"

@@ -157,7 +157,7 @@ in                                     // Concatena as strings
 
 - Um comando =let= cria um novo /escopo/ para símbolos. Símbolos podem ser redefinidos dentro de um novo escopo -- mas nunca no mesmo.
 
-#+BEGIN_SRC sh :tangle examples/10-nested_envs.mmml :eval never
+#+BEGIN_SRC sh :eval never
 def main =
 let x = 1                   // x = 1
 in let x = x + 1            // x' = x + 1 = 2
@@ -216,7 +216,7 @@ def main =
       print y + 10
 #+END_SRC
 
-#+BEGIN_SRC sh :tangle examples/11-coercion.mmml :eval never
+#+BEGIN_SRC sh :eval never
 def main =
 let a = if true then 'a' else 1,        // tipo int
     b = if false then 1 else 1.2,       // tipo float
