@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Oct  4 10:09:35 2017"
- *         Updated: "2017-10-23 11:38:59 kassick"
+ *         Updated: "2017-10-23 13:19:02 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -18,6 +18,7 @@
 #include "mmml/TypedArgListVisitor.H"
 #include "mmml/error.H"
 #include "mmml/utils.H"
+#include "mmml/casts.H"
 
 namespace mmml
 {
@@ -123,7 +124,8 @@ antlrcpp::Any ToplevelVisitor::visitFuncdef_impl(MMMLParser::Funcdef_implContext
         fbody_start->getCharPositionInLine());
 
     // Default: it recurses
-    f->rtype = Types::recursive_type;
+    if (!f->rtype)
+        f->rtype = Types::recursive_type;
 
     ///// Now we visit the function body
     // FuncbodyVisitor
@@ -157,19 +159,21 @@ antlrcpp::Any ToplevelVisitor::visitFuncdef_impl(MMMLParser::Funcdef_implContext
         return f;
     }
 
-    f->rtype = fb_ret;
-
-    if (f->rtype->equals(Types::recursive_type))
+    if (fb_ret->equals(Types::recursive_type))
     {
         Report::err(ctx) << "Function " << f->name
                          << " always recurses into itself. Can not resolve recursion"
                          << endl;
-        f->rtype = Types::int_type;
-    } else if (f->rtype->equals(Types::nil_type)) {
+        fb_ret = Types::int_type;
+    } else if (fb_ret->equals(Types::nil_type)) {
         Report::err(ctx) << "Function " << f->name
                          << " does not returns a value"
                          << endl;
-        f->rtype = Types::int_type;
+        fb_ret = Types::int_type;
+    }
+
+    if (f->rtype->equals(Types::recursive_type)) {
+        f->rtype = fb_ret;
     }
 
     // Now drop the temporary symbol table and the code,
@@ -221,10 +225,22 @@ antlrcpp::Any ToplevelVisitor::visitFuncdef_impl(MMMLParser::Funcdef_implContext
               <<
             std::move(*funcvisitor.code_ctx)
               <<
+            Instruction()
+            .with_label(out_label)
+            .with_annot("return type(" + f->rtype->name() + ")" );
+
+    auto return_type = gen_cast_code(ctx, fb_ret, f->rtype, code_ctx, true);
+    if (!return_type)
+    {
+        Report::err(ctx) << "Can not coerce function implementation result type ``"
+                         << fb_ret->name() << "''"
+                         << " to type " << f->rtype
+                         << endl;
+    }
+
+    *code_ctx <<
             Instruction("crunch",
                         {1, ncrunch})
-            .with_label(out_label)
-            .with_annot("return")
               <<
             Instruction("swap")
               <<
@@ -271,9 +287,11 @@ antlrcpp::Any ToplevelVisitor::visitFuncdef_header(MMMLParser::Funcdef_headerCon
         return f;
     }
 
-    f->rtype = type_registry.find_by_name(ctx->type()->getText());
+    TypedArgListVisitor rettype_visitor;
+    f->rtype = rettype_visitor.visit(ctx->type());
+    //f->rtype = type_registry.find_by_name(ctx->type()->getText());
     if (!f->rtype) {
-        Report::err(ctx) << "Unknown type in function " << f->name
+        Report::err(ctx) << "Unknown return type in function " << f->name
                           << endl;
 
         f->rtype = Types::int_type;
