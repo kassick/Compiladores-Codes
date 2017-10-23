@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Fri Sep 29 19:44:30 2017"
- *         Updated: "2017-10-23 11:14:28 kassick"
+ *         Updated: "2017-10-23 12:15:22 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -295,7 +295,7 @@ antlrcpp::Any MetaExprVisitor::visitLiteral_hexadecimal_rule(MMMLParser::Literal
             Instruction("push",
                         { ctx->getText() })
             .with_annot("type(int)");
-    return code_ctx;
+    return Types::int_type;
 }
 
 antlrcpp::Any MetaExprVisitor::visitLiteral_binary_rule(MMMLParser::Literal_binary_ruleContext *ctx)  {
