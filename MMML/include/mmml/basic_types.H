@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Thu Sep 28 00:18:58 2017"
- *         Updated: "2017-10-10 11:42:57 kassick"
+ *         Updated: "2017-10-23 13:25:56 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -208,8 +208,12 @@ class TupleType : public Type
             auto lptr = lit->lock();
             auto rptr = rit->lock();
 
-            if (!lptr || !rptr || !lptr->equals(rptr))
+            if (!lptr || !rptr)
                 return false;
+            else if (!lptr->equals(rptr))
+                if (!(lptr->as<SequenceType>() && rptr->as<NilType>()) &&
+                    !(lptr->as<NilType>() && rptr->as<SequenceType>()))
+                    return false;
 
             lit++;
             rit++;

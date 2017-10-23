@@ -1,0 +1,31 @@
+// intToString__ 512 10 "" ->
+//     intToString__ 51 10 "2" ->
+//         intToString__ 5 10 "12" ->
+//           intToString__ 0 10 "512" ->
+//             "512"
+
+def intToString__ x : int,
+                  b : int,
+                  r : char [] =
+  let lastDigit = x - (x / b) * b,        // x % b, x = 51, lastDigit = 1
+      rest = x / b,                       //         rest = 5
+      r1 = [ '0' + char lastDigit ] :: r  // r1 = "2", ['1'] :: ['2'] = "12"
+  in
+    if rest == 0
+    then r1
+    else intToString__ rest b r1
+
+// funciona para base < 10
+def intToStringBase x : int, b : int = intToString__ x b ""
+
+def intToString x : int = intToStringBase x 10
+
+def charToString c : char = [c]
+
+def main =
+let s = "101010",
+    c = 'a',
+    c_ascii = int c, // 97
+    c2 = char 98     // 'b'
+in
+   ( intToString 101010 ) :: (charToString  c2) // "101010" :: "b" -> "101010b"

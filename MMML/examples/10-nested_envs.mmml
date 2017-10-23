@@ -3,3 +3,9 @@ let x = 1                   // x = 1
 in let x = x + 1            // x' = x + 1 = 2
    in let x = x + 1         // x'' = x' + 1 = 2
       in x                  // retorna 3
+
+def main =
+let x = 1                   // x = 1
+in let x = x + 1            // x' = x + 1 = 2
+   in let x = x + 1         // x'' = x' + 1 = 2
+      in x                  // retorna 3

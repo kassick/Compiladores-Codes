@@ -1,7 +1,8 @@
 def main =
-let _ = print "Digite seu nome: ",
-    name = read_string _ ,
-    _ = print "Digite sua idade: ",
-    idade = read_int _
-in
+                                       // let declara simbolos
+let _ = print "Digite seu nome: ",     // _ descarta o valor do retorno
+    name = read_string _ ,             // guarda a string em "nome"
+    _ = print "Digite sua idade: ",    // descarta o retorno de print
+    idade = read_int _                 // guarda o retorno em "idade"
+in                                     // Concatena as strings
     print "Olá, " :: name :: ", voce tem " :: (str idade) :: " anos" :: ['\n']

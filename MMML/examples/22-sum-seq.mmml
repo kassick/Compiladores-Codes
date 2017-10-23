@@ -1,0 +1,18 @@
+def sum__ res : int , seq : int[] =
+    if !seq
+    then res
+    else let h::t = seq
+         in sum__ (res + h) t
+
+def sum seq : int [] =
+    sum__ 0 seq
+
+def avg_seq seq : int[] =
+   let n = length seq, // int
+       s = sum seq     // int
+   in
+      s / (float n) // devolve uma soma inteira
+                    // dividida por um float
+                    // -> retorna float
+
+def main = avg_seq [1] :: [2] :: [3]

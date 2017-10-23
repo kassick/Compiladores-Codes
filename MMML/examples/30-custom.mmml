@@ -1,0 +1,22 @@
+class MeuTipo =
+  campo1 : int,
+  campo2 : {char[], int}
+  // , outros : campos
+
+def fun1 x : int =
+
+let x = make MeuTipo {1, {"string", length "string"}}
+in
+   // ...
+
+get campo1 x
+
+def construct_MeuTipo a : int =
+  make MeuTipo{a, {"default", length "default"}}
+
+def MeuTipo_campo2 x : MeuTipo =
+    get campo2 x
+
+def main = let x = construct_MeuTipo 10,
+               c2 = MeuTipo_campo2 x
+           in { get campo1 x, c2 , x}

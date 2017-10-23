@@ -1,0 +1,9 @@
+def retString n : int =
+  let a = ['a'],     // a eh tipo char[]
+      b = "bbb",     // b eh tipo char[]
+      c::d2 = "cdd"  // c eh tipo char, d2 eh tipo char[]
+  in
+    a :: b :: [c] :: d2 // retorna ['a', 'b', 'b', 'b', 'c', 'd', 'd']
+                        // ou "abbbcdd"
+
+def main = retString 1

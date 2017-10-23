@@ -1,2 +1,3 @@
+// Funcao Main inicia o programa
 def main =
     print "Ola Mundo!"

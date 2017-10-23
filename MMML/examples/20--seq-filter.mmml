@@ -1,0 +1,14 @@
+def filter_gt_10__ ret : int[], s : int [] =
+    if !s
+    then ret                                   // nada mais, retorna ret
+    else let h::t = s                          // quebra em inicio e resto
+         in
+           if h > 10                           // maior que 10?
+           then filter_gt_10__ (ret :: [h] ) t // chama recursivo, incluindo o
+                                               //          inicio no resultado
+           else filter_gt_10__ ret t           // chama recursivo, ignora o inicio
+
+def filter_gt_10 s : int[] =
+   filter_gt_10__ nil s
+
+def main = filter_gt_10 [1] :: [11] :: [5] :: [20]

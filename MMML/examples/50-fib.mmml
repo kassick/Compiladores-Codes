@@ -1,0 +1,14 @@
+def fib x : int =
+    if x <= 0 then -1 // 0 nao eh valido
+    else if x == 1 then 1
+    else if x == 2 then 1
+    else (fib x - 1) + (fib x - 2)
+
+def main =
+    let _ = print "Digite um numero : ",
+        n = read_int _ ,
+        fib_n = fib n
+    in
+       if !fib_n
+       then let _ = print "Numero invalido para fibbonaci\n" in nil
+       else let _ = print ("Fib de " :: (str n) :: " eh " :: (str fib_n)) in nil

@@ -1,0 +1,8 @@
+def media a : float, b : float =
+    (a + b) / 2 // (float + float) / int = float / int = float
+
+def main =
+    let x = read_int _,
+        y = 'z'
+    in
+      media x y // x eh coagido para float , y eh coagido para float
