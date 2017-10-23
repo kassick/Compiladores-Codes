@@ -1,6 +1,6 @@
 def concat a : int[] , b : int[] = a :: b
 
 def main =
-   concat ([1] :: [2] :: nil) // Coage para int[] por causa da concatenacao da esquerda
+  concat ([1] :: [2] :: nil) // Coage para int[] por causa da concatenacao da esquerda
           nil                 // Coage para int[] por que eh o
                               // que o parametro 2 de concat espera

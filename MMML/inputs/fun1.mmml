@@ -1,4 +1,4 @@
-def f1 a : int, b : char -> int
+def f1 a : int, b : char -> char
 def f1 a : int, b : char = a + b
 
 def main = f1 1 'a'

@@ -51,7 +51,7 @@ if [ -z "$TEST" ]; then
     return 1
 fi
 
-if [! -f "$TEST" ]; then
+if [ ! -f "$TEST" ]; then
     echo -n "NO TEST AVAILABLE"
     return 1
 fi
@@ -70,12 +70,21 @@ outdir=`dirname $TEST`
 output=`basename $TEST|cut -d '.' -f 1|sed -e 's/\n//g'`
 output="${outdir}/${output}.png"
 
-if java -cp "${ANTLR_JAR}:${GRAMMAR}" "$ANTLR_TESTRIG" MMML $RULE $TEST -ps /dev/stdout 2>/tmp/antlr.tool.out | convert - "$output" ; then
-    echo -n "$output"
+if [ "$GRAMMAR" -nt "$TEST" ] || [ ! -e "$output"] || [ "$TEST" -nt "$output" ];
+then
+
+    if java -cp "${ANTLR_JAR}:${GRAMMAR}" "$ANTLR_TESTRIG" MMML $RULE $TEST -ps /dev/stdout 2>/tmp/antlr.tool.out | convert - "$output" ; then
+        echo -n "$output"
+    else
+        echo -n erro: `cat /tmp/antlr.tool.out | tr -s '\n' ' '`
+    fi
 else
-    echo -n erro: `cat /tmp/antlr.tool.out | tr -s '\n' ' '`
+    echo -n "$output"
 fi
 #+END_SRC
+
+#+RESULTS: mmml_gen_tree
+[[file:Missing testNO TEST AVAILABLEerro: line 1:0 mismatched input '<EOF>' expecting 'def']]
 
 * Entrada                                                            :ignore:
 
@@ -108,6 +117,7 @@ in
 #+END_EXPORT
 
 * A Linguagem Micro Mini ML
+oooo
 
 {{{mml}}} é uma linguagem da família ML (F#, OCaML, Nemerle, dentre outras). Ela é uma linguagem funcional /pura/ -- isto é, cada variável é atribuída uma única vez, não sendo permitidas alterações posteriores. Iterações devem ser feitas utilizando recursão.
 
@@ -123,7 +133,11 @@ Exemplos de entradas *com erro* podem ser encontradas em [[./errors][errors]] .
 
 *** Hello World
 
-#+INCLUDE: "examples/01-hello_world.mmml" example
+#+BEGIN_SRC fsharp :tangle examples/01-hello_world.mmml :eval never
+// Funcao Main inicia o programa
+def main =
+    print "Ola Mundo!"
+#+END_SRC
 
 *** Entrada/Saída
 
@@ -133,49 +147,188 @@ Exemplos de entradas *com erro* podem ser encontradas em [[./errors][errors]] .
 - O comando =let= declara símbolos que armazenam resultados de funções ou outras operações.
 - O símbolo especial =_= nunca é armazenado. No exemplo, o retorno da função print é descartado.
 
-#+INCLUDE: "examples/02-entrada-saida.mmml" example
+#+BEGIN_SRC fsharp :tangle examples/02-entrada-saida.mmml :eval never
+def main =                             // let declara simbolos:
+let _ = print "Digite seu nome: ",     // _ descarta o valor do retorno
+    name = read_string _ ,             // guarda a string em "nome"
+    _ = print "Digite sua idade: ",    // descarta o retorno de print
+    idade = read_int _                 // guarda o retorno em "idade"
+in                                     // Concatena as strings
+    print "Olá, " :: name :: ", voce tem " :: (str idade) :: " anos" :: ['\n']
+#+END_SRC
 
 *** Escopo
 
 - Um comando =let= cria um novo /escopo/ para símbolos. Símbolos podem ser redefinidos dentro de um novo escopo -- mas nunca no mesmo.
 
-#+INCLUDE: "examples/10-nested_envs.mmml" example
+#+BEGIN_SRC fsharp :tangle examples/10-nested_envs.mmml :eval never
+def main =
+let x = 1                   // x = 1
+in let x = x + 1            // x' = x + 1 = 2
+   in let x = x + 1         // x'' = x' + 1 = 2
+      in x                  // retorna 3
+#+END_SRC
 
 *** Tipos
 
 {{{mml}}} é uma linguagem fortemente tipada, porém não há a necessidade de declarar o /tipo/ dos símbolos explicitamente
 
-#+INCLUDE: "examples/03-tipos.mmml" example
+#+BEGIN_SRC fsharp :tangle examples/03-tipos.mmml :eval never
+def main =
+  let x = 1,              // x tem tipo int
+      y = 'c',            // y tem tipo char
+      z = 1.4,            // z tem tipo float
+      s = "abc",          // s tem tipo char[], sequencia
+      f1 = x + z,         // f1 tem tipo float
+      i1 = x + y,         // i1 tem tipo int
+      s2 = [y],           // s2 tem tipo char[]
+      s3 = [s2],          // s3 tem tipo char[][]
+      s4 = s2 :: s,       // s4 tem tipo char[]
+      b0 = true && false, // b0 tem tipo bool
+      b1 = y || z,        // b1 tem tipo bool
+      b2 = s || s2,       // b2 tem tipo bool
+      f2 = float x,       // f2 tem tipo float
+      c1 = char z         // c1 tem tipo char
+in
+  print b1
+#+END_SRC
 
-#+INCLUDE: "examples/11-coercion.mmml" example
+Tipos podem ser /coagidos/ para um tipo "maior" em determinadas situações como a chamada =if= ou em chamadas de funções.
+
+#+BEGIN_SRC fsharp :tangle examples/11-coercion.mmml :eval never
+def main =
+let a = if true then 'a' else 1,        // tipo int
+    b = if false then 1 else 1.2,       // tipo float
+    c = if true then true else 0,       // tipo bool
+    d = if false then nil else "a",     // tipo char[]
+    e = char if false then 97 else 98   // tipo char
+in {a, b, c, d, e}
+#+END_SRC
 
 *** Controle de Fluxo
 
 O controle de fluxo é feito com a declaração =if=. Porém, um /if/ de {{{mml}}} retorna o valor que resulta da sua avaliação.
 
-#+INCLUDE: "examples/04-controle_de_fluxo.mmml" example
+#+BEGIN_SRC fsharp :tangle examples/04-controle_de_fluxo.mmml :eval never
+def main =
+  let x = read_int _
+  in
+    let y = if x == 0
+            then 10
+            else 11
+    in
+      print y + 10
+#+END_SRC
 
-#+INCLUDE: "examples/11-coercion.mmml" example
+#+BEGIN_SRC fsharp :tangle examples/11-coercion.mmml :eval never
+def main =
+let a = if true then 'a' else 1,        // tipo int
+    b = if false then 1 else 1.2,       // tipo float
+    c = if true then true else 0,       // tipo bool
+    d = if false then nil else "a",     // tipo char[]
+    e = char if false then 97 else 98   // tipo char
+in {a, b, c, d, e}
+#+END_SRC
 
 *** Funções
 
 Funções não precisam declarar seu tipo de retorno, pois ele é *deduzido* a partir da expressão da função
 
-#+INCLUDE: examples/05-funcoes.mmml example
+#+BEGIN_SRC fsharp :tangle examples/05-funcoes.mmml :eval never
+// ping_ retorna int
+def ping_ cur : int, limit : int =
+   if cur < limit
+   then let _ = print "Ping " :: (str cur) :: ['\n']
+        in
+          ping_ cur + 1 limit // Retorna o que ping_ retornar
+   else
+     limit                    // Retorna int
+
+// ping retorna o que ping_ retornar (int)
+def ping limit : int = ping_ 0 limit
+
+def main =
+let limit = read_int _
+in
+  ping limit
+#+END_SRC
 
 Quando necessário, pode-se declarar o tipo de uma função antes de sua implementação
 
-#+INCLUDE: "examples/06-funcoes.mmml" example
+#+BEGIN_SRC fsharp :tangle examples/06-funcoes.mmml :eval never
+def ping_ cur : int, limit : int -> int
+def pong_ cur : int, limit : int -> int
+
+def ping_ cur : int, limit : int =
+if cur == limit
+then limit
+else let _ = print "Ping " :: (str cur) :: ['\n']
+     in pong_ cur limit
+
+def pong_ cur : int, limit : int =
+if cur == limit
+then limit
+else let _ = print "Pong " :: (str cur) :: ['\n']
+     in ping_ cur + 1 limit
+
+def main = ping_ 0 10
+#+END_SRC
 
 *** Operando com Sequências
 
 A maneira principal de operar com sequências em {{{mml}}} é através de recursão.
 
-#+INCLUDE: "examples/07-seq.mmml" example
+#+BEGIN_SRC fsharp :tangle examples/07-seq.mmml :eval never
+def str_capitalize_ s : char[],
+                    r : char[] =
+if ! s                                               // Se vazia, retorna vazia
+then r
+else let // _ = print "s=" :: s :: ['\n'],           // Debug, descomentar
+         // _ = print "r=" :: r :: ['\n'],           // Debug, descomentar
+         h::t = s                                    // quebra em primeiro elemento e resto da lista
+     in let up = if h >= 'a' && h <= 'z'
+                 then h - ('a' - 'A')
+                 else h
+        in str_capitalize_ t (r :: [up])
+
+def str_capitalize s : char[] = str_capitalize_ s ""
+
+def main =
+let sin = read_string _
+in
+  print (str_capitalize sin)
+#+END_SRC
 
 Tipos sequência possuem uma constante especial =nil= que representa uma sequência vazia de qualquer tipo.
 
-#+INCLUDE: "examples/08-seq-nil.mmml" example
+#+BEGIN_SRC fsharp :tangle examples/08-seq-nil.mmml :eval never
+def filtra_positivos_menores_que n : int,
+                                 v : int[],
+                                 result : int[] =
+if ! v then result
+else let primeiro :: resto = v
+     in
+        if primeiro < 0 || !(primeiro < n)
+           then filtra_positivos_menores_que n resto result
+           else let result = result :: [primeiro]
+                in filtra_positivos_menores_que n resto result
+
+def main = filtra_positivos_menores_que 10 [1] :: [-2] :: [100] :: [9] :: [10] nil
+#+END_SRC
+
+Para facilitar o acesso a sequência, existem duas operações especiais (/funções genéricas/) nativas que operam em *qualquer* tipo sequência. =nth= retorna o n-ésimo item de uma sequência. =let_nth= cria uma nova sequência onde o n-ésimo elemento foi alterado.
+
+#+BEGIN_SRC fsharp :tangle examples/12-nth.mmml :eval never
+def main =
+let s1 = [1] :: [2],
+    s2 = s1 :: [int 'a'],
+    c1 = char (nth s2 2),
+    s3 = let_nth s1 ( (length s1) - 1) 'b'
+in {
+     c1,
+     s3
+   }
+#+END_SRC
 
 ** Tipos Básicos
 
@@ -184,7 +337,7 @@ A linguagem possui os seguintes tipos básicos:
 - ~char~ -- um caractere
 - ~int~ -- um inteiro de 32 bits
 - ~float~ -- um número de ponto flutuante de 64 bits
-- Sequências: -- Um tipo básico, seguido de ~[]~:
+- Sequências: -- Um tipo válido, seguido de ~[]~:
   - ~int[]~ -- sequência de ints
   - ~char[]~ -- sequência de caracteres (i.e. string)
   - ~float[][]~ -- sequência de sequência de floats (array bi-dimensional)
@@ -223,7 +376,7 @@ As seguintes expressões booleanas são aceitas na linguagem:
 A precedência de operadores segue o padrão esperado para linguagens como /Java/ e /C/: Negação, Igualdade/Inigualdade, E/OU lógico, com parênteses para alterar a ordem de avaliação.
 
 Exemplos:
-#+BEGIN_SRC C :encoding utf-8
+#+BEGIN_SRC fsharp :encoding utf-8
 a || b
 
 (a == b) || c // parenteses desnecessario
@@ -232,9 +385,9 @@ a == (b || c) // parenteses necessario
 
 !(c == a)
 
-c // C, uma lista, é nao vazio?
+c // c como lista: é uma lista não-vazia?; c como tipo básico: possui valor não-zero?
 
-!c // C, uma lista, é vazia?
+!c // c como lista: é vazia? ; c como tipo básico: possui valor zero?
 
 !(a || b)
 
@@ -242,7 +395,23 @@ c // C, uma lista, é nao vazio?
 
 Expressões booleanas podem ser utilizadas como condicional no comando =if=, mas também podem ter seu resultado "atribuído" a símbolos:
 
-#+INCLUDE: "examples/09-bool-coertion.mmml" example
+#+BEGIN_SRC fsharp :tangle examples/09-bool-coertion.mmml :eval never
+def main =
+let a = "abc" || nil,           // nil -> false, char[] -> bool
+    b = "abc" || 1,             // int -> bool, char[] -> bool
+    c = 'a' || 9.5,             // basic types -> bool
+    a2 = "abc" && nil,
+    b2 = "abc" && 1,
+    c2 = 'a' && 9.5,
+    v2 = 1 + int true,           // coercao falha, mas cast funciona,
+    v3 = (int (!v2 && c2)) * 10  // deve ser igual a 0
+in
+   { a && b && c,      // Sempre verdadeiro
+     a2 && b2 && c2,   // Sempre falso
+     v2,               // deve ser 2,
+     v3                // deve ser 10
+   }
+#+END_SRC
 
 ** Operadores Relacionais
 
@@ -253,7 +422,7 @@ Os operadores relacionais comparam dois *tipos básicos* e retornam um valor boo
 - Igual: ====
 - Diferente: =!==
 
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 a == 1
 
 x <= 2 + 1
@@ -268,10 +437,10 @@ As expressões aritméticas são as operações aritméticas básicas de linguag
 - Divisão: ~/~
 - Resto da Divisão: ~%~
 
-A precedência de operadores garante que Exponenciação tem prioridade sobre Multiplicação e Divisão, que por sua vez têm prioridade sobre Soma e Subtração.
+A precedência de operadores garante que Multiplicação, Divisão e Módulo possuem prioridade sobre Soma e Subtração.
 
 Exemplos:
-#+BEGIN_SRC python
+#+BEGIN_SRC fsharp :eval never
 a + 2
 
 a * b * c / d
@@ -282,7 +451,7 @@ a * b * c / d
 ** Condicional /if/
 
 A estrutura /if/ da linguagem tem a seguinte forma:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 if boolexpr
 then expr1
 else expr2
@@ -291,7 +460,7 @@ else expr2
 O comportamento é como esperado: Se a espressão /boolexpr/ for /verdadeira/, é executado a primeira expresão; caso contrário, a segunda.
 
 Uma diferença do /if/ da {{{mml}}} para o /if/ de linguagens imperativas é que ele é uma /expressão/: o /if/ *retorna* o resultado da expressão avaliada. Ou seja, o código
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 if x == 1
 then 10
 else 20
@@ -312,14 +481,14 @@ r = if_eval_1(x == 1, 10, 20);
 #+END_SRC
 
 Uma vez que o /if/ é, ele próprio, uma /expressão/, ele pode ser utilizado dentro de expressões booleanas ou aritméticas. A expresão:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 (if x == 0 then 10 * x else 20 / x) * 2
 #+END_SRC
 
 retorna $10 * x * 2$ quando ~x~ é zero e $(20 / x) * 2$ quando x é diferente de zero.
 
 Uma vez que a condição do if é uma /expressão/, podemos utilizar parênteses, igualdades, operadores lógicos, etc.
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 if (x == 0 || z)
 then if z
      then (z * 10 + 2)
@@ -328,7 +497,7 @@ else 10
 #+END_SRC
 
 *Observação*: Em {{{mml}}}, o /else/ *não é opcional*. Se não há resultado a ser retornado quando a condição for /falsa/, então deve-se retornar um valor padrão.
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 if x == 0
 then x * 2
 else -1
@@ -339,14 +508,14 @@ else -1
 A linguagem é {{{mml}}} é uma linguagem funcional /pura/: uma vez que um valor é atribuído a um /símbolo/, este símbolo não pode ser alterado. Uma ``variável'' em {{mml}}, portanto, não é /variável/ -- é como uma declaração de constante.
 
 A declaração de símbolos é feita com a primitiva /let/:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 let x = 1 * 2 + y
 in
   x * 2 / 10
 #+END_SRC
 
 A primitiva /let/ pode declarar vários símbolos. Para isso, deve-se utilizar vírgula:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 let x = 1,
     y = x + 2,
     z = x * y
@@ -355,7 +524,7 @@ in
 #+END_SRC
 
 Um símbolo declarado *sempre* deve receber um valor resultante de uma *expressão*. Uma vez que um /if/ é uma expressão, ele pode ser utilizado no lado direito da igualdade durante um /let/:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 let x = if z && t
         then z * t             // ambos verdade, pode multiplicar
         else if z then z * 10  // apenas z
@@ -368,14 +537,14 @@ in
 #+END_SRC
 
 Assim como o /if/, o /let/ é, também, uma *expressão* e, portanto, retorna valor:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 if (let x = 100 in x * x * x * x) == 100
 then false  // 100^4 eh 100 ?! nunca deveria retornar false
 else true   // sempre deveria retrnar true
 #+END_SRC
 
 O *escopo* de qualquer símbolo está restrito à expressão associada ao /in/ do /let/. O seguinte trecho de código deveria retornar $38$:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 let x = 10
 in // na proxima expressao, x eh 10
    x + (let x = 20
@@ -386,7 +555,7 @@ in // na proxima expressao, x eh 10
 #+END_SRC
 
 A seguinte expressão retorna 20:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 let x = 10
 in
   let x = 20
@@ -394,25 +563,34 @@ in
     x
 #+END_SRC
 
+O seguinte programa sempre retorna 3:
+#+BEGIN_SRC fsharp :tangle examples/10-nested_envs.mmml :eval never
+def main =
+let x = 1                   // x = 1
+in let x = x + 1            // x' = x + 1 = 2
+   in let x = x + 1         // x'' = x' + 1 = 2
+      in x                  // retorna 3
+#+END_SRC
+
 ** Chamadas de Função
 
 Para invocar uma função em {{{mml}}}, deve-se utilizar o nome da função seguido de seus parâmetros. O código a seguir chama a função ~funct~ com os parâmetros ~a~, ~b~ e ~c~.
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 funct a b c
 #+END_SRC
 
 Parâmetros de uma função podem ser resultado de expressões. O seguinte código chama a função ~funct~ com os parâmetros $x + 1$, $x - 2$ e $x * 2$:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 funct x + 1 x - 2 x * 2
 #+END_SRC
 
 Uma vez que os parâmetros são expressões, pode-se utilizar parênteses para isolá-los no código:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 funct ( x + 1 ) ( x - 2 ) ( x * 2 )
 #+END_SRC
 
 Esta sintáxe de chamada de função pode introduzir ambiguidades: O seguinte código poderia ser interpretado como a chamada da função ~print_results~ com 3 parâmetros ou como a chamada da função ~print_results~ com 2 parâmetros, um deles o resultado da função ~funct~ ou com apenas um resultado.
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 print_results funct 1 2 //[1] print_results (funct) (1) (2)
                         // ou
                         //[2] print_results (funct 1)  (2)
@@ -423,19 +601,19 @@ print_results funct 1 2 //[1] print_results (funct) (1) (2)
 Esta ambiguidade deve ser resolvida para o primeiro caso (i.e. print_results com 3 parâmetros). Para expressar qualquer outra alternativa, o programa deve incluir os parênteses adequadamente.
 
 A sintaxe da chamada de função também fica ambígua no caso de funções que não esperam nenhum parâmetro. A função ~read_int~, que lê um inteiro da entrada, não precisa de nenhum parâmetro. Nesse caso, deve-se utilizar o símbolo especial ~_~ (/underscore/) que indica ``nenhum parâmetro'':
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 read_int _
 #+END_SRC
 
 A chamada de uma função também é uma /expressão/. Assim, podemos atribuir os resultados de uma função a símbolos e utilizar os resultados dentro de expressões:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 let x = read_int _,
     y = funct x
 in
   print_results y + (do_something x)
 #+END_SRC
 
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 if funct (if x == 0 then 10 else 20)
 then 10
 else 20
@@ -444,7 +622,7 @@ else 20
 ** Declaração de Funções
 
 Uma função na linguagem {{{mml}}} é declarada com a primitiva ~def~:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 def print_results r : int =
    print (concat "Resultado: " (str r))
 #+END_SRC
@@ -452,12 +630,12 @@ def print_results r : int =
 Os parâmetros de uma função devem sempre possuir tipos definidos após o símbolo ~:~ .
 
 Pode-se declarar um cabeçalho para a função para definir claramente qual o tipo de retorno. A declaração do tipo de retorno, no entanto, é /opcional/ -- o tipo de retorno de uma função deve ser *deduzido* a partir da expressão de retorno.
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 def print_results r -> int
 #+END_SRC
 
 A declaração de tipos de retorno, no entanto, é necessária para deduzir o tipo de funções /mutuamente recursivas/:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 def f1 a : int, b : float -> float
 def f2 a : int, b : float -> float
 
@@ -472,7 +650,7 @@ def f2 a : int, b : float =
 #+END_SRC
 
 Uma função não possui a palavra chave *returns*. O retorno é sempre o resultado de uma *expressão* -- e o tipo de retorno de uma função é definido pelo resultado da expressão.
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 // media 1 devolve a media de 3. O tipo de retorno eh int
 def media1 a : int,
            b : int,
@@ -490,7 +668,7 @@ def andPred a : bool, b : bool = a && b
 #+END_SRC
 
 O /corpo/ de uma função é sempre uma expressão. Assim, pode-se utilizar /if/ e /let/ dentro de uma função:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 def max2int a : int,
             b : int =
     if (a > b)
@@ -501,7 +679,7 @@ def max2int a : int,
 Toda função retorna algum valor. Uma função de nome ~print~, por exemplo, pode retornar um valor inteiro indicando quantos símbolos foram colocados na tela.
 
 Quando o valor de uma função não necessitar ser armazenado, pode-se, no ~let~, utilizar o símbolo especial ~_~:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 let x = read_int _,
     _ = print_int x + 1 // ignora o resultado de print
 in
@@ -528,7 +706,7 @@ Algumas funções são consideradas especiais da linguagem e devem estar dispon�
 Um tipo sequência em {{{mml}}} é equivalente a um vetor ou uma lista em outras linguagens. Toda sequência possui tamanho definido. Uma função especial chamada ~length~ é responsável por indicar quantos elementos existem na sequência.
 
 Uma sequência é criada utilizando o operador ~[]~:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 let s1 = [1],            // sequencia de 1 elemento
     s2 = [ read_int _ ], // 1 elemento, lido da entrada
     s3 = nil             // lista vazia
@@ -538,7 +716,7 @@ in (length s1) +         // retorna 1 +
 #+END_SRC
 
 Sequências podem ser concatenadas utilizando o operador ~::~
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 let s1 = [1],
     s2 = [2],
     s3 = [3],
@@ -551,7 +729,7 @@ in
 #+END_SRC
 
 Uma sequência sempre pode ser quebrada em um /início/, seguido do /resto/ da lista. A sequência [1, 2, 3] pode ser considerada como o início $1$, seguido da lista [2, 3]. Uma expressão /let/ permite quebrar a lista em seu início e seu resto com o operador ~::~
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 let seq = [1] :: [2] :: [3],
     h::rest = seq // quebra seq em um inicio chamado h
                   // e uma continuacao chamada rest
@@ -560,7 +738,7 @@ in
 #+END_SRC
 
 Uma lista de de um ou menos elementos sempre produzirá um /resto/ *nulo*. A função abaixo utiliza isso para calcular o tamanho de uma sequência de inteiros:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 def len_int_seq__ count : int, s : int[] =
    if !s       // ! ( length s > 0 )
    then count // nada mais para contar
@@ -573,7 +751,7 @@ def len_int_seq s : int[] =
 #+END_SRC
 
 O seguinte código retorna uma lista com todos os elementos da sequencia maiores que 10:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never :tangle examples/20--seq-filter.mmml
 def filter_gt_10__ ret : int[], s : int [] =
     if !s
     then ret                                   // nada mais, retorna ret
@@ -586,16 +764,18 @@ def filter_gt_10__ ret : int[], s : int [] =
 
 def filter_gt_10 s : int[] =
    filter_gt_10__ nil s
+
+def main = filter_gt_10 [1] :: [11] :: [5] :: [20]
 #+END_SRC
 
-*Observação*: Uma /string/ na linguagem {{{mml}}} é uma sequência de caracteres. Por exemplo, a seguinte função possui tipo de retorno src_fsharp[:exports code]{char[]} :
-#+BEGIN_SRC fsharp :exports code
+*Observação*: Uma /string/ na linguagem {{{mml}}} é uma sequência de caracteres. Por exemplo, a seguinte função possui tipo de retorno src_fsharp[:eval never :exports code]{char[]} :
+#+BEGIN_SRC fsharp :exports code :eval never
 def stringConstante n : int =
    "string"
 #+END_SRC
 
 O mesmo vale para as operações de desempacotamento de lista, concatenação e criação:
-#+BEGIN_SRC fsharp :exports code
+#+BEGIN_SRC fsharp :exports code :tangle examples/21-return-string.mmml :eval never
 def retString n : int =
   let a = ['a'],     // a eh tipo char[]
       b = "bbb",     // b eh tipo char[]
@@ -603,13 +783,15 @@ def retString n : int =
   in
     a :: b :: [c] :: d2 // retorna ['a', 'b', 'b', 'b', 'c', 'd', 'd']
                         // ou "abbbcdd"
+
+def main = retString 1
 #+END_SRC
 
 ** Conversão entre Tipos
 
-Quando for necessário converter um tipo primitivo para outro tipo primitivo, devemos usar uma operação de /cast/. Em {{{mml}}}, um cast funciona como uma chamada de função cujo nome é o tipo destino. src_fsharp[:exports code]{int 0.2} converte para inteiro o valor em ponto flutuante 0.2 .
+Quando for necessário converter um tipo primitivo para outro tipo primitivo, devemos usar uma operação de /cast/. Em {{{mml}}}, um cast funciona como uma chamada de função cujo nome é o tipo destino. src_fsharp[:eval never :exports code]{int 0.2} converte para inteiro o valor em ponto flutuante 0.2 .
 
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 let y = 2.2,
     x = int y // x = 2
 in
@@ -617,7 +799,7 @@ in
 #+END_SRC
 
 A conversão de tipos pode ser útil quando queremos forçar um retorno de função para um tipo específico:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 def avg2 a : int, b : int, round : bool =
    if round
    then
@@ -626,7 +808,7 @@ def avg2 a : int, b : int, round : bool =
       (a + b) / 2.0       // calcula (a+b)/2.0, float
 #+END_SRC
 
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :tangle examples/22-sum-seq.mmml :eval never
 def sum__ res : int , seq : int[] =
     if !seq
     then res
@@ -643,6 +825,8 @@ def avg_seq seq : int[] =
       s / (float n) // devolve uma soma inteira
                     // dividida por um float
                     // -> retorna float
+
+def main = avg_seq [1] :: [2] :: [3]
 #+END_SRC
 
 As seguintes conversões de tipos são aceitas na linguagem {{{mml}}}:
@@ -672,7 +856,7 @@ As seguintes conversões de tipos são aceitas na linguagem {{{mml}}}:
 
 *Obs.:* Casts não são definidos para tipos sequência, tuplas ou classes, apenas para tipos básicos.
 
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :tangle examples/23-int-to-string.mmml :eval never
 // intToString__ 512 10 "" ->
 //     intToString__ 51 10 "2" ->
 //         intToString__ 5 10 "12" ->
@@ -709,13 +893,13 @@ in
 ** Tipos Tupla
 
 Uma /tupla/ é como um vetor que suporta tipos distintos em cada posição. Tuplas são úteis para retornar mais de um valor em uma função.
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 def doisRetornos x : int = {x, x + 1}
 #+END_SRC
 
 Diferente de um tipo sequência, que pode conter de 0 a n valores, um tipo tupla possui tamanho fixo. O retorno da função acima, por exemplo, é uma tupla de tamanho 2.
 
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 def doisRetornos x : int -> {int, int}
 #+END_SRC
 
@@ -724,41 +908,50 @@ def doisRetornos x : int -> {int, int}
 Um tipo definido pelo usuário é algo parecido com /structs/ de C ou /classes/ de C++/Java, etc.
 
 A declaração de tipo de usuário é feita com a palavra-chave ~class~:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :tangle examples/30-custom.mmml :eval never
 class MeuTipo =
   campo1 : int,
   campo2 : {char[], int}
   // , outros : campos
 #+END_SRC
 
+#+BEGIN_SRC fsharp :tangle examples/30-custom.mmml :exports none :eval never
+def fun1 x : int =
+#+END_SRC
+
 Para construir uma "instância" de um tipo definido pelo usuário, deve-se usar a palavra chave ~make~ em uma expressão. É obrigatório fornecer valor para *todos os campos da instância*:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :tangle examples/30-custom.mmml :eval never
 let x = make MeuTipo {1, {"string", length "string"}}
 in
    // ...
 #+END_SRC
 
+#+BEGIN_SRC fsharp :tangle examples/30-custom.mmml :exports none :eval never
+   get campo1 x
+#+END_SRC
+
 Pode-se, no entanto, criar uma função "construtora" para um tipo:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :tangle examples/30-custom.mmml :eval never
 def construct_MeuTipo a : int =
-  make MeuTipo{1, {"default", length "default"}}
+  make MeuTipo{a, {"default", length "default"}}
 #+END_SRC
 
 O acesso a campos de um tipo definido pelo usuário se faz com a palavra chave =get=:
-#+BEGIN_SRC fsharp
-let x = make MeuTipo {1, {"string", length "string"}} ,
-    f1 = get campo1 x
-in
-   // ...
+#+BEGIN_SRC fsharp :tangle examples/30-custom.mmml :eval never
+def MeuTipo_campo2 x : MeuTipo =
+    get campo2 x
 #+END_SRC
 
 Não é possível /alterar/ o conteúdo de campos em instâncias já criadas. No entanto, é possível criar uma nova instância de um tipo definido pelo usuário, alterando apenas um dos campos:
-#+BEGIN_SRC fsharp
-let x = make MeuTipo {1, {"string", length "string"}} ,
-    x1 = set campo1 x 2           // constroi MeuTipo {2, {"string", 7}}
-in
-   {get campo1 x, get campo1 x1}  // retorna {1, 2}
-   // ...
+#+BEGIN_SRC fsharp :eval never
+def MeuTipo_set_campo1 x : MeuTipo, val : int =
+    set campo1 x val           // constroi MeuTipo {2, {"string", 7}}
+#+END_SRC
+
+#+BEGIN_SRC fsharp :tangle examples/30-custom.mmml :exports none :eval never
+def main = let x = construct_MeuTipo 10,
+               c2 = MeuTipo_campo2 x
+           in { get campo1 x, c2 , x}
 #+END_SRC
 
 ** Aritmética de Tipos na linguagem {{{mml}}}
@@ -769,7 +962,7 @@ Na linguagem {{{mml}}}, tipos são definidos explicitamente
 - na construção de tipos definidos pelo usuário.
 
 Já os tipos de símbolos (equivalenes a variáveis) em {{{mml}}} são sempre /derivados/ da expressão, em função dos /tipos/ nos parâmetros de uma função.
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 let x = read_int _ // tipo de x eh derivado do retorno de read_int
 in // ...
 #+END_SRC
@@ -778,14 +971,15 @@ Torna-se necessário, portanto, /inferir/, a partir das operações básicas da 
 
 Na linguagem {{{mml}}}, os operadores aritméticos devem respeitar a seguinte /aritmética de tipos/;
 
-|   | Lado Esquerdo | (Operadores) | Lado Direito  |    | Resultado |
-| / | <>            | <>           | <>            | <> | <>        |
-|---+---------------+--------------+---------------+----+-----------|
-|   | Char          | + - / *      | Char          | \to  | Char      |
-|   | Char          | + - / *      | Inteiro       | \to  | Inteiro   |
-|   | Inteiro       | + - / *      | Char/Inteiro  | \to  | Inteiro   |
-|   | Inteiro       | + - / *      | Float         | \to  | Float     |
-|   | Float         | + - / *      | Inteiro/Float | \to  | Float     |
+|   | Lado Esquerdo  | (Operadores) | Lado Direito   |    | Resultado |
+| / | <>             | <>           | <>             | <> | <>        |
+|---+----------------+--------------+----------------+----+-----------|
+|   | Char           | + - / *      | Char           | \to  | Char      |
+|   | Char           | + - / *      | Inteiro        | \to  | Inteiro   |
+|   | Inteiro        | + - / *      | Char/Inteiro   | \to  | Inteiro   |
+|   | Inteiro        | + - / *      | Float          | \to  | Float     |
+|   | Float          | + - / *      | Inteiro/Float  | \to  | Float     |
+|   | Char/Int/Float | %            | Char/Int/Float | \to  | Int       |
 
 Para o operator ~::~ (concatenação), a operação só deve ser permitida com tipos base e dimensão *idênticas*:
 |   | Lado Esquerdo | (Operadores) | Lado Direito |   | Resultado |
@@ -842,7 +1036,7 @@ No caso da coerção para /booleano/, o /valor/ obtido será equivalente a /fals
 - Char, Inteiro, Float, com valor 0
 
 O seguinte código deve, portanto, funcionar corretamente:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :tangle examples/40-coertion.mmml :eval never
 def media a : float, b : float =
     (a + b) / 2 // (float + float) / int = float / int = float
 
@@ -854,7 +1048,7 @@ def main =
 #+END_SRC
 
 Uma coerção especial é a da constante nula ~nil~ para algum tipo sequência. A constante ~nil~ pode ser coagida para qualquer tipo sequência durante chamadas de função ou concatenação de sequências:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 def concat a : int[] , b : int[] = a :: b
 
 def main =
@@ -865,24 +1059,24 @@ def main =
 #+END_SRC
 
 A coerção de tipos também deve acontecer durante o "retorno" de if's, para que o retorno seja de algum tipo abrangente o sufuciente para armazenar tanto o retorno do lado /verdadeiro/ quando o do lado /falso/:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 let x = if a
         then 5.2   // float
         else 7     // int
 in x          // <-- x é do tipo float
 #+END_SRC
 
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :eval never
 let l = if a
         then [1]   // tipo int[]
         else nil   // tipo QUALQUER[]
-in l       // <-- x é do tipo int[]
+in l       // <-- l é do tipo int[]
 #+END_SRC
 
 ** Um Programa em {{{mml}}}
 
 Um programa em {{{mml}}} deve possuir uma função chamada /main/ que não recebe nenhum parâmetro. A execução do programa se inicia por esta função:
-#+BEGIN_SRC fsharp
+#+BEGIN_SRC fsharp :tangle examples/50-fib.mmml :eval never
 def fib x : int =
     if x <= 0 then -1 // 0 nao eh valido
     else if x == 1 then 1
@@ -900,8 +1094,11 @@ def main =
 #+END_SRC
 
 * Entradas e Árvores de Análise
+
 - Exemplo 1
-  #+INCLUDE: "inputs/main.mmml" example
+  #+BEGIN_SRC fsharp :tangle inputs/main.mmml :eval never
+  def main = 1
+  #+END_SRC
 
   #+CALL: mmml_gen_tree(TEST="inputs/main.mmml") :results file
 
@@ -910,7 +1107,9 @@ def main =
 
 - Exemplo 2
 
-  #+INCLUDE: "inputs/main2.mmml" example
+  #+BEGIN_SRC fsharp :tangle inputs/main2.mmml :eval never
+  def main = "uma \"\nstring com \\\"escapes\\\""
+  #+END_SRC
 
   #+CALL: mmml_gen_tree(TEST="inputs/main2.mmml") :results file
 
@@ -918,7 +1117,9 @@ def main =
  [[file:inputs/main2.png]]
 
 - Exemplo 3
-  #+INCLUDE: "inputs/main3.mmml" example
+  #+BEGIN_SRC fsharp :tangle inputs/main3.mmml :eval never
+  def main = 0xabfe
+  #+END_SRC
 
   #+CALL: mmml_gen_tree(TEST="inputs/main3.mmml") :results file
 
@@ -926,7 +1127,12 @@ def main =
 [[file:inputs/main3.png]]
 
 - Exemplo 4: Funções
-  #+INCLUDE: "inputs/fun1.mmml" example
+  #+BEGIN_SRC fsharp :tangle inputs/fun1.mmml :eval never
+  def f1 a : int, b : char -> char
+  def f1 a : int, b : char = a + b
+
+  def main = f1 1 'a'
+  #+END_SRC
 
   #+CALL: mmml_gen_tree(TEST="inputs/fun1.mmml") :results file
 
@@ -935,7 +1141,15 @@ def main =
 
 - Exemplo 5: if
 
-  #+INCLUDE: "inputs/if.mmml" example
+  #+BEGIN_SRC fsharp :tangle inputs/if.mmml :eval never
+  def main =
+  let x = read_int _ ,
+      y = read_char _
+  in
+      if x == y
+      then x - y
+    else x + y
+  #+END_SRC
 
   #+CALL: mmml_gen_tree("inputs/if.mmml") :results file
 
@@ -944,7 +1158,13 @@ def main =
 
 - Exemplo 6: let
 
-  #+INCLUDE: "inputs/let.mmml" example
+  #+BEGIN_SRC fsharp :tangle inputs/let.mmml :eval never
+  def main =
+      let x = 1,
+          y = 2
+      in
+      x + y
+  #+END_SRC
 
   #+CALL: mmml_gen_tree("inputs/let.mmml")
 
@@ -952,7 +1172,13 @@ def main =
   [[file:inputs/let.png]]
 
 - Exemplo 7 : expressões booleanas
-  #+INCLUDE: "inputs/expr1.mmml" example
+  #+BEGIN_SRC fsharp :tangle inputs/expr1.mmml :eval never
+  def main =
+    if x + 1 == 2 && x - 1 == 0 || y
+    then "correto"
+    else "wtf"
+  #+END_SRC
+
   #+CALL: mmml_gen_tree("inputs/expr1.mmml")
 
   #+RESULTS:
@@ -960,7 +1186,20 @@ def main =
 
 - Exemplo 8 : Chamada de Função
 
-  #+INCLUDE: "inputs/funcall1.mmml" example
+  #+BEGIN_SRC fsharp :tangle inputs/funcall1.mmml :eval never
+  def funcao1 x : int, y : char, z : char[] =
+      z :: "|" :: (str x + y) :: "|" :: [y]
+
+  def main =
+  let a = 1,
+      b = 2,
+      c = 'a',
+      y = "YPSILON"
+  in
+      funcao1 a + b
+          c + 2
+            y
+  #+END_SRC
 
   #+CALL: mmml_gen_tree("inputs/funcall1.mmml")
 
@@ -968,7 +1207,13 @@ def main =
   [[file:inputs/funcall1.png]]
 
 - Exemplo 9 : Chamada de Função 2
-  #+INCLUDE: "inputs/funcall2.mmml" example
+  #+BEGIN_SRC fsharp :tangle inputs/funcall2.mmml :eval never
+  def funcao1 a : int, b : int, c : int = (a + b) / float (c + a)
+
+  def funcao2 a : int, b : int = a + b
+
+  def main = funcao1 0 + 1 2 (funcao2 1 9)
+  #+END_SRC
 
   #+CALL: mmml_gen_tree("inputs/funcall2.mmml")
 
@@ -976,7 +1221,23 @@ def main =
   [[file:inputs/funcall2.png]]
 
 - Exemplo 10 : Tuplas
-  #+INCLUDE: "inputs/tuples.mmml" example
+
+  #+BEGIN_SRC fsharp :tangle inputs/tuples.mmml :eval never
+  def make_tuple_int x : int, y : int -> {int, int}
+
+  class A =
+  s : {int, int}
+
+  def make_tuple_int x : int,
+                    y : int =
+      {x + 1,
+      if x == 0
+      then y + 1
+      else y + x
+      }
+
+  def main = make_tuple_int 1 2
+  #+END_SRC
 
   #+CALL: mmml_gen_tree("inputs/tuples.mmml")
 
@@ -984,7 +1245,22 @@ def main =
   [[file:inputs/tuples.png]]
 
 - Exemplo 11 : Tipos Definidos pelo Usuário
-  #+INCLUDE: "inputs/custom_types.mmml" example
+
+  #+BEGIN_SRC fsharp :tangle inputs/custom_types.mmml :eval never
+  class MeuTipo =
+    campo1 : int,
+    campo4 : {int, int[]}[]
+
+  def construct_MeuTipo a : int -> MeuTipo
+
+  def construct_MeuTipo a : int =
+    make MeuTipo { a, [ {0, nil} ] }
+
+  def funct a : MeuTipo =
+    get campo1 make MeuTipo {1, [ {1, [1]} ]}
+
+  def main = 0
+  #+END_SRC
 
   #+CALL: mmml_gen_tree("inputs/custom_types.mmml")
 
@@ -992,15 +1268,39 @@ def main =
   [[file:inputs/custom_types.png]]
 
 - Exemplo 12 : Listas
-  #+INCLUDE: "inputs/lists.mmml" example
+
+  #+BEGIN_SRC fsharp :tangle inputs/lists.mmml :eval never
+  def concat a : int[] , b : int[] = a :: b
+
+  def main =
+    concat ([1] :: [2] :: nil) // Coage para int[] por causa da concatenacao da esquerda
+            nil                 // Coage para int[] por que eh o
+                                // que o parametro 2 de concat espera
+  #+END_SRC
 
   #+CALL: mmml_gen_tree("inputs/lists.mmml")
 
   #+RESULTS:
   [[file:inputs/lists.png]]
 
+- Exemplo 16 : Tipos Sequência
+
+  #+BEGIN_SRC fsharp :tangle inputs/seq1.mmml :eval never
+  def fun m2 : int[][] = 0
+
+  def main = 1
+  #+END_SRC
+
+  #+CALL: mmml_gen_tree("inputs/seq1.mmml")
+
+  #+RESULTS:
+  [[file:inputs/seq1.png]]
+
 - Exemplo 13 : Precedência com operadores booleanos e expressões
-  #+INCLUDE: "inputs/precedence1.mmml" example
+
+  #+BEGIN_SRC fsharp :tangle inputs/precedence1.mmml :eval never
+  def main = if (length "stringue") == get 0 {0, 1} then 0 else 1
+  #+END_SRC
 
   #+CALL: mmml_gen_tree("inputs/precedence1.mmml")
 
@@ -1009,7 +1309,13 @@ def main =
 
 - Exemplo 14 : Precedência de operadores booleanos
 
-  #+INCLUDE: "inputs/precedence_bool.mmml" example
+  #+BEGIN_SRC fsharp :tangle inputs/precedence_bool.mmml :eval never
+  def f1 a : int = false && a || true && a
+
+  def f2 a : int = false || a && true || a
+
+  def main = 0
+  #+END_SRC
 
   #+CALL: mmml_gen_tree("inputs/precedence_bool.mmml")
 
@@ -1018,18 +1324,11 @@ def main =
 
 - Exemplo 15 : Precedência de operadores booleanos
 
-  #+INCLUDE: "inputs/precedence_bool2.mmml" example
+  #+BEGIN_SRC fsharp :tangle inputs/precedence_bool2.mmml :eval never
+  def main = true && false && true
+  #+END_SRC
 
   #+CALL: mmml_gen_tree("inputs/precedence_bool2.mmml")
 
   #+RESULTS:
   [[file:inputs/precedence_bool2.png]]
-
-- Exemplo 16 : Tipos Sequência
-
-  #+INCLUDE: "inputs/seq1.mmml" example
-
-  #+CALL: mmml_gen_tree("inputs/seq1.mmml")
-
-  #+RESULTS:
-  [[file:inputs/seq1.png]]

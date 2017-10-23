@@ -1,1 +1,12 @@
-def main = funcao1 a + b c + 2 y
+def funcao1 x : int, y : char, z : char[] =
+    z :: "|" :: (str x + y) :: "|" :: [y]
+
+def main =
+let a = 1,
+    b = 2,
+    c = 'a',
+    y = "YPSILON"
+in
+    funcao1 a + b
+        c + 2
+          y

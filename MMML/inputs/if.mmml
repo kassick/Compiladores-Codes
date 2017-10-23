@@ -1,1 +1,7 @@
-def main = if x == y then x - y else x + y
+def main =
+let x = read_int _ ,
+    y = read_char _
+in
+    if x == y
+    then x - y
+  else x + y

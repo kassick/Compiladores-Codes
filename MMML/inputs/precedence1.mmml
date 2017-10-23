@@ -1,1 +1,1 @@
-def main = if (len arr) == get 0 tup then 0 else 1
+def main = if (length "stringue") == get 0 {0, 1} then 0 else 1

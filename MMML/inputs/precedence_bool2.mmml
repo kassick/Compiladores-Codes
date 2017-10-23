@@ -1,1 +1,1 @@
-def main = a && b && c
+def main = true && false && true

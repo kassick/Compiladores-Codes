@@ -1,1 +1,5 @@
-def main = funcao1 a + b c (funcao2 a b)
+def funcao1 a : int, b : int, c : int = (a + b) / float (c + a)
+
+def funcao2 a : int, b : int = a + b
+
+def main = funcao1 0 + 1 2 (funcao2 1 9)

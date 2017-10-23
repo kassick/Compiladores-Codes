@@ -1,3 +1,5 @@
-def f1 a : int = x && a || x && b
+def f1 a : int = false && a || true && a
 
-def f2 a : int = x || a && x || b
+def f2 a : int = false || a && true || a
+
+def main = 0
