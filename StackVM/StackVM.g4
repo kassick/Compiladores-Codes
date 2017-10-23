@@ -195,7 +195,7 @@ SKIP_: (COMMENT | WS) -> skip;
 
 LITERAL_STRING
     :   '"'
-        ( ~('"' | [\n\r] ) | '\\' [a-z] )*
+        ( ~('"' | [\n\r] ) | '\\' [a-z"\\] )*
         '"'
     ;
 

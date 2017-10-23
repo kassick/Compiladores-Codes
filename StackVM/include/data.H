@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Mon Sep 18 11:35:28 2017"
- *         Updated: "2017-10-18 17:50:26 kassick"
+ *         Updated: "2017-10-23 12:08:36 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -49,6 +49,7 @@ const string char_escape(const char c) {
         case '\r': return "\\r";
         case '\b': return "\\b";
         case '\'': return "\\'" ;
+        case '\\': return "\\\\";
         default:
             return string({c});
     }
@@ -65,6 +66,7 @@ const string str_escape(const string & s)
             case '\r': sout << "\\r"; break;
             case '\b': sout << "\\b"; break;
             case '"': sout <<  "\\\"" ; break;
+            case '\\': sout << "\\\\";break;
             default:
                 sout << s[i];
         }
@@ -78,6 +80,7 @@ const string str_unescape(const string & s)
     stringstream sout;
     for (int i = 0 ; i < s.length() ; i++)
     {
+        //cerr << "s[" << i << "]: " << s[i] << endl;
         if (s[i] == '\\') {
             // escape!
             if (i + 1 < s.length()) {
@@ -87,7 +90,11 @@ const string str_unescape(const string & s)
                     case 'r': sout << '\r'; break;
                     case 'b': sout << '\b'; break;
                     case '"': sout << '"' ; break;
+                    case '\\': sout << '\\'; break;
                     default:
+                        // cerr << "s[i]: " << s[i]
+                        //      << " s[i+1]: " << s[i+1]
+                        //      << endl;
                         // oops, unknown escape
                         sout << "(UNKNOWN ESCAPE " << s[i+1] << ")";
                 }
