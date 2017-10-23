@@ -20,8 +20,6 @@
 <script>
  doParse = function(text, inputstr)
  {
-     console.log('text is ' + text);
-     console.log('input is ' + inputstr);
      r = ccall('parse_string_c', 'string', ['string', 'string'], [text, inputstr]);
      return r;
  };
@@ -34,7 +32,7 @@
      d_res.value = '';
      res = '';
 
-     res = doParse(d_ta.value, d_in.value);
+     res = doParse(d_ta.value + '\n', d_in.value + '\n');
 
      d_res.value = res;
  };
