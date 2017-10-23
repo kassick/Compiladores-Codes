@@ -322,6 +322,19 @@ div
 # resultado: 0.5
 #+END_SRC
 
+O operador =mod= faz a operação de /módulo inteiro/ (resto da divisão) entre tipos inteiros. É um erro fornecer algo que não seja =int= no topo da pilha.
+#+BEGIN_SRC sh :eval never
+push 50
+push 'g'
+push 'a'
+sub
+cast_i
+mod
+cast_c
+push 'a'
+add
+#+END_SRC
+
 Operações lógicas são suportadas apenas sobre *inteiros*. Inteiro com valor 0 equivale a falso. Inteiro com valor não-zero equivale a verdadeiro.
 
 As seguintes operações lógicas são suportadas:
