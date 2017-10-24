@@ -20,6 +20,14 @@ Versões:
 
 Máquina Virtual (inspirada em Java) de pilha. Suporta tipos básicos (char, int, double) e listas (de listas)* .
 
+## MMML -- Implementação da Linguagem
+
+Linguagem "funcional" pura. Não possui funções como objetos de primeira ordem, tampouco lambdas e afins. Linguagem de simples implementação para a cadeira de Compiladores
+
+[Documentação](./MMML/mmml.org)
+
+Linguagem
+
 # Versão Javascript
 
 O código em C/C++ pode ser compilado para *asm.js* e executado no navegador. Os arquivos org incluem o arquivo javascript correto e executam a função de parse e apresentam o resultado em uma textarea.
