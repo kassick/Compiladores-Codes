@@ -5,7 +5,7 @@
  *
  *         Version: 1.0
  *         Created: "Wed Aug 30 21:07:02 2017"
- *         Updated: "2017-09-04 17:20:52 kassick"
+ *         Updated: "2018-08-09 12:22:48 kassick"
  *
  *          Author: Rodrigo Kassick
  *
@@ -16,6 +16,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 #include "SExprBaseVisitor.h"
 
 static

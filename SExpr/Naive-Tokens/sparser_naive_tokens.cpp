@@ -1,5 +1,5 @@
 /****************************************************************************
- *        Filename: "sparser.cpp"
+ *        Filename: "sparser_naive_tokens.cpp"
  *
  *     Description: Parser "naive" para a gramática de S-expressões
  *
