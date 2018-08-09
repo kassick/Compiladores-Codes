@@ -1,5 +1,5 @@
 /****************************************************************************
- *        Filename: "sparser.cpp"
+ *        Filename: "sparser_ll1.cpp"
  *
  *     Description: Parser para a seguinte gramática de S-expressões
  *

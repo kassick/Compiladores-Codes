@@ -6,5 +6,5 @@ add_custom_target(ll1_html
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   )
 
-add_executable(sexpr_ll1 sparser_naive.cpp)
+add_executable(sexpr_ll1 sparser_ll1.cpp)
 add_dependencies(sexpr_ll1 ll1_html)
