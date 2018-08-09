@@ -24,26 +24,26 @@ This code was tested with
 In order to build the javascript:
 
 1. **Prepare the Build Environment**
-  1. Download and install emscripten in some path (e.g. `./emscripten`)
-  2. Install and/or Activate a SDK environment (may take a while)
-     ```sh
-     emsdk install node-4.1.1-64bit clang-tag-e1.37.18-64bit emscripten-tag-1.37.18-64bit sdk-tag-1.37.18-64bit
-     emsdk activate sdk-tag-1.37.18-64bit
-     ```
-  2. Create a build directory
-    ```sh
-    mkdir JS
-    cd JS
+    1. Download and install emscripten in some path (e.g. `./emscripten`)
+    2. Install and/or Activate a SDK environment (may take a while)
+      ```sh
+      emsdk install node-4.1.1-64bit clang-tag-e1.37.18-64bit emscripten-tag-1.37.18-64bit sdk-tag-1.37.18-64bit
+      emsdk activate sdk-tag-1.37.18-64bit
+      ```
+    2. Create a build directory
+      ```sh
+      mkdir JS
+      cd JS
+      ```
+    3. Load the emsdk environment:
+      ```sh
+      source ../emsdk-portable/emsdk_env.sh
     ```
-  3. Load the emsdk environment:
-    ```sh
-    source ../emsdk-portable/emsdk_env.sh
-   ```
-  4. Execute cmake to prepare the build environment
-     ```sh
-     emconfigure cmake ..
-     ```
-2. Compile: Just call `make` in the previously configures build directory. Since CMake has already cached the commands it should use, there's no need to wrap `make` with `emmake` or to `source` the sdk environment.
+    4. Execute cmake to prepare the build environment
+      ```sh
+      emconfigure cmake ..
+      ```
+2. **Compile**: Just call `make` in the previously configures build directory. Since CMake has already cached the commands it should use, there's no need to wrap `make` with `emmake` or to `source` the sdk environment.
    ```sh
    cd JS
    make
