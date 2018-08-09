@@ -79,7 +79,7 @@ These files can be used by a browser, such as in the following example:
 </script>
 ```
 
-## DO NOT USE -- Hand Compiling a C++ code to JavaScript:
+## DO NOT USE -- Manually Compiling a C++ code to JavaScript:
 ```sh
 source emsdk_env.sh
 emsdk activate sdk-tag-1.37.18-64bit
