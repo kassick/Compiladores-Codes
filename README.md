@@ -30,6 +30,7 @@ In order to build the javascript:
         `emsdk install node-4.1.1-64bit clang-tag-e1.37.18-64bit emscripten-tag-1.37.18-64bit sdk-tag-1.37.18-64bit`
 
         `emsdk activate sdk-tag-1.37.18-64bit`
+
     2. Create a build directory
 
         `mkdir JS`
