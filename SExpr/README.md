@@ -16,4 +16,8 @@ Available versions:
 
 - [ANTLR ALL(*) with a Visitor](./SExpr/AntlrVisitor/sparser_antlr_visitor.cpp): An implementation with antlr as a parser. No actions are embedded inside the grammar. This code showcases the Visitor pattern.
 
-- [ANTLR ALL(*) with Rule Argument Attributes](./SExpr/Antlr-Attributes/sparser_antlr_attrs.cpp): An implementation with antlr as a parser. It uses rule attributes to avoid using "global" variables such as `indent`
+- [ANTLR ALL(*) with Rule Argument Attributes](./SExpr/Antlr-Attributes/sparser_antlr_attrs.cpp): An implementation with antlr as a parser. It uses rule attributes to avoid using "global" variables such as `indent**
+
+**Extra:**
+
+- [C# Template Project](./CSharp) : A template project with C# using antlr. It does not a complete implementation of the previous examples. It's here to help students who decide to use C# instead of Java for their project.
